@@ -139,7 +139,7 @@ export function BeatScene() {
     // the MP3 is the music (fast/test mode never depends on it: a virtual clock runs instead)
     let audio: HTMLAudioElement | null = fast ? null : new Audio(TRACK.src)
     // song 2: "bloody" by 2Slimey (the card in the corner shows it while it is audible)
-    const unannounce = audio ? announce(TRACKS.bloody, audio) : null
+    const unannounce = audio ? announce(TRACKS.habits, audio) : null
     const unguard = audio ? guardMusic(audio) : null
     const clock = new SongClock(audio, fast ? FAST_RATE : 1)
     let blocked = false

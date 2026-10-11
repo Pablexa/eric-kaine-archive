@@ -5,6 +5,7 @@ import { useStore } from '../../../lib/experience/store'
 import { credits, fm } from '../../../lib/experience/stage'
 import { sfx } from '../../../lib/audio/sfx'
 import { voice } from '../../../lib/audio/voice'
+import { stopAll } from '../../../lib/audio/musicGuard'
 import { EASE } from '../../../lib/animation/timeline'
 import { endMusic, PATIENCE, seek, setEndVolume, skip, startEndMusic, stopEndMusic, toggleEndMute, togglePlay } from '../../../lib/audio/endMusic'
 import './Credits.css'
@@ -26,6 +27,8 @@ const DEV = {
 export function EndMusic() {
   useEffect(() => {
     fm.set('off')
+    // only the credits song from here on (it registers itself right after)
+    stopAll()
     sfx.stopMusic()
     sfx.hum(false)
     voice.stop()

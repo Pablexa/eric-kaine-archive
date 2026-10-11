@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
+import { stopAll } from '../audio/musicGuard'
 import { voice } from '../audio/voice'
 import { initialState, isTrollActive, reducer, type Action, type EndingId, type ExperienceState, type RevealSource } from './machine'
 import { chat, bubble } from './chat'
@@ -69,7 +70,10 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     fm.set('off')
     songOne.set('waiting')
     songTwo.set(false)
+    // LEAVE / Esc: every song and every voice stops at once, Bleood's loop included
+    stopAll()
     voice.stop()
+    sfx.stopMusic()
     streamOverlay.set(false)
     subsOverride.set(null)
     const pile = pileRef.current

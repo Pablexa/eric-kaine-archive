@@ -9,6 +9,8 @@ import { backdrop, fm, hudHidden, pileDim, streamOverlay, subsOverride } from '.
 import { channel } from '../../../lib/content/channel'
 import { artistMedia, objectMedia } from '../../../lib/assets/realMedia'
 import { sfx } from '../../../lib/audio/sfx'
+import { stopAll } from '../../../lib/audio/musicGuard'
+import { voice } from '../../../lib/audio/voice'
 import { scrollToY } from '../../../lib/interactions/scroll'
 import { EASE, TIME, prefersReducedMotion, wait } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
@@ -67,6 +69,8 @@ export function LegendScene() {
     fm.set('off')
     streamOverlay.set(false)
     document.querySelectorAll('audio, video').forEach((m) => (m as HTMLMediaElement).pause())
+    stopAll()
+    voice.stop()
     sfx.stopMusic()
     sfx.hum(false)
     // Gain reaches zero immediately too, cutting any fanfare voices still alive.

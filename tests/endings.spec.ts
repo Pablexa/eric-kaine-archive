@@ -51,6 +51,8 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await page.getByTestId('credits-to-ending').click()
     await expect(credits).toHaveCount(0)
     await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'patience')
+    // at the end only the credits song is audible: Bleood's loop and every earlier song stopped
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __music: () => number }).__music())).toBe(1)
     // the card can bring the credits back; the song never stopped
     await page.getByTestId('open-credits').click()
     await expect(credits).toBeVisible()
@@ -172,6 +174,8 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await expect(page.getByTestId('leave')).toContainText(/LEAVING|%|jk/)
     await expect(page.getByTestId('troll-stage')).toHaveCount(0, { timeout: 10_000 })
     await expect(page.getByTestId('cheese-audio')).toHaveCount(0)
+    // nothing keeps playing after LEAVE: no song (Bleood's loop included), no voice
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __music: () => number }).__music())).toBe(0)
     expect(await page.evaluate(() => [...document.documentElement.classList].filter((c) => c.startsWith('ug-')))).toEqual([])
     await expect(page.getByTestId('ugly-widgets')).toHaveCount(0)
     await expect(page.getByTestId('live-chat')).toHaveCount(0)

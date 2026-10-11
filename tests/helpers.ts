@@ -115,7 +115,7 @@ export async function playActThree(page: Page) {
   // song 1 stopped on the meltdown's "1.5K" line; the MySpace-era song plays where the old chiptune used to
   await expect(page.getByTestId('kaineity-audio')).toHaveCount(0)
   await expect(page.getByTestId('myspace-audio')).toHaveCount(1)
-  await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'kaineity-loop', { timeout: 10_000 })
+  await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'bloody', { timeout: 10_000 })
 
   // 05 popups — close until it gives up
   await expect(page.getByTestId('popup').first()).toBeVisible({ timeout: 30_000 })
@@ -191,8 +191,10 @@ export async function playActFour(page: Page, { touch = false, capture = false, 
   }
   await activate('brainrot-meme')
   await expect(brainrot).toHaveAttribute('data-memes', '1')
+  // the 15 s cut can switch to four panes at any moment, so check that the button adds one
+  const panesBefore = Number(await brainrot.getAttribute('data-pane-count'))
   await activate('brainrot-add-pane')
-  await expect(brainrot).toHaveAttribute('data-pane-count', '3')
+  await expect.poll(async () => Number(await brainrot.getAttribute('data-pane-count'))).toBeGreaterThan(panesBefore)
   await shot('real-videos')
   await expect(brainrot).toHaveAttribute('data-section', 'quad', { timeout: 30_000 })
   await shot('maximum-brainrot')

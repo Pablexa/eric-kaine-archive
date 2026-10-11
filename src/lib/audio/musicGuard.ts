@@ -5,6 +5,8 @@
  * Without this, two open tabs play the same loop out of sync, and turning one
  * down from the live panel leaves the other one loud.
  */
+import { TIME } from '../animation/timeline'
+
 const registered = new Set<HTMLMediaElement>()
 const yieldedTo = new Set<HTMLMediaElement>()
 const tabId = Math.random().toString(36).slice(2)
@@ -63,3 +65,16 @@ export function guardMusic(el: HTMLMediaElement) {
     el.removeEventListener('play', onPlay)
   }
 }
+
+/** Silences every song at once: leaving the takeover, or the finale before the credits song starts. */
+export function stopAll() {
+  yieldedTo.clear()
+  for (const m of registered) m.pause()
+}
+
+/** How many registered songs are audible right now (for tests). */
+export function playingSongs() {
+  return [...registered].filter((m) => !m.paused).length
+}
+
+if (TIME.scale < 1) (window as unknown as { __music?: () => number }).__music = playingSongs

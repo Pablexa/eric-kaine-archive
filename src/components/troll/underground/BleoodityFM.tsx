@@ -6,12 +6,12 @@ import { announce, TRACKS } from '../../../lib/audio/nowPlaying'
 import { speaking } from '../../../lib/audio/voice'
 import { guardMusic } from '../../../lib/audio/musicGuard'
 
-/** The loop (normalised to about -16 LUFS) plays at full level for its first seconds, then sits lower under Bleoodity. */
-const START_LEVEL = 1
-const UNDER_LEVEL = 0.5
+/** The loop (normalised to about -16 LUFS) starts at half level, then sits well under Bleoodity so her voice is clear. */
+const START_LEVEL = 0.5
+const UNDER_LEVEL = 0.15
 const START_FOR = 9000
 /** Extra dip while a voice line is audible. */
-const UNDER_VOICE = 0.55
+const UNDER_VOICE = 0.4
 
 /** Song 3, Bleood's "i aint start making money till i started doing drugs", looping behind every underground scene. No separate player. */
 export function BleoodityFM() {
