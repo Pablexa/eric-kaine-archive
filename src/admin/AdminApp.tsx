@@ -277,6 +277,9 @@ function SessionCard({ target, setTarget }: { target: string; setTarget: (v: str
               <button type="button" onClick={() => push(90)} className="border border-line-2 bg-ink-3 py-1.5">Normal</button>
             </div>
           </div>
+          <div className="border-t border-line pt-3">
+            <MixControls to={v.id} reported={{ music: v.s.music ?? 1, voice: v.s.voice ?? 1 }} testid="session-mix" />
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -330,20 +333,14 @@ function MixSlider({ label, hint, value, max, step, onChange, testid }: { label:
 }
 
 /** Music (every song, including Bleood's act) and the characters' voices, for everyone or one session. */
-function MixCard({ target }: { target: string }) {
-  const map = useStore(visitors)
-  const def = useStore(mixDefault)
-  const [to, setTo] = useState<'all' | 'one'>('all')
-  const v = ID_RE.test(target) ? map.get(target) : undefined
-  const dest = to === 'all' ? 'all' : target
-  const reported = to === 'all' ? def : { music: v?.s.music ?? 1, voice: v?.s.voice ?? 1 }
+/** Music (every song, Bleood's act included) and the characters' voices, for one session or everyone. */
+function MixControls({ to, reported, testid }: { to: 'all' | string; reported: { music: number; voice: number }; testid: string }) {
   const [draft, setDraft] = useState<{ music?: number; voice?: number }>({})
   const music = draft.music ?? Math.round(reported.music * 100)
   const voice = draft.voice ?? Math.round(reported.voice * 100)
-  const ok = to === 'all' || !!v
 
   // follow what the visitors report once they have applied a change
-  useEffect(() => setDraft({}), [to, target])
+  useEffect(() => setDraft({}), [to])
   useEffect(() => {
     setDraft((d) => ({
       ...(d.music !== undefined && d.music !== Math.round(reported.music * 100) ? { music: d.music } : {}),
@@ -353,56 +350,48 @@ function MixCard({ target }: { target: string }) {
 
   const push = (part: { music?: number; voice?: number }) => {
     setDraft((d) => ({ ...d, ...part }))
-    setMix(dest, { music: part.music === undefined ? undefined : part.music / 100, voice: part.voice === undefined ? undefined : part.voice / 100 })
+    setMix(to, { music: part.music === undefined ? undefined : part.music / 100, voice: part.voice === undefined ? undefined : part.voice / 100 })
   }
 
   return (
-    <section className="border border-line-2 bg-ink-2 p-5" aria-labelledby="mix-h" data-testid="mix-card">
-      <h2 id="mix-h" className="pixel text-[16px] text-verity">MÚSICA Y VOCES</h2>
-      <div className="mt-3 grid grid-cols-2 gap-1 border border-line-2 p-1 text-[13px]" role="radiogroup" aria-label="A quién">
-        {(['all', 'one'] as const).map((k) => (
-          <button
-            key={k}
-            type="button"
-            role="radio"
-            aria-checked={to === k}
-            onClick={() => setTo(k)}
-            className={`px-2 py-1.5 font-bold ${to === k ? 'bg-paper text-ink' : 'text-paper-2 hover:bg-ink-3'}`}
-            data-testid={`mix-to-${k}`}
-          >
-            {k === 'all' ? 'Todos (y los que entren)' : `Solo #${ID_RE.test(target) ? target : '_____'}`}
-          </button>
-        ))}
+    <div className="space-y-4">
+      <MixSlider
+        label="Música (todas las canciones)"
+        hint="Incluye la música del acto de Bleood: el visitante no puede bajarla, solo vos."
+        value={music}
+        max={100}
+        step={5}
+        onChange={(pct) => push({ music: pct })}
+        testid={`${testid}-music`}
+      />
+      <MixSlider
+        label="Voz de los personajes"
+        hint="100 % es lo normal; podés subirla hasta 300 %."
+        value={voice}
+        max={MAX_VOICE * 100}
+        step={10}
+        onChange={(pct) => push({ voice: pct })}
+        testid={`${testid}-voice`}
+      />
+      <div className="grid grid-cols-3 gap-1.5 text-[13px]">
+        <button type="button" onClick={() => push({ music: 30 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid={`${testid}-music-low`}>Música baja</button>
+        <button type="button" onClick={() => push({ voice: 200 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid={`${testid}-voice-up`}>Voz ×2</button>
+        <button type="button" onClick={() => push({ music: 100, voice: 100 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid={`${testid}-reset`}>Normal</button>
       </div>
-      {!ok ? (
-        <p className="mt-3 text-[13px] text-paper-2">Elegí una sesión conectada para cambiarle solo a ella.</p>
-      ) : (
-        <div className="mt-4 space-y-4">
-          <MixSlider
-            label="Música (todas las canciones)"
-            hint="Incluye la música del acto de Bleood: el visitante no puede bajarla, solo vos."
-            value={music}
-            max={100}
-            step={5}
-            onChange={(pct) => push({ music: pct })}
-            testid="mix-music"
-          />
-          <MixSlider
-            label="Voz de los personajes"
-            hint="100 % es lo normal; podés subirla hasta 300 %."
-            value={voice}
-            max={MAX_VOICE * 100}
-            step={10}
-            onChange={(pct) => push({ voice: pct })}
-            testid="mix-voice"
-          />
-          <div className="grid grid-cols-3 gap-1.5 text-[13px]">
-            <button type="button" onClick={() => push({ music: 30 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid="mix-music-low">Música baja</button>
-            <button type="button" onClick={() => push({ voice: 200 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid="mix-voice-up">Voz ×2</button>
-            <button type="button" onClick={() => push({ music: 100, voice: 100 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid="mix-reset">Normal</button>
-          </div>
-        </div>
-      )}
+    </div>
+  )
+}
+
+/** The same mix for everyone on the site, including visitors who arrive later. */
+function MixCard() {
+  const def = useStore(mixDefault)
+  return (
+    <section className="border border-line-2 bg-ink-2 p-5" aria-labelledby="mix-h" data-testid="mix-card">
+      <h2 id="mix-h" className="pixel text-[16px] text-verity">MÚSICA Y VOCES · TODOS</h2>
+      <p className="mt-1 text-[12px] text-muted">Para todos los que están en la web y los que entren después. Para una sola persona, usá la sesión elegida.</p>
+      <div className="mt-4">
+        <MixControls to="all" reported={def} testid="mix" />
+      </div>
     </section>
   )
 }
@@ -627,7 +616,7 @@ export function AdminApp() {
         </div>
         <div className="space-y-4 lg:col-span-5">
           <SessionCard target={target} setTarget={setTarget} />
-          <MixCard target={target} />
+          <MixCard />
           <CallCard target={target} setTarget={setTarget} />
           <MessageCard target={target} />
         </div>

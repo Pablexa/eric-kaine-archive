@@ -1,4 +1,5 @@
 import { sfx } from './sfx'
+import { createStore } from '../experience/store'
 import { TIME } from '../animation/timeline'
 import type { Author } from '../experience/chat'
 
@@ -19,6 +20,9 @@ const EMPTY: Manifest = { lines: {}, barks: [] }
 const manifests: Partial<Record<Speaker, Manifest>> = {}
 const loading: Partial<Record<Speaker, Promise<void>>> = {}
 let current: HTMLAudioElement | null = null
+
+/** True while a character's voice line is playing (music dips under it). */
+export const speaking = createStore(false)
 
 function load(who: Speaker) {
   loading[who] ??= fetch(`${DIRS[who]}manifest.json`)
@@ -55,7 +59,9 @@ export const voice = {
     if (!interrupt && current && !current.paused && !current.ended) return Promise.resolve()
     return new Promise<void>((resolve) => {
       let settled = false
+      let mine: HTMLAudioElement | null = null
       const done = () => {
+        if (mine && current === mine) speaking.set(false)
         if (settled) return
         settled = true
         window.clearTimeout(cap)
@@ -78,7 +84,9 @@ export const voice = {
         audio.addEventListener('ended', done, { once: true })
         audio.addEventListener('error', done, { once: true })
         audio.addEventListener('pause', done, { once: true })
+        audio.addEventListener('playing', () => { if (current === audio) speaking.set(true) }, { once: true })
         current = audio
+        mine = audio
         void audio.play().catch(done)
       }
       const who = speakerOf(author)
@@ -92,5 +100,6 @@ export const voice = {
   stop() {
     current?.pause()
     current = null
+    speaking.set(false)
   },
 }

@@ -163,8 +163,11 @@ export const PROTOCOLS: { scene: Scene; index: string; label: string }[] = [
   { scene: 'mosh', index: '11', label: 'Rage mosh pit' },
 ]
 
-/** Scenes scored by Eric Kaineity's loop (everything before the beat). */
-export const KAINEITY_SCENES: Scene[] = ['intro', 'redact', 'collapse', 'pile', 'lights', 'button', 'meltdown', 'uglify', 'popups', 'clones']
+/** Song 1, "Reasons I Should Stay": from its cue in the intro until the meltdown's "1.5K" line. */
+export const SONG_ONE_SCENES: Scene[] = ['intro', 'redact', 'collapse', 'pile', 'lights', 'button', 'meltdown']
+
+/** Song 2, "bloody": from Protocol 04 (where the old chiptune used to start) until the beat. */
+export const SONG_TWO_SCENES: Scene[] = ['uglify', 'popups', 'clones']
 
 /** Scenes during which the archive is in its "uglified" state. */
 export const CHAOS_SCENES: Scene[] = ['uglify', 'popups', 'clones', 'beat', 'twist', 'label', 'foodfight', 'brainrot', 'mosh', 'legend']

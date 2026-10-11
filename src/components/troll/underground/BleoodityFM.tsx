@@ -3,9 +3,14 @@ import { fm } from '../../../lib/experience/stage'
 import { useStore } from '../../../lib/experience/store'
 import { useSfxState } from '../../shared/useSfx'
 import { announce, TRACKS } from '../../../lib/audio/nowPlaying'
+import { speaking } from '../../../lib/audio/voice'
 
-/** Base level of the loop (the MP3 is normalised to about -16 LUFS). */
-const LEVEL = 0.7
+/** The loop (normalised to about -16 LUFS) plays at full level for its first seconds, then sits lower under Bleoodity. */
+const START_LEVEL = 1
+const UNDER_LEVEL = 0.5
+const START_FOR = 9000
+/** Extra dip while a voice line is audible. */
+const UNDER_VOICE = 0.55
 
 /** Song 3, Bleood's "i aint start making money till i started doing drugs", looping behind every underground scene. No separate player. */
 export function BleoodityFM() {
@@ -15,10 +20,21 @@ export function BleoodityFM() {
   const [playing, setPlaying] = useState(false)
   const [failed, setFailed] = useState(false)
 
-  // Only the site owner sets this level (live panel → music); it ducks under live calls and never restarts playback.
+  const talking = useStore(speaking)
+  const [settled, setSettled] = useState(false)
   useEffect(() => {
-    if (audio.current) audio.current.volume = LEVEL * sound.duck * sound.music
-  }, [sound.music, sound.duck, state])
+    if (state !== 'on') return
+    setSettled(false)
+    const t = window.setTimeout(() => setSettled(true), START_FOR)
+    return () => window.clearTimeout(t)
+  }, [state])
+
+  // The visitor has no control here; the site owner does (live panel: site volume and music). Ducks under
+  // live calls and Bleoodity's lines, and never restarts playback.
+  const level = (settled ? UNDER_LEVEL : START_LEVEL) * (talking ? UNDER_VOICE : 1)
+  useEffect(() => {
+    if (audio.current) audio.current.volume = Math.min(1, level * sound.volume * sound.duck * sound.music)
+  }, [level, sound.volume, sound.music, sound.duck, state])
 
   useEffect(() => {
     if (state !== 'on' || !audio.current) return
@@ -43,7 +59,7 @@ export function BleoodityFM() {
   }, [state])
 
   if (state !== 'on') return null
-  return <div data-troll-ui data-testid="background-music" data-playing={playing} className="pointer-events-none fixed bottom-1 left-1 z-[47] max-w-[60vw] bg-black px-1 font-mono text-[9px] text-[#00ff00]">
+  return <div data-troll-ui data-testid="background-music" data-playing={playing} data-level={settled ? 'under' : 'start'} className="pointer-events-none fixed bottom-1 left-1 z-[47] max-w-[60vw] bg-black px-1 font-mono text-[9px] text-[#00ff00]">
     <audio ref={audio} src="/media/bleoodity-loop.mp3" autoPlay loop preload="auto" onPlaying={() => setPlaying(true)} onPause={() => setPlaying(false)} onTimeUpdate={(e) => setPlaying(!e.currentTarget.paused)} onError={() => setFailed(true)} data-testid="cheese-audio" />
     {failed ? 'MP3 failed to load :(' : `♫ ${TRACKS.money.artist.toLowerCase()} - ${TRACKS.money.title} • LOOP FOREVER.exe`}
   </div>

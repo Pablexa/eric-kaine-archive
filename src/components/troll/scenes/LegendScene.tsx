@@ -62,9 +62,11 @@ export function LegendScene() {
     }
     await bleoodity('ONE POINT FIVE BILLION. EVERYONE FOUND HIM.', 1700)
 
-    // Remove both the real embedded player and the parody stream immediately.
+    // Remove both the real embedded player and the parody stream immediately, and silence every song:
+    // Bleoodity is about to remember Eric's bio, and the credits song comes next.
     fm.set('off')
     streamOverlay.set(false)
+    document.querySelectorAll('audio, video').forEach((m) => (m as HTMLMediaElement).pause())
     sfx.stopMusic()
     sfx.hum(false)
     // Gain reaches zero immediately too, cutting any fanfare voices still alive.

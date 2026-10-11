@@ -5,7 +5,7 @@ import { chat } from '../../../lib/experience/chat'
 import { chaos } from '../../../lib/experience/chaos'
 import { verity } from '../../../lib/experience/verity'
 import { ask, objective } from '../../../lib/experience/store'
-import { backdrop } from '../../../lib/experience/stage'
+import { backdrop, songTwo } from '../../../lib/experience/stage'
 import { sfx } from '../../../lib/audio/sfx'
 import { scrollToY } from '../../../lib/interactions/scroll'
 import { pick, prefersReducedMotion, wait } from '../../../lib/animation/timeline'
@@ -103,7 +103,8 @@ export function UglifyScene() {
       sfx.enable()
       await say('i turned your sound back on. you’re welcome.', { tone: 'loud' })
     }
-    sfx.startMusic()
+    // song 2, "bloody" by 2Slimey (it replaced the old chiptune here)
+    songTwo.set(true)
     await step(() => chaos.widget('construction'), 'step six: a soundcloud player. it only plays snippets.', () => sfx.errorDing(3), STAMPS.player)
     await step(
       () => {

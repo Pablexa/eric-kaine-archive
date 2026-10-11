@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useRef } from 'react'
 import { animate, motion, useMotionValue } from 'motion/react'
 import { useExperience } from '../../lib/experience/ExperienceContext'
-import { CHAOS_SCENES, KAINEITY_SCENES, UNDERGROUND_SCENES, isTrollActive } from '../../lib/experience/machine'
-import { KaineityFM } from './KaineityFM'
+import { CHAOS_SCENES, SONG_ONE_SCENES, SONG_TWO_SCENES, UNDERGROUND_SCENES, isTrollActive } from '../../lib/experience/machine'
+import { SongLoop } from './SongLoop'
+import { TRACKS } from '../../lib/audio/nowPlaying'
 import { chat } from '../../lib/experience/chat'
 import { objective, useStore } from '../../lib/experience/store'
-import { backdrop, introCard, pileDim, shake, songOneCue, streamOverlay } from '../../lib/experience/stage'
+import { backdrop, introCard, pileDim, shake, songOne, songTwo, streamOverlay } from '../../lib/experience/stage'
 import { prefersReducedMotion } from '../../lib/animation/timeline'
 import { ChatLog, Objective } from './ChatLog'
 import { EndingCard } from './EndingCard'
@@ -48,7 +49,8 @@ export function TrollLayer() {
   const dim = useStore(pileDim)
   const shakeN = useStore(shake)
   const showStream = useStore(streamOverlay)
-  const songCue = useStore(songOneCue)
+  const song1 = useStore(songOne)
+  const song2 = useStore(songTwo)
   const stageRef = useRef<HTMLDivElement>(null)
   const sx = useMotionValue(0)
   const active = isTrollActive(state)
@@ -119,7 +121,12 @@ export function TrollLayer() {
         {scene === 'button' ? <ButtonScene key={`button-${state.run}`} /> : null}
         {scene === 'meltdown' ? <MeltdownScene key={`meltdown-${state.run}`} /> : null}
       </motion.div>
-      {scene && KAINEITY_SCENES.includes(scene) && (scene !== 'intro' || songCue) ? <KaineityFM key={`kfm-${state.run}`} /> : null}
+      {scene && SONG_ONE_SCENES.includes(scene) && (song1 === 'playing' || (song1 === 'waiting' && scene !== 'intro')) ? (
+        <SongLoop key={`song1-${state.run}`} src="/media/reasons-i-should-stay.mp3" track={TRACKS.reasons} level={0.5} testid="kaineity-audio" />
+      ) : null}
+      {scene && SONG_TWO_SCENES.includes(scene) && (song2 || scene !== 'uglify') ? (
+        <SongLoop key={`song2-${state.run}`} src="/media/bloody.mp3" track={TRACKS.bloody} level={0.5} testid="bloody-audio" />
+      ) : null}
 
       {/* Act III renders above the page (not inside the stage) so the page stays visible and pokeable */}
       <Suspense fallback={null}>

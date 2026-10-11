@@ -61,3 +61,4 @@ Voices:
 - `dev-avatar.png`: the developer's (757valentino) Discord avatar, cropped from a profile screenshot they shared for the credits signature. The banner photo and the names in their profile bio were deliberately not used.
 
 The "currently playing" card (top right) names each song while it is audible. Its covers `covers/reasons.jpg`, `covers/bloody.jpg` and `covers/money.jpg` are the song cover images the site owner supplied on 2026-10-11, square-cropped to 300 × 300 (Pillow).
+- `bloody.mp3` (199.8 s): the owner's full "bloody" (2Slimey) file that `beat-scene.mp3` was cut from, looped in Protocols 04–06 since 2026-10-11 (it replaced the synthesized chiptune). The file measured −6.9 LUFS with +2.6 dBTP clipping and bass-heavy, so it was re-encoded with `highpass=f=28, bass=g=-6:f=140:w=0.7` and two-pass linear `loudnorm` to −16 LUFS: −16.4 LUFS, −3.1 dBTP.

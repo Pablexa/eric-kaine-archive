@@ -204,3 +204,19 @@ The owner supplied `bleoodity voice.mp3` (8.8 s), said it is their own voice or 
 | Full suite | 30/30 pass |
 
 Not verified: how it sounds. The reference is only 8.8 s, so artefacts are likely; a 30 s–2 min recording would give a cleaner clone (re-run the script with `--ref`).
+
+## Music cues, Bleood mix and panel controls — verification 2026-10-11
+
+Owner requests: Protocol 04 plays 2Slimey instead of the old chiptune; the music stops on the meltdown's "1.5K" line; the Bleood music plays at normal volume first and lower afterwards so Bleoodity is heard; the owner's panel can turn it down and raise the voices (it could not); every Bleood song stops when Bleoodity reads Eric's bio.
+
+| Check | Result |
+|---|---|
+| `bloody.mp3` (full 2Slimey track for 04–06) | Supplied file −6.9 LUFS / +2.6 dBTP, bass-heavy → bass −6 dB, −16.4 LUFS / −3.1 dBTP, 199.8 s |
+| Song cues | Song 1 stops when tiny Eric Kaineity starts the "… / actually. / 1.5K + 1 is still pretty gatekept." beat; song 2 starts at Protocol 04 step six (where `sfx.startMusic()` was) and plays to the beat; asserted in `playActThree` (no song-1 element, `bloody-audio` present, corner card says "bloody") |
+| Bleood loop | Full level (×1) for 9 s, then ×0.5; ×0.55 more while any voice line plays; × the session's site volume × the owner's music level × call duck. At the bio every `<audio>`/`<video>` is paused (asserted: none playing) |
+| `tests/live-act4.spec.ts` (new; runs only with `LIVE_BASE`, against `wrangler dev`) | Pass (3.5 min): with a visitor in Bleoodity's act, the panel's session Música 0 → the loop's volume is 0, 100 → back; session site volume 0 → 0, +10 → back; voice 300 % → her next line plays with gain 3 |
+| Why the panel "didn't work" before | The session card's site volume no longer reached the Bleood loop (only Música did) and the voice level lived in a separate card; both are now in the session card and both affect the loop |
+| Flaky test fixed | The cooperative path sometimes missed "1.5B": in fast mode it is on screen for ~0.3 s and `toHaveText` polls at growing intervals. Now checked every frame (`waitForFunction`, `polling: 'raf'`); 4/4 repeats pass |
+| Full suite | 29 passed + 1 skipped (the live-only spec) before the flake fix; the flaky case then passed 4/4 |
+
+Not verified by ear: the new mix levels and the tamed 2Slimey track.

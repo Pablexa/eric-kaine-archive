@@ -4,7 +4,7 @@ import { useExperience } from '../../../lib/experience/ExperienceContext'
 import { chat } from '../../../lib/experience/chat'
 import { verity } from '../../../lib/experience/verity'
 import { objective } from '../../../lib/experience/store'
-import { backdrop, pileDim, shake } from '../../../lib/experience/stage'
+import { backdrop, pileDim, shake, songOne } from '../../../lib/experience/stage'
 import { sfx } from '../../../lib/audio/sfx'
 import { EASE, prefersReducedMotion, wait } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
@@ -96,6 +96,8 @@ export function MeltdownScene() {
     verity.jump(window.innerWidth + 30, ty, 22)
     verity.setMode('free', false)
     await verity.moveTo(cx, ty, { size: 22, duration: reduce ? 0 : 1.6, ease: [0.22, 1, 0.36, 1], signal })
+    // song 1 stops here: the "1.5K" moment is quiet
+    songOne.set('stopped')
     await say('…', { hold: 900 })
     await say('actually.', { hold: 700 })
     await say('1.5K + 1 is still pretty gatekept.', { hold: 1400 })

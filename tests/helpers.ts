@@ -112,6 +112,10 @@ export async function playActThree(page: Page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.className), { timeout: 60_000 }).toContain('ug-font')
   await page.getByTestId('choice-hideous').click({ timeout: 90_000 })
   await expect.poll(() => page.evaluate(() => document.documentElement.className), { timeout: 20_000 }).toContain('ug-tilt')
+  // song 1 stopped on the meltdown's "1.5K" line; song 2 ("bloody") plays where the old chiptune used to
+  await expect(page.getByTestId('kaineity-audio')).toHaveCount(0)
+  await expect(page.getByTestId('bloody-audio')).toHaveCount(1)
+  await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'bloody', { timeout: 10_000 })
 
   // 05 popups — close until it gives up
   await expect(page.getByTestId('popup').first()).toBeVisible({ timeout: 30_000 })
@@ -199,10 +203,13 @@ export async function playActFour(page: Page, { touch = false, capture = false, 
   await shot('mosh')
   for (let i = 0; i < 12; i++) { await activate('mosh-jump'); await sleep(100) }
   await expect(page.getByTestId('legend')).toBeVisible({ timeout: 30_000 })
-  await expect(page.getByTestId('legend-subs')).toHaveText('1.5B', { timeout: 15_000 })
+  // in fast mode 1.5B is on screen for only a few hundred ms before the bio replaces it: check every frame
+  await page.waitForFunction(() => document.querySelector('[data-testid=legend-subs]')?.textContent === '1.5B', null, { timeout: 15_000, polling: 'raf' })
   await shot('legend')
   await expect(page.getByTestId('legend-bio')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByTestId('background-music')).toHaveCount(0)
+  // Bleoodity remembers Eric's bio: every song has stopped (the credits song comes next)
+  expect(await page.evaluate(() => [...document.querySelectorAll('audio, video')].filter((m) => !(m as HTMLMediaElement).paused).length)).toBe(0)
   await expect(page.getByTestId('live-chat')).toHaveCount(0)
   await expect(page.getByTestId('ending')).toBeVisible({ timeout: 30_000 })
 }
