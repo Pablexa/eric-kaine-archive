@@ -62,3 +62,7 @@ Voices:
 
 The "currently playing" card (top right) names each song while it is audible. Its covers `covers/reasons.jpg`, `covers/bloody.jpg`, `covers/habits.jpg` (OsamaSon, "Habits") and `covers/money.jpg` are the song cover images the site owner supplied on 2026-10-11, square-cropped to 300 × 300 (Pillow).
 - Protocols 04–06 loop `kaineity-loop.mp3`, which the owner identified on 2026-10-11 as "bloody" by 2Slimey (the earlier separate `bloody.mp3` is no longer in the project).
+
+## Bleood song restored to the owner's file (2026-10-11)
+
+- `bleoodity-loop.mp3` (107.3 s): the owner's own Bleood song file, as supplied (md5 of the upload `f5fe7480…`, identical to their first upload). The earlier tamed version (bass cut + loudness normalisation) is gone. The only processing is one fixed gain of −11.95 dB (ffmpeg `volume`, re-encoded VBR ~184 kbps) so it plays at the same loudness as "bloody": the original measured −4.6 LUFS with +9 dBTP overs; the file now measures −16.6 LUFS, −2.9 dBTP. No EQ, no compression, no edits.

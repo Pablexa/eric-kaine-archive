@@ -161,6 +161,8 @@ test.describe('Acts II–IV — protocols and endings', () => {
     // The loop has no pause, stop or mute control, and plays even though sound was declined.
     await expect(page.getByTestId('sound-toggle')).toHaveCount(0)
     const audio = page.getByTestId('cheese-audio')
+    // one copy only: Bleood's song is the single song playing in the page
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __music: () => number }).__music())).toBe(1)
     const level = () => audio.evaluate((el) => (el as HTMLAudioElement).volume)
     // Bleood's loop plays exactly like "bloody" in Protocols 04–06: SONG_LEVEL (0.5) × the site volume
     await page.getByTestId('volume').fill('0.9')
