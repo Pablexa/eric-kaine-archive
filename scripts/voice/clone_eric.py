@@ -78,6 +78,14 @@ def main() -> None:
     if args.list:
         print('\n'.join(lines)); print(len(lines), 'lines', file=sys.stderr); return
 
+    render_voice(lines, BARKS, OUT, args.ref, args.knnvc, args.piper_model, args.piper)
+
+
+def render_voice(lines: list[str], barks: list[str], out: Path, ref_audio: str, knnvc: str, piper_model: str, piper: str, resume: bool = False) -> None:
+    """Speak each line with Piper, convert it to the reference voice with kNN-VC, write mp3s + manifest.json to `out`.
+
+    `resume` keeps clips already rendered (same text → same file name) instead of starting over.
+    """
     import soundfile as sf, torch, torchaudio
 
     def _load(path, *_, **__):
@@ -85,29 +93,32 @@ def main() -> None:
         return torch.from_numpy(data.T.copy()), sr
     torchaudio.load = _load  # torchaudio>=2.9 needs torchcodec for load(); soundfile is enough here
 
-    sys.path.insert(0, str(Path(args.knnvc).resolve()))
+    sys.path.insert(0, str(Path(knnvc).resolve()))
     from hubconf import knn_vc
     torch.set_num_threads(max(1, torch.get_num_threads()))
     vc = knn_vc(pretrained=True, progress=False, prematched=True, device='cpu')
 
-    OUT.mkdir(parents=True, exist_ok=True)
-    for old in OUT.glob('*.mp3'):
-        old.unlink()
+    out.mkdir(parents=True, exist_ok=True)
+    if not resume:
+        for old in out.glob('*.mp3'):
+            old.unlink()
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         ref = tmp / 'ref.wav'
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', args.ref, '-ac', '1', '-ar', '16000', '-af', 'highpass=f=70', str(ref)], check=True)
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', ref_audio, '-ac', '1', '-ar', '16000', '-af', 'highpass=f=70', str(ref)], check=True)
         matching = vc.get_matching_set([str(ref)])
 
         def render(text: str) -> str:
             name = hashlib.sha1(text.encode('utf-8')).hexdigest()[:12] + '.mp3'
+            if resume and (out / name).exists():
+                return name
             raw, wav16, conv = tmp / 'tts.wav', tmp / 'tts16.wav', tmp / 'conv.wav'
-            subprocess.run([args.piper, '-m', args.piper_model, '-f', str(raw)], input=speakable(text).encode(), check=True, capture_output=True)
+            subprocess.run([piper, '-m', piper_model, '-f', str(raw)], input=speakable(text).encode(), check=True, capture_output=True)
             # pad with silence: very short lines are otherwise too short for kNN-VC's loudness gate
             subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(raw), '-ac', '1', '-ar', '16000', '-af', 'adelay=300,apad=pad_dur=0.4', str(wav16)], check=True)
-            out = vc.match(vc.get_features(str(wav16)), matching, topk=4)
-            sf.write(conv, out.numpy(), 16000)
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(conv), '-af', 'loudnorm=I=-16:TP=-1.5', '-ar', '22050', '-ac', '1', '-b:a', '48k', str(OUT / name)], check=True)
+            converted = vc.match(vc.get_features(str(wav16)), matching, topk=4)
+            sf.write(conv, converted.numpy(), 16000)
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(conv), '-af', 'loudnorm=I=-16:TP=-1.5', '-ar', '22050', '-ac', '1', '-b:a', '48k', str(out / name)], check=True)
             return name
 
         manifest = {'lines': {}, 'barks': []}
@@ -117,9 +128,9 @@ def main() -> None:
                 print(f'{i}/{len(lines)} {text}', flush=True)
             except Exception as e:  # one bad line should not sink the batch; it falls back to a bark
                 print(f'{i}/{len(lines)} SKIPPED {text!r}: {e}', flush=True)
-        manifest['barks'] = [render(b) for b in BARKS]
-    (OUT / 'manifest.json').write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
-    print('wrote', len(manifest['lines']), 'lines and', len(manifest['barks']), 'barks to', OUT)
+        manifest['barks'] = [render(b) for b in barks]
+    (out / 'manifest.json').write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+    print('wrote', len(manifest['lines']), 'lines and', len(manifest['barks']), 'barks to', out)
 
 
 if __name__ == '__main__':

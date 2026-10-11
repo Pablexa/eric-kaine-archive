@@ -191,3 +191,16 @@ At the owner's request: song 1 is now "Reasons I Should Stay" (Jaydes); the song
 | Screenshots | `86-credits.png` (desktop), `88-credits-mobile.png` (Pixel 7, no horizontal overflow), `89-now-playing.png`, `90-ending-now-playing.png`; no console errors |
 
 Notes: the three song covers the owner sent were not available as files, so the corner card uses the artists' existing photos for now. The developer avatar is cropped from a profile screenshot (about 120 px source); the banner photo and the names in the profile bio were left out on purpose. Nobody listened to the normalised song.
+
+## Bleoodity's cloned voice — verification 2026-10-11
+
+The owner supplied `bleoodity voice.mp3` (8.8 s), said it is their own voice or used with permission, and asked for it to be Bleoodity's voice. `scripts/voice/clone_bleoodity.py` (new; it reuses `render_voice()` now factored out of `clone_eric.py`, with a `--resume` option) extracted 54 Bleoodity lines (Twist, Act IV, the legend and her poke lines; template lines with live numbers fall back to barks) and rendered them plus 10 barks with Piper "ryan" + kNN-VC on CPU. `voice.ts` now loads a manifest per character; the old Bleood meme snippets are only a fallback.
+
+| Check | Result |
+|---|---|
+| Render | 54 lines + 10 barks, 0 skipped, 63 files (one line is also a bark), 1.1 MB |
+| Pitch (median F0, torchaudio) | Reference 107 Hz; base TTS 134 Hz; cloned lines 108–113 Hz (moved into the reference's range) |
+| `tests/voices.spec.ts` (new, `?fast=1&voice=1`, sound on, through to the label) | Pass: Eric Kaineity's clips come from `voice/eric/`, Bleoodity's from `voice/bleoodity/`, no `bleood-N` fallback played, every clip returns 200 |
+| Full suite | 30/30 pass |
+
+Not verified: how it sounds. The reference is only 8.8 s, so artefacts are likely; a 30 s–2 min recording would give a cleaner clone (re-run the script with `--ref`).

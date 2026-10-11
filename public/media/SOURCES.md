@@ -45,7 +45,8 @@ Images:
 - `bleoodity.png`: crop of `bleood.jpg` (official cryn innis coupe video still), grayscale → yellow colorize. The Bleoodity guide.
 
 Voices:
-- `voice/bleood-1..7.mp3`: 1.3 s snippets cut from `bleood-cheese.mp3` (real Bleood audio, no synthesis). Played, slightly pitch-varied, when Bleoodity talks.
+- `voice/bleood-1..7.mp3`: 1.3 s snippets cut from `bleood-cheese.mp3` (real Bleood audio, no synthesis). Since 2026-10-11 only a fallback, played slightly pitch-varied if Bleoodity's cloned lines are missing.
+- `voice/bleoodity/*.mp3` + `manifest.json` (2026-10-11): Bleoodity's lines in a voice cloned from an 8.8 s recording the site owner supplied, stating it is their own or used with permission (the recording is not committed). Rendered by `scripts/voice/clone_bleoodity.py` with the same Piper "ryan" + kNN-VC pipeline as Eric Kaineity (same licences; keep the site non-commercial). The reference is short, so expect more artefacts than Eric Kaineity's 35 s clone.
 - `voice/eric/*.mp3` + `manifest.json`: Eric Kaineity's lines in a voice cloned from the site owner's own 35 s recording, with their consent (the raw recording is not committed). Rendered by `scripts/voice/clone_eric.py`: Piper TTS voice en_US "ryan" medium (rhasspy/piper v0.0.2; dataset licence CC BY-NC-SA 4.0, so keep the site non-commercial) converted with kNN-VC (bshall/knn-vc v0.1, MIT; WavLM-Large + prematched HiFi-GAN).
 
 ## Violet Bleoodity and live-call ringtone (2026-10-11)
