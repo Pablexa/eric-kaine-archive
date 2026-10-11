@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
+import { voice } from '../audio/voice'
 import { initialState, isTrollActive, reducer, type Action, type EndingId, type ExperienceState, type RevealSource } from './machine'
 import { chat, bubble } from './chat'
 import { verity } from './verity'
@@ -66,6 +67,7 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
 
   const restore = useCallback(async (quick: boolean) => {
     fm.set('off')
+    voice.stop()
     streamOverlay.set(false)
     subsOverride.set(null)
     const pile = pileRef.current

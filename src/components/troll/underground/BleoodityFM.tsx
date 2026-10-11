@@ -3,7 +3,7 @@ import { fm } from '../../../lib/experience/stage'
 import { useStore } from '../../../lib/experience/store'
 import { useSfxState } from '../../shared/useSfx'
 
-/** Local meme MP3, looping behind every underground scene. No separate player. */
+/** Cursed 2Slimey bootleg, looping behind every underground scene. No separate player. */
 export function BleoodityFM() {
   const state = useStore(fm)
   const sound = useSfxState()
@@ -31,7 +31,7 @@ export function BleoodityFM() {
 
   if (state !== 'on') return null
   return <div data-troll-ui data-testid="background-music" data-playing={playing} className="pointer-events-none fixed bottom-1 left-1 z-[47] max-w-[60vw] bg-black px-1 font-mono text-[9px] text-[#00ff00]">
-    <audio ref={audio} src="/media/bleood-cheese.mp3" autoPlay loop preload="auto" onPlaying={() => setPlaying(true)} onPause={() => setPlaying(false)} onError={() => setFailed(true)} data-testid="cheese-audio" />
-    {failed ? 'MP3 failed to load :(' : '♫ bleood — mhm i got the cheese • LOOP FOREVER.exe'}
+    <audio ref={audio} src="/media/bleoodity-loop.mp3" autoPlay loop preload="auto" onPlaying={() => setPlaying(true)} onPause={() => setPlaying(false)} onError={() => setFailed(true)} data-testid="cheese-audio" />
+    {failed ? 'MP3 failed to load :(' : '♫ 2slimey (cursed bootleg) • LOOP FOREVER.exe'}
   </div>
 }

@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useRef } from 'react'
 import { animate, motion, useMotionValue } from 'motion/react'
 import { useExperience } from '../../lib/experience/ExperienceContext'
-import { CHAOS_SCENES, UNDERGROUND_SCENES, isTrollActive } from '../../lib/experience/machine'
+import { CHAOS_SCENES, KAINEITY_SCENES, UNDERGROUND_SCENES, isTrollActive } from '../../lib/experience/machine'
+import { KaineityFM } from './KaineityFM'
 import { chat } from '../../lib/experience/chat'
 import { objective, useStore } from '../../lib/experience/store'
 import { backdrop, introCard, pileDim, shake, streamOverlay } from '../../lib/experience/stage'
@@ -116,6 +117,7 @@ export function TrollLayer() {
         {scene === 'button' ? <ButtonScene key={`button-${state.run}`} /> : null}
         {scene === 'meltdown' ? <MeltdownScene key={`meltdown-${state.run}`} /> : null}
       </motion.div>
+      {scene && KAINEITY_SCENES.includes(scene) ? <KaineityFM key={`kfm-${state.run}`} /> : null}
 
       {/* Act III renders above the page (not inside the stage) so the page stays visible and pokeable */}
       <Suspense fallback={null}>

@@ -1,5 +1,3 @@
-import { spriteUrl } from './sprites'
-
 /** Local, source-checked photos. Full provenance lives in /media/SOURCES.md. */
 export interface RealMedia {
   src: string
@@ -26,9 +24,22 @@ export const artistMedia = {
   jaydes: { src: '/media/jaydes.jpg', alt: 'Jaydes in the official Poison music video', source: 'https://www.youtube.com/watch?v=MgKebqcV8o4', credit: 'The Toxic Lifestyle · Jaydes — Poison; directed by Tycho' },
   slimey: { src: '/media/slimey.jpg', alt: '2Slimey in the official Vet music video', source: 'https://www.youtube.com/watch?v=vBoKLPKP8J0', credit: '2Slimey · Vet (official music video)' },
   cheese: objectMedia.cheese,
-  // The sole invented character remains the existing fictional yellow orb.
-  verity: { src: spriteUrl('lilverity'), alt: 'Lil Verity, the fictional yellow guide orb', source: '/media/SOURCES.md', credit: 'Original fictional Verity character' },
+  verity: { src: '/media/bleoodity.png', alt: 'Bleoodity: Bleood\'s photo, tinted yellow', source: 'https://www.youtube.com/watch?v=m1zoIUa7rBE', credit: 'Derived from bleood · cryn innis coupe (official video)' },
 } satisfies Record<string, RealMedia>
+
+/** The guide: Eric Kaine's real avatar tinted yellow, then Bleood's photo tinted yellow after the twist. */
+export const characterMedia = {
+  kaineity: { src: '/media/eric-kaineity.png', alt: 'Eric Kaineity: Eric Kaine\'s avatar, tinted yellow', source: 'https://www.youtube.com/@eric2kaine', credit: 'Derived from Eric Kaine\'s channel avatar' },
+  bleoodity: { src: '/media/bleoodity.png', alt: 'Bleoodity: Bleood\'s photo, tinted yellow', source: 'https://www.youtube.com/watch?v=m1zoIUa7rBE', credit: 'Derived from bleood · cryn innis coupe (official video)' },
+  ericPfp: { src: '/media/eric-pfp.png', alt: 'Eric Kaine\'s channel avatar', source: 'https://www.youtube.com/@eric2kaine', credit: 'Eric Kaine' },
+} satisfies Record<string, RealMedia>
+
+/** Every real underground photo, for collages, popups, clones and wallpapers. */
+export const undergroundPhotos: RealMedia[] = [
+  artistMedia.bleood, artistMedia.slayr, artistMedia.osamason, artistMedia.carti, artistMedia.jaydes, artistMedia.slimey,
+  objectMedia.cheese, objectMedia.burger, objectMedia.seal, objectMedia.drink, objectMedia.draco, objectMedia.slime,
+  characterMedia.ericPfp,
+]
 
 export type ObjectMediaId = keyof typeof objectMedia
 export type ArtistMediaId = keyof typeof artistMedia

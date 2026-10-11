@@ -1,4 +1,5 @@
 import { sfx } from '../audio/sfx'
+import { voice } from '../audio/voice'
 import { Aborted, TIME, prefersReducedMotion } from '../animation/timeline'
 import type { Mood } from './machine'
 
@@ -58,6 +59,7 @@ class ChatStore {
     const line: ChatLine = { id: this.nextId++, author, text, shown: text.length, done: true, at: Date.now(), tone }
     this.lines = [...this.lines.slice(-7), line]
     this.emit()
+    voice.speak(text, author, { interrupt: false })
     return line
   }
 
@@ -74,6 +76,7 @@ class ChatStore {
     this.lines = [...this.lines.slice(-7), line]
     this.skipFlag = false
     this.emit()
+    voice.speak(text, author)
     const holdMs = (hold ?? Math.min(2600, 700 + text.length * 32)) * TIME.scale
 
     return new Promise((resolve, reject) => {

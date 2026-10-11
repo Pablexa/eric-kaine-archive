@@ -163,6 +163,9 @@ export const PROTOCOLS: { scene: Scene; index: string; label: string }[] = [
   { scene: 'mosh', index: '11', label: 'Mosh pit' },
 ]
 
+/** Scenes scored by Eric Kaineity's loop (everything before the beat). */
+export const KAINEITY_SCENES: Scene[] = ['intro', 'redact', 'collapse', 'pile', 'lights', 'button', 'meltdown', 'uglify', 'popups', 'clones']
+
 /** Scenes during which the archive is in its "uglified" state. */
 export const CHAOS_SCENES: Scene[] = ['uglify', 'popups', 'clones', 'beat', 'twist', 'label', 'foodfight', 'brainrot', 'mosh', 'legend']
 

@@ -42,7 +42,7 @@ export function ChatLog() {
                 className={`chat-line max-w-full px-2 py-0.5 leading-[1.25] sm:px-2.5 sm:py-1 ${underground ? 'text-[12px] sm:text-[16px]' : l.tone === 'loud' ? 'text-[17px] sm:text-[28px]' : 'text-[14px] sm:text-[19px]'} ${i < visible.length - 3 ? 'max-sm:hidden' : ''}`}
               >
                 {l.author === 'verity' ? (
-                  <span className="text-verity">&lt;verity&gt; </span>
+                  <span className="text-verity">&lt;eric kaineity&gt; </span>
                 ) : l.author === 'bleoodity' ? (
                   <span className="text-[#ff4fd8]">&lt;bleoodity&gt; </span>
                 ) : (
@@ -65,7 +65,7 @@ export function ChatLog() {
             exit={{ opacity: 0, y: 6 }}
             transition={{ duration: 0.25, ease: EASE.outExpo }}
             role="group"
-            aria-label="Respond to Verity"
+            aria-label="Respond to Eric Kaineity"
           >
             {pending.options.map((o, i) => (
               <button

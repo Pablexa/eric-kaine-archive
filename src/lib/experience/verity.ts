@@ -31,7 +31,7 @@ class VerityController {
   costume: Costume = 'none'
   /** When true, the orb's element accepts pointer input (drag / click). */
   interactive = false
-  label = 'Verity, the archive guide'
+  label = 'Eric Kaineity, the archive guide'
   /** Scenes can take over what pressing / grabbing Verity does. */
   onPress: ((viaKeyboard: boolean) => void) | null = null
   onGrab: ((e: PointerEvent) => void) | null = null

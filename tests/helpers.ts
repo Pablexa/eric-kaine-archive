@@ -158,7 +158,7 @@ export async function playActFour(page: Page, { touch = false, capture = false, 
   }
   await expect(page.getByTestId('label')).toBeVisible({ timeout: 30_000 })
   await expect(page.getByTestId('background-music')).toBeVisible()
-  await expect(page.getByTestId('cheese-audio')).toHaveAttribute('src', '/media/bleood-cheese.mp3')
+  await expect(page.getByTestId('cheese-audio')).toHaveAttribute('src', '/media/bleoodity-loop.mp3')
   await expect.poll(() => page.getByTestId('cheese-audio').evaluate((el) => (el as HTMLAudioElement).readyState)).toBeGreaterThanOrEqual(2)
   await expect.poll(() => page.getByTestId('label').locator('img').evaluateAll((imgs) => imgs.every((el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth > 0))).toBe(true)
   await expect(page.locator('html')).toHaveClass(/ug-vamp/)
