@@ -48,7 +48,7 @@ interface AdminTag {
 
 type Tag = VisitorTag | AdminTag
 
-const EMPTY: VisitorState = { phase: 'professional', scene: null, route: null, sound: false, visible: true }
+const EMPTY: VisitorState = { phase: 'professional', scene: null, route: null, sound: false, visible: true, volume: 0.9 }
 const MAX_FRAME = 4096
 const MAX_JSON = 2048
 
@@ -181,6 +181,13 @@ export class Hub extends DurableObject<Env> {
         if (tag.call) this.endCall(tag.call, null)
         return
       }
+      case 'volume': {
+        const v = Number(m.v)
+        if (!this.validTarget(m.to) || !Number.isFinite(v)) return
+        const vol = Math.round(Math.max(0, Math.min(1, v)) * 100) / 100
+        for (const t of this.targets(m.to)) send(t, { t: 'volume', v: vol })
+        return
+      }
     }
   }
 
@@ -199,6 +206,7 @@ export class Hub extends DurableObject<Env> {
           route: str(s.route, 12),
           sound: s.sound === true,
           visible: s.visible !== false,
+          volume: Number.isFinite(Number(s.volume)) ? Math.max(0, Math.min(1, Number(s.volume))) : 0.9,
         }
         tag.at = now
         ws.serializeAttachment(tag)

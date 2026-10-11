@@ -252,6 +252,12 @@ export async function chooseCallDevices(next: Partial<AudioDevices>) {
   }
 }
 
+/** Sube o baja el volumen de la web (música, efectos y voces) de un visitante. */
+export function setVisitorVolume(to: string, v: number) {
+  if (!ID_RE.test(to)) return false
+  return send({ t: 'volume', to, v: Math.max(0, Math.min(1, v)) })
+}
+
 export function setMuted(muted: boolean) {
   mic?.setMuted(muted)
   call.set({ ...call.get(), muted })

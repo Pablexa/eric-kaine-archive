@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useStore } from '../lib/experience/store'
 import { ID_RE, MAX_TEXT, type VisitorInfo } from '../lib/live/protocol'
-import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setMuted, startCall, visitors } from './hub'
+import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setMuted, setVisitorVolume, startCall, visitors } from './hub'
 import { DevicePicker } from '../components/live/DevicePicker'
 
 const SCENES: Record<string, string> = {
@@ -202,10 +202,116 @@ function CallCard({ target, setTarget }: { target: string; setTarget: (v: string
   )
 }
 
+/** Everything for the chosen session in one place: where they are, their volume, call and message. */
+function SessionCard({ target, setTarget }: { target: string; setTarget: (v: string) => void }) {
+  const map = useStore(visitors)
+  const c = useStore(call)
+  const v = ID_RE.test(target) ? map.get(target) : undefined
+  const reported = Math.round((v?.s.volume ?? 0.9) * 100)
+  const [draft, setDraft] = useState<number | null>(null)
+  const shown = draft ?? reported
+  const busy = c.phase === 'mic' || c.phase === 'ringing' || c.phase === 'connected'
+
+  const push = (pct: number) => {
+    const next = Math.max(0, Math.min(100, Math.round(pct)))
+    setDraft(next)
+    setVisitorVolume(target, next / 100)
+  }
+  // once the visitor reports the new volume back, the slider follows them again
+  useEffect(() => {
+    if (draft !== null && reported === draft) setDraft(null)
+  }, [reported, draft])
+
+  return (
+    <section className="border-2 border-verity bg-ink-2 p-5" aria-labelledby="ses-h" data-testid="session-card">
+      <h2 id="ses-h" className="pixel text-[16px] text-verity">SESIÓN ELEGIDA</h2>
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+        }}
+      >
+        <span className="grid place-items-center border border-line-2 bg-ink px-3 font-mono text-muted">#</span>
+        <input
+          inputMode="numeric"
+          maxLength={5}
+          placeholder="el número que ve arriba a la izquierda"
+          value={target}
+          onChange={(e) => setTarget(e.target.value.replace(/\D/g, '').slice(0, 5))}
+          className="w-full min-w-0 border border-line-2 bg-ink px-3 py-2 font-mono text-[20px] tracking-[0.2em] outline-none placeholder:text-[12px] placeholder:tracking-normal focus:border-verity"
+          aria-label="Número de la sesión"
+          data-testid="session-target"
+        />
+      </form>
+      {!v ? (
+        <p className="mt-3 text-[14px] text-paper-2" data-testid="session-empty">
+          {ID_RE.test(target) ? `#${target} no está conectado ahora.` : 'Tocá "Elegir" en la lista, o escribí el número que la persona ve arriba a la izquierda de su pantalla.'}
+        </p>
+      ) : (
+        <div className="mt-3 space-y-3">
+          <p className="text-[14px] text-paper-2">
+            <span className="font-mono text-paper">#{v.id}</span> · {where(v)} · {v.s.sound ? '🔊 sonido on' : '🔇 sonido off'} · {v.s.visible ? 'mirando' : 'en otra pestaña'}
+          </p>
+          <div>
+            <div className="flex items-center justify-between text-[12px] uppercase tracking-wide text-paper-2">
+              <span>Volumen de su web (música, efectos y voces)</span>
+              <span className="font-mono text-[14px] text-paper" data-testid="session-volume">{shown} %</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={shown}
+              onChange={(e) => push(Number(e.target.value))}
+              className="mt-1 w-full accent-[var(--color-verity)]"
+              aria-label={`Volumen de #${v.id}`}
+              data-testid="session-volume-slider"
+            />
+            <div className="mt-2 grid grid-cols-4 gap-1.5 text-[13px]">
+              <button type="button" onClick={() => push(shown - 10)} className="border border-line-2 bg-ink-3 py-1.5 font-bold" data-testid="session-vol-down">−10</button>
+              <button type="button" onClick={() => push(shown + 10)} className="border border-line-2 bg-ink-3 py-1.5 font-bold" data-testid="session-vol-up">+10</button>
+              <button type="button" onClick={() => push(0)} className="border border-line-2 bg-ink-3 py-1.5" data-testid="session-vol-zero">Silencio</button>
+              <button type="button" onClick={() => push(90)} className="border border-line-2 bg-ink-3 py-1.5">Normal</button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => void startCall(v.id)}
+              disabled={busy || v.call !== 'idle'}
+              className="bg-[#1fbf4a] px-3 py-2 font-display font-extrabold text-black disabled:opacity-40"
+              data-testid="session-call"
+            >
+              Llamar a #{v.id}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const box = document.getElementById('msg-text')
+                box?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+                box?.focus()
+              }}
+              className="bg-verity px-3 py-2 font-display font-extrabold text-ink"
+              data-testid="session-message"
+            >
+              Escribirle
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 function MessageCard({ target }: { target: string }) {
   const [text, setText] = useState('')
   const [to, setTo] = useState<'all' | 'one'>('all')
   const [ttl, setTtl] = useState(10)
+  // picking a session points the message at that number
+  useEffect(() => {
+    if (ID_RE.test(target)) setTo('one')
+  }, [target])
   const dest = to === 'all' ? 'all' : target
   const ok = text.trim().length > 0 && (to === 'all' || ID_RE.test(target))
 
@@ -244,6 +350,7 @@ function MessageCard({ target }: { target: string }) {
         rows={3}
         placeholder="Escribí el mensaje (Enter envía, Shift+Enter nueva línea)"
         className="mt-3 w-full resize-y border border-line-2 bg-ink px-3 py-2 text-[16px] outline-none focus:border-verity"
+        id="msg-text"
         data-testid="msg-text"
       />
       <div className="mt-1 flex flex-wrap gap-1.5">
@@ -285,7 +392,7 @@ function MessageCard({ target }: { target: string }) {
   )
 }
 
-function Visitors({ onPick }: { onPick: (id: string) => void }) {
+function Visitors({ onPick, selected }: { onPick: (id: string) => void; selected: string }) {
   const map = useStore(visitors)
   const c = useStore(call)
   const now = useNow()
@@ -323,6 +430,7 @@ function Visitors({ onPick }: { onPick: (id: string) => void }) {
                 <th className="px-4 py-2 font-medium">#</th>
                 <th className="px-2 py-2 font-medium">Dónde está</th>
                 <th className="px-2 py-2 font-medium">Sonido</th>
+                <th className="px-2 py-2 font-medium">Volumen</th>
                 <th className="px-2 py-2 font-medium">Pestaña</th>
                 <th className="px-2 py-2 font-medium">Tiempo</th>
                 <th className="px-4 py-2" />
@@ -330,7 +438,7 @@ function Visitors({ onPick }: { onPick: (id: string) => void }) {
             </thead>
             <tbody>
               {rows.map((v) => (
-                <tr key={v.id} className={`border-t border-line ${c.id === v.id && c.phase === 'connected' ? 'bg-[#1fbf4a]/10' : ''}`} data-testid="visitor-row" data-id={v.id}>
+                <tr key={v.id} className={`border-t border-line ${c.id === v.id && c.phase === 'connected' ? 'bg-[#1fbf4a]/10' : selected === v.id ? 'bg-verity/10' : ''}`} data-testid="visitor-row" data-id={v.id} data-selected={selected === v.id}>
                   <td className="px-4 py-2 font-mono text-[15px] text-paper">
                     {v.id}
                     {v.tabs > 1 && <span className="ml-1 text-[11px] text-muted">×{v.tabs}</span>}
@@ -341,11 +449,18 @@ function Visitors({ onPick }: { onPick: (id: string) => void }) {
                     {v.call !== 'idle' && <span className="ml-2 bg-[#1fbf4a] px-1 text-[11px] font-bold text-black">{v.call === 'ringing' ? 'SONANDO' : 'EN LLAMADA'}</span>}
                   </td>
                   <td className="px-2 py-2">{v.s.sound ? '🔊' : '🔇'}</td>
+                  <td className="px-2 py-2 font-mono text-paper-2" data-testid="visitor-volume">{Math.round((v.s.volume ?? 0.9) * 100)} %</td>
                   <td className="px-2 py-2 text-paper-2">{v.s.visible ? 'mirando' : 'en otra pestaña'}</td>
                   <td className="px-2 py-2 font-mono text-paper-2">{mmss(now - v.since)}</td>
                   <td className="px-4 py-2 text-right">
-                    <button type="button" onClick={() => onPick(v.id)} className="border border-line-2 px-2 py-1 text-[12px] hover:border-verity">
-                      Elegir
+                    <button
+                      type="button"
+                      onClick={() => onPick(v.id)}
+                      aria-pressed={selected === v.id}
+                      className={`px-2 py-1 text-[12px] ${selected === v.id ? 'bg-verity font-bold text-ink' : 'border border-line-2 hover:border-verity'}`}
+                      data-testid="visitor-pick"
+                    >
+                      {selected === v.id ? 'Elegido' : 'Elegir'}
                     </button>
                   </td>
                 </tr>
@@ -404,10 +519,11 @@ export function AdminApp() {
       </header>
       <main className="grid gap-4 p-4 sm:p-6 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-7">
-          <Visitors onPick={setTarget} />
+          <Visitors onPick={setTarget} selected={target} />
           <Log />
         </div>
         <div className="space-y-4 lg:col-span-5">
+          <SessionCard target={target} setTarget={setTarget} />
           <CallCard target={target} setTarget={setTarget} />
           <MessageCard target={target} />
         </div>

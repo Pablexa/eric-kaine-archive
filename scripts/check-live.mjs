@@ -178,6 +178,20 @@ try {
   await admin.locator(`[data-testid=visitor-row][data-id="${id}"]`).waitFor({ timeout: 8000 })
   step('visitor keeps the same number after reload')
 
+  // pick the session from the list and drive its volume from the panel
+  await admin.locator(`[data-testid=visitor-row][data-id="${id}"] [data-testid=visitor-pick]`).click()
+  await admin.getByTestId('session-card').getByText(`#${id}`).first().waitFor({ timeout: 3000 })
+  if (await admin.getByTestId('session-call').isDisabled()) fail('session card cannot call the picked visitor')
+  await admin.getByTestId('session-vol-zero').click()
+  await admin.locator(`[data-testid=visitor-row][data-id="${id}"] [data-testid=visitor-volume]`).filter({ hasText: /^0 %$/ }).waitFor({ timeout: 5000 })
+    .catch(() => fail('visitor did not report volume 0 after the panel set it'))
+  const stored = await visitor.evaluate(() => JSON.parse(localStorage.getItem('ek-archive:sound') ?? '{}').volume)
+  if (stored !== 0) fail(`visitor volume should be 0, got ${stored}`)
+  await admin.getByTestId('session-vol-up').click()
+  await admin.locator(`[data-testid=visitor-row][data-id="${id}"] [data-testid=visitor-volume]`).filter({ hasText: /^10 %$/ }).waitFor({ timeout: 5000 })
+    .catch(() => fail('visitor did not report volume 10 after +10'))
+  step('panel picks the session and sets its volume (0 %, then +10 → 10 %); the visitor applies and reports it')
+
   // offline target
   await admin.getByTestId('call-target').fill('10000')
   await admin.getByTestId('admin-call').click()

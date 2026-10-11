@@ -138,6 +138,10 @@ function handle(m: VisitorIn) {
       stopRing = ring(audioDevices.get().output)
       ringTimer = window.setTimeout(decline, RING_FOR)
       return
+    case 'volume':
+      // the developer turned this visitor's site volume up or down
+      sfx.setVolume(m.v)
+      return
     case 'hangup':
       endCall(m.reason === 'admin' ? 'The developer hung up' : m.reason === 'lost' ? 'Call dropped' : null)
       return

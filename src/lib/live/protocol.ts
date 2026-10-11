@@ -25,6 +25,8 @@ export interface VisitorState {
   sound: boolean
   /** Tab is in the foreground. */
   visible: boolean
+  /** Site volume, 0–1 (music, effects and voices). */
+  volume: number
 }
 
 export interface VisitorInfo {
@@ -53,6 +55,7 @@ export type VisitorIn =
   | { t: 'clear' }
   | { t: 'ring' }
   | { t: 'hangup'; reason: 'admin' | 'elsewhere' | 'lost' }
+  | { t: 'volume'; v: number }
 
 /** admin → server */
 export type AdminOut =
@@ -60,6 +63,7 @@ export type AdminOut =
   | { t: 'msg'; to: 'all' | string; text: string; ttl: number }
   | { t: 'clear'; to: 'all' | string }
   | { t: 'call'; to: string }
+  | { t: 'volume'; to: 'all' | string; v: number }
   | { t: 'hangup' }
 
 /** server → admin */
