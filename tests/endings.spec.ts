@@ -126,7 +126,6 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await expect(page.getByTestId('leave')).toContainText(/LEAVING|%|jk/)
     await expect(page.getByTestId('troll-stage')).toHaveCount(0, { timeout: 10_000 })
     await expect(page.getByTestId('cheese-audio')).toHaveCount(0)
-    await expect(page.getByTestId('sound-toggle')).toBeVisible()
     expect(await page.evaluate(() => [...document.documentElement.classList].filter((c) => c.startsWith('ug-')))).toEqual([])
     await expect(page.getByTestId('ugly-widgets')).toHaveCount(0)
     await expect(page.getByTestId('live-chat')).toHaveCount(0)

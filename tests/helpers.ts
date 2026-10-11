@@ -118,7 +118,7 @@ export async function playActThree(page: Page) {
   await expect(page.getByTestId('popup-scene')).toHaveAttribute('data-goal', '15')
   for (let i = 0; i < 60 && (await page.getByTestId('popup-scene').count()); i++) {
     const close = page.getByTestId('popup-close').last()
-    if (await close.count()) await close.dispatchEvent('click').catch(() => {})
+    if (await close.count()) await close.dispatchEvent('click', undefined, { timeout: 2_000 }).catch(() => {})
     await sleep(80)
   }
 

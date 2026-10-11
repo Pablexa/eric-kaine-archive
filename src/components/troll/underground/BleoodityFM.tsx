@@ -11,14 +11,18 @@ export function BleoodityFM() {
   const [playing, setPlaying] = useState(false)
   const [failed, setFailed] = useState(false)
 
+  // Volume only: never restarts playback.
+  useEffect(() => {
+    if (audio.current) audio.current.volume = Math.max(0.35, sound.volume) * 0.8
+  }, [sound.volume, state])
+
   useEffect(() => {
     const el = audio.current
     if (!el || state !== 'on') return
     // The loop ignores the sound toggle: it plays for the whole Bleoodity act.
-    el.volume = Math.max(0.35, sound.volume) * 0.8
     el.muted = false
     // Retry on a tap if the browser requires a fresh gesture for media playback.
-    const play = () => { void el.play().catch(() => {}) }
+    const play = () => { if (el.paused) void el.play().catch(() => {}) }
     play()
     window.addEventListener('pointerdown', play, { passive: true })
     window.addEventListener('keydown', play)
@@ -27,11 +31,11 @@ export function BleoodityFM() {
       window.removeEventListener('keydown', play)
       el.pause()
     }
-  }, [state, sound.volume])
+  }, [state])
 
   if (state !== 'on') return null
   return <div data-troll-ui data-testid="background-music" data-playing={playing} className="pointer-events-none fixed bottom-1 left-1 z-[47] max-w-[60vw] bg-black px-1 font-mono text-[9px] text-[#00ff00]">
-    <audio ref={audio} src="/media/bleoodity-loop.mp3" autoPlay loop preload="auto" onPlaying={() => setPlaying(true)} onPause={() => setPlaying(false)} onError={() => setFailed(true)} data-testid="cheese-audio" />
+    <audio ref={audio} src="/media/bleoodity-loop.mp3" autoPlay loop preload="auto" onPlaying={() => setPlaying(true)} onPause={() => setPlaying(false)} onTimeUpdate={(e) => setPlaying(!e.currentTarget.paused)} onError={() => setFailed(true)} data-testid="cheese-audio" />
     {failed ? 'MP3 failed to load :(' : '♫ 2slimey (cursed bootleg) • LOOP FOREVER.exe'}
   </div>
 }

@@ -97,22 +97,26 @@ def main() -> None:
         tmp = Path(tmp)
         ref = tmp / 'ref.wav'
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', args.ref, '-ac', '1', '-ar', '16000', '-af', 'highpass=f=70', str(ref)], check=True)
-        matching = vc.get_matching_set([ref])
+        matching = vc.get_matching_set([str(ref)])
 
         def render(text: str) -> str:
             name = hashlib.sha1(text.encode('utf-8')).hexdigest()[:12] + '.mp3'
             raw, wav16, conv = tmp / 'tts.wav', tmp / 'tts16.wav', tmp / 'conv.wav'
             subprocess.run([args.piper, '-m', args.piper_model, '-f', str(raw)], input=speakable(text).encode(), check=True, capture_output=True)
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(raw), '-ac', '1', '-ar', '16000', str(wav16)], check=True)
-            out = vc.match(vc.get_features(wav16), matching, topk=4)
+            # pad with silence: very short lines are otherwise too short for kNN-VC's loudness gate
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(raw), '-ac', '1', '-ar', '16000', '-af', 'adelay=300,apad=pad_dur=0.4', str(wav16)], check=True)
+            out = vc.match(vc.get_features(str(wav16)), matching, topk=4)
             sf.write(conv, out.numpy(), 16000)
             subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(conv), '-af', 'loudnorm=I=-16:TP=-1.5', '-ar', '22050', '-ac', '1', '-b:a', '48k', str(OUT / name)], check=True)
             return name
 
         manifest = {'lines': {}, 'barks': []}
         for i, text in enumerate(lines, 1):
-            manifest['lines'][text] = render(text)
-            print(f'{i}/{len(lines)} {text}', flush=True)
+            try:
+                manifest['lines'][text] = render(text)
+                print(f'{i}/{len(lines)} {text}', flush=True)
+            except Exception as e:  # one bad line should not sink the batch; it falls back to a bark
+                print(f'{i}/{len(lines)} SKIPPED {text!r}: {e}', flush=True)
         manifest['barks'] = [render(b) for b in BARKS]
     (OUT / 'manifest.json').write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
     print('wrote', len(manifest['lines']), 'lines and', len(manifest['barks']), 'barks to', OUT)
