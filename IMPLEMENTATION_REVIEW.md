@@ -125,3 +125,23 @@ This replaces the 2026-10-10 notes above for the media rewrite (real photos, rea
 - Actual video playback. This sandbox's network policy blocks YouTube, so the players render as blocked frames in `60-real-videos.png`/`60-maximum-brainrot.png`. Embed URLs and CSP `frame-src https://www.youtube-nocookie.com` were checked; whether YouTube allows embedding of both videos must be confirmed in a normal browser with internet access.
 - Audible sound. Playback state (`playing`, advancing time, not muted) is verified, but nobody listened. Browsers can still block autoplay until a tap; the component retries on the next tap or keypress.
 - The MP3 is an 18.064-second fragment of the meme, not the full song.
+
+## Full underground pass — verification 2026-10-11
+
+Every phase after the reveal is now underground-themed with real photos: leak hunt, follow button, leak-alert broadcast, MySpace-era uglify, leak popups, industry-plant clones, a cracked-FL-Studio beat synced to the owner's track, the "leaked website" twist, and Act IV. Eric Kaineity (Eric's avatar, yellow) replaces the drawn orb until the twist; Bleoodity (Bleood's photo, yellow) after it. No drawn sprites remain in the takeover.
+
+| Check | Result |
+|---|---|
+| `tsc` + `vite build` | Pass |
+| Desktop suite (23 scenarios) | 21 pass on the full run; the two failures were investigated: `thumbnails come from YouTube` (sandbox blocks `i.ytimg.com`) and an intermittent `leaving the takeover` failure, fixed below |
+| Act II–IV routes after fixes: main path, cooperative reduced-motion path, leaving the takeover | Pass, twice in a row each (`--repeat-each 2`) |
+| Music | All four MP3s play in Chromium (time advances). In Act IV the loop is unmuted, looping, not paused, and its time advances |
+| Eric Kaineity voice | 135 lines + 10 filler barks rendered, 0 skipped, 2.3 MB total, loaded one line at a time. Pitch check: owner recording median ≈147 Hz, stock TTS ≈170 Hz, clone ≈127 Hz (moved into the owner's range) |
+| Screenshots | `screenshots/70-*` (each Act II–III phase, desktop) inspected: photos load, the yellow guides render, primary controls are visible |
+
+Fixes found while verifying:
+- The Act IV music's `data-playing` flag could stay `false` while audio played, and a volume change restarted playback. Volume now has its own effect, and the flag also follows `timeupdate`.
+- Test helper: the popup close `dispatchEvent` could wait forever when the last popup vanished between count and click; it is now bounded to 2 s.
+- Removed an assertion I had added earlier that expected the HUD sound button after leaving; the archive navigation never had one.
+
+Not verified: nobody listened to the voices or music, and voices are skipped in `?fast=1` test runs, so in-page voice playback is only checked by code path and file serving. Phones were out of scope for this pass.

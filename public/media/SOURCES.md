@@ -31,3 +31,19 @@ These files use Wikimedia’s existing 500px previews. Browser presentation may 
 - Subway video 1: https://www.youtube.com/watch?v=i0M4ARe9v0Y — `Subway Surfers (2026) - Gameplay [4K 16x9] No Copyright`, public uploader `Subway Surfers` / https://www.youtube.com/@subwaysurfers . Title/uploader verified with YouTube oEmbed; uploader naming does not by itself establish SYBO affiliation.
 - Subway video 2: https://www.youtube.com/watch?v=ZtHCnXMjIXY — `Subway Surfers Gameplay PC - First play`, uploader Cartoons Mee / https://www.youtube.com/@CartoonsMee . Title/uploader verified with YouTube oEmbed.
 - Additional visible collage players retain Eric's verified Bleoodity stream and Bleood's existing official cheese upload from `channel.ts`. All video playback uses visible YouTube privacy-enhanced embeds, with original watch/source links. Videos are not downloaded.
+
+## Full underground pass (2026-10-11)
+
+Music (all supplied by the site owner as their own cursed adaptations; not downloaded by the assistant):
+- `kaineity-loop.mp3` (59.5 s): Eric Kaineity's loop under Acts II–III. Follows the HUD sound toggle.
+- `bleoodity-loop.mp3` (107.3 s): cursed 2Slimey bootleg, loops for all of Act IV with no page control.
+- `beat-scene.mp3`: first 42 s of the owner's 199.8 s file with a 3 s fade-out (ffmpeg, 160 kbps). The drop lands at 12.55 s after a gap from 11.40 s; Protocol 07 is synced to it.
+
+Images:
+- `eric-pfp.png`: Eric Kaine's channel avatar, supplied by the site owner (160 px, upscaled to 256 px).
+- `eric-kaineity.png`: the same avatar, grayscale → yellow colorize (Pillow). The Eric Kaineity guide.
+- `bleoodity.png`: crop of `bleood.jpg` (official cryn innis coupe video still), grayscale → yellow colorize. The Bleoodity guide.
+
+Voices:
+- `voice/bleood-1..7.mp3`: 1.3 s snippets cut from `bleood-cheese.mp3` (real Bleood audio, no synthesis). Played, slightly pitch-varied, when Bleoodity talks.
+- `voice/eric/*.mp3` + `manifest.json`: Eric Kaineity's lines in a voice cloned from the site owner's own 35 s recording, with their consent (the raw recording is not committed). Rendered by `scripts/voice/clone_eric.py`: Piper TTS voice en_US "ryan" medium (rhasspy/piper v0.0.2; dataset licence CC BY-NC-SA 4.0, so keep the site non-commercial) converted with kNN-VC (bshall/knn-vc v0.1, MIT; WavLM-Large + prematched HiFi-GAN).
