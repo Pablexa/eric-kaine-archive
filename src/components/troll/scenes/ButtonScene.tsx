@@ -206,13 +206,20 @@ export function ButtonScene() {
     objective.set('Find the real button')
     await say('fine. then find the real one.', { hold: 300 })
     const real = Math.floor(Math.random() * 5)
+    // Listen before the decoys appear: the real one may be found mid-shuffle.
+    const found = new Promise<void>((resolve) => (shellResolve.current = resolve))
     setDecoys(Array.from({ length: 5 }, (_, i) => ({ id: i, slot: i, real: i === real, dead: false })))
     setStage('shell')
-    await wait(700, signal)
-    await shuffle(signal, 5)
-    await new Promise<void>((resolve) => (shellResolve.current = resolve))
+    const shuffling = new AbortController()
+    signal.addEventListener('abort', () => shuffling.abort(), { once: true })
+    void wait(700, shuffling.signal).then(() => shuffle(shuffling.signal, 5)).catch(() => {})
+    await found
+    shuffling.abort()
 
     // 4: nothing happens
+    // Listen before the button returns: pressing it before Verity finishes talking still counts.
+    let pressedEarly = false
+    const pressed = new Promise<void>((resolve) => (pressedResolve.current = () => { pressedEarly = true; resolve() }))
     setDecoys([])
     setPos(centerPos())
     setStage('calm')
@@ -220,9 +227,8 @@ export function ButtonScene() {
     dispatch({ type: 'MOOD', mood: 'calm' })
     const c = centerPos()
     await verity.moveTo(c.x + size().w * 0.62, c.y - size().h * 0.9, { size: 64, duration: 0.8, signal })
-    await say('…fine.', { hold: 1400 })
-    await say('press it. see if i care.', { hold: 200 })
-    const pressed = new Promise<void>((resolve) => (pressedResolve.current = resolve))
+    if (!pressedEarly) await say('…fine.', { hold: 1400 })
+    if (!pressedEarly) await say('press it. see if i care.', { hold: 200 })
     const idle = (async () => {
       for (const line of IDLE_LINES) {
         await wait(6500, signal)

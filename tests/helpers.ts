@@ -101,8 +101,9 @@ export async function beatTheButton(page: Page) {
   await sleep(2400)
   await page.getByTestId('decoy-real').click()
   await expect(page.getByTestId('decoy-real')).toHaveCount(0, { timeout: 10_000 })
-  await sleep(1500)
+  // Press as soon as it returns, before Verity says "press it. see if i care." — this used to soft-lock.
   await page.getByTestId('subscribe').click()
+  await expect(page.getByTestId('troll-stage')).toHaveAttribute('data-scene', 'meltdown', { timeout: 15_000 })
 }
 
 /** Act III: uglify → popups → clones → beat → twist. */
