@@ -1,0 +1,280 @@
+/* Protocol 02 "Lights out": a 2008 underground leak basement, seen one flashlight beam at a time. */
+
+.lx-scene {
+  --lx-pink: #ff2bd6;
+  --lx-lime: #39ff14;
+  --lx-yellow: #ffe600;
+  --lx-cyan: #00e5ff;
+  --lx-red: #ff1a1a;
+  --lx-navy: #000080;
+  --lx-comic: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive;
+  --lx-impact: Impact, 'Haettenschweiler', 'Arial Black', sans-serif;
+}
+
+/* ---------- the basement (only visible inside the beam) ---------- */
+
+.lx-decor {
+  position: absolute;
+  white-space: nowrap;
+  padding: 3px 9px;
+  font: 900 clamp(13px, 1.6vw, 22px) / 1 var(--lx-impact);
+  letter-spacing: 0.5px;
+  box-shadow: 4px 4px 0 #000;
+  opacity: 0.92;
+}
+.lx-decor-a { background: var(--lx-yellow); color: var(--lx-red); border: 4px ridge var(--lx-pink); }
+.lx-decor-b { background: var(--lx-pink); color: var(--lx-yellow); border: 3px dashed var(--lx-lime); font-family: var(--lx-comic); font-weight: 700; }
+.lx-decor-c { background: var(--lx-navy); color: var(--lx-lime); border: 4px outset #c0c0c0; font-family: var(--lx-comic); font-weight: 700; }
+.lx-decor-d { background: #000; color: var(--lx-cyan); border: 3px solid var(--lx-red); text-shadow: 2px 2px var(--lx-pink); }
+.lx-decor-e { background: var(--lx-lime); color: #120056; border: 4px ridge var(--lx-yellow); }
+
+.lx-news {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  height: 26px;
+  background: #000;
+  border-top: 3px ridge var(--lx-red);
+  border-bottom: 3px ridge var(--lx-red);
+  overflow: hidden;
+}
+.lx-news-label {
+  flex: none;
+  padding: 0 10px;
+  background: var(--lx-red);
+  color: var(--lx-yellow);
+  font: 900 14px/20px var(--lx-impact);
+  letter-spacing: 1px;
+}
+.lx-marquee {
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.lx-marquee-track {
+  display: inline-block;
+  color: var(--lx-yellow);
+  font: 700 13px/20px var(--lx-comic);
+  animation: lx-marquee 26s linear infinite;
+}
+@keyframes lx-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- a hidden leak ---------- */
+
+.lx-leak-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--lx-navy);
+  border: 3px ridge var(--lx-pink);
+  box-shadow: 5px 5px 0 var(--lx-lime);
+  font-family: var(--lx-comic);
+}
+.lx-leak-photo {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+}
+.lx-leak-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.15) saturate(1.35);
+}
+.lx-leak-tag {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  padding: 1px 4px;
+  background: var(--lx-red);
+  color: var(--lx-yellow);
+  border: 1px solid var(--lx-yellow);
+  font: 900 10px/1.1 var(--lx-impact);
+  letter-spacing: 0.5px;
+  transform: rotate(-6deg);
+}
+.lx-leak-len {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 0 3px;
+  background: rgba(0, 0, 0, 0.82);
+  color: var(--lx-lime);
+  font: 700 10px/14px ui-monospace, 'Courier New', monospace;
+}
+.lx-leak-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  background: rgba(255, 230, 0, 0.92);
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0 var(--lx-pink);
+}
+.lx-leak-play::after {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 5px;
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent #000;
+}
+.lx-leak-name {
+  flex: none;
+  padding: 0 4px;
+  border-top: 2px solid #000;
+  background: var(--lx-yellow);
+  color: #d00000;
+  font: 700 10px/14px var(--lx-comic);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lx-leak-wave {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  height: 14px;
+  padding: 1px 4px;
+  background: #000;
+}
+.lx-leak-wave i {
+  flex: 1 1 0;
+  min-height: 1px;
+  background: var(--lx-lime);
+}
+.lx-leak-wave i:nth-child(3n) { background: var(--lx-cyan); }
+.lx-leak-wave i:nth-child(7n) { background: var(--lx-pink); }
+.lx-leak-sticker {
+  position: absolute;
+  right: -12px;
+  top: -14px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  background: var(--lx-yellow);
+  color: var(--lx-red);
+  font: 900 11px/1 var(--lx-impact);
+  text-align: center;
+  transform: rotate(14deg);
+  clip-path: polygon(50% 0%, 61% 15%, 79% 9%, 79% 28%, 98% 32%, 88% 50%, 98% 68%, 79% 72%, 79% 91%, 61% 85%, 50% 100%, 39% 85%, 21% 91%, 21% 72%, 2% 68%, 12% 50%, 2% 32%, 21% 28%, 21% 9%, 39% 15%);
+}
+
+/* ---------- battery pickup: a fake download button ---------- */
+
+.lx-pickup-inner {
+  display: block;
+  padding: 4px 8px;
+  background: var(--lx-lime);
+  color: #000;
+  border: 3px outset #eaffea;
+  box-shadow: 3px 3px 0 var(--lx-pink);
+  font: 900 12px/1 var(--lx-impact);
+  text-align: center;
+  white-space: nowrap;
+  transform: rotate(-7deg);
+  animation: lx-blink 0.9s steps(2, start) infinite;
+}
+.lx-pickup-inner small {
+  display: block;
+  margin-top: 2px;
+  font: 700 9px/1 var(--lx-comic);
+  color: #120056;
+}
+@keyframes lx-blink {
+  50% { background: var(--lx-yellow); }
+}
+
+/* ---------- HUD ---------- */
+
+.lx-meter {
+  padding: 4px 8px;
+  background: #000;
+  border: 3px ridge var(--lx-pink);
+  box-shadow: 4px 4px 0 var(--lx-lime);
+  transform: rotate(-1.5deg);
+}
+.lx-meter-label {
+  color: var(--lx-yellow);
+  font: 900 14px/1 var(--lx-impact);
+  letter-spacing: 1px;
+  text-shadow: 2px 2px var(--lx-red);
+}
+.lx-meter-bar {
+  border: 2px inset #c0c0c0;
+  background: #111;
+}
+.lx-meter-num {
+  color: var(--lx-lime);
+  font: 700 14px/1 ui-monospace, 'Courier New', monospace;
+}
+.lx-counter {
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  background: var(--lx-navy);
+  border: 3px outset #c0c0c0;
+  color: #fff;
+  font: 700 11px/1 var(--lx-comic);
+  transform: rotate(2deg);
+}
+.lx-counter-digits {
+  display: flex;
+  gap: 1px;
+}
+.lx-counter-digits b {
+  display: inline-block;
+  min-width: 11px;
+  padding: 2px 1px;
+  background: #000;
+  border: 1px solid #444;
+  color: var(--lx-lime);
+  font: 700 13px/1 ui-monospace, 'Courier New', monospace;
+  text-align: center;
+}
+.lx-slot {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  background: #000;
+  border: 2px dashed var(--lx-pink);
+}
+.lx-slot:nth-child(odd) { transform: rotate(-4deg); }
+.lx-slot:nth-child(even) { transform: rotate(5deg); border-color: var(--lx-lime); }
+.lx-slot-q {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--lx-yellow);
+  font: 900 16px/1 var(--lx-impact);
+}
+.lx-slot img {
+  filter: contrast(1.15) saturate(1.35);
+}
+@media (min-width: 640px) {
+  .lx-slot { width: 44px; height: 44px; }
+  .lx-slot-q { font-size: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-marquee-track,
+  .lx-pickup-inner { animation: none; }
+}
