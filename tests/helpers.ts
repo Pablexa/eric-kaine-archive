@@ -196,8 +196,9 @@ export async function playActFour(page: Page, { touch = false, capture = false, 
   await activate('brainrot-add-pane')
   await expect.poll(async () => Number(await brainrot.getAttribute('data-pane-count'))).toBeGreaterThan(panesBefore)
   await shot('real-videos')
-  await expect(brainrot).toHaveAttribute('data-section', 'quad', { timeout: 30_000 })
-  await shot('maximum-brainrot')
+  // fast pacing runs the whole 15 s cut in about 2 s: reach four panes, or find the scene already over
+  await expect.poll(async () => ((await brainrot.count()) ? await brainrot.getAttribute('data-section') : 'over'), { timeout: 30_000 }).toMatch(/^(quad|over)$/)
+  if (await brainrot.count()) await shot('maximum-brainrot')
 
   const mosh = page.getByTestId('mosh')
   await expect(mosh).toBeVisible({ timeout: 20_000 })
@@ -208,7 +209,8 @@ export async function playActFour(page: Page, { touch = false, capture = false, 
   // in fast mode 1.5B is on screen for only a few hundred ms before the bio replaces it: check every frame
   await page.waitForFunction(() => document.querySelector('[data-testid=legend-subs]')?.textContent === '1.5B', null, { timeout: 15_000, polling: 'raf' })
   await shot('legend')
-  await expect(page.getByTestId('legend-bio')).toBeVisible({ timeout: 15_000 })
+  // in fast pacing the bio lasts about half a second; the screenshot above can outlast it
+  await expect.poll(async () => (await page.getByTestId('legend-bio').isVisible()) || (await page.getByTestId('ending').isVisible()), { timeout: 15_000 }).toBe(true)
   await expect(page.getByTestId('background-music')).toHaveCount(0)
   // Bleoodity remembers Eric's bio: every song has stopped (the credits song comes next)
   expect(await page.evaluate(() => [...document.querySelectorAll('audio, video')].filter((m) => !(m as HTMLMediaElement).paused).length)).toBe(0)

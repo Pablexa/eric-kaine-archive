@@ -220,3 +220,28 @@ Owner requests: Protocol 04 plays 2Slimey instead of the old chiptune; the music
 | Full suite | 29 passed + 1 skipped (the live-only spec) before the flake fix; the flaky case then passed 4/4 |
 
 Not verified by ear: the new mix levels and the tamed 2Slimey track.
+
+## Cloud pass on d340848 — 2026-10-11
+
+Built on the local session's d340848 (one song at a time across tabs, panel build flags, MySpace song, 15 s brainrot, covers).
+
+Changes:
+- **Bleood under Bleoodity, much quieter:** `BleoodityFM` levels 1 / 0.5 / ×0.55 → **0.5 / 0.15 / ×0.4**. The owner's panel controls still multiply in (session site volume × Música × call duck).
+- **Song names:** `kaineity-loop.mp3` (Protocols 04–06) is "bloody" by 2Slimey (`TRACKS.bloody`, `covers/bloody.jpg`); `beat-scene.mp3` (Protocol 07) is "Habits" by OsamaSon (`TRACKS.habits`, `covers/habits.jpg`). The now-playing card, README, SOURCES and the test expectation follow.
+- **Everything stops:** `stopAll()` in `src/lib/audio/musicGuard.ts` pauses every registered song. It runs from `restore()` (LEAVE / Esc, with `voice.stop()` and `sfx.stopMusic()`), at the legend bio, and in `EndMusic` before "patience" registers.
+- **Brainrot in fast tests:** the 15 s cut lasted ~2 s under `?fast=1`, so tests could not press its buttons. In fast mode only, the auto-exit keeps at least 6 real seconds; visitors are unchanged (exit at 15 s, auto 10 s later).
+- **Test helpers:** the add-pane check no longer assumes a pane count, and the "four panes" and bio checks also accept the scene having already moved on (fast pacing can outrun a screenshot).
+
+Verification, in this sandbox (Chromium, `vite preview` on 4174, `wrangler dev` on 8787 with a local test key):
+
+| Check | Result |
+|---|---|
+| `npx tsc -b`, `npx tsc -p worker`, `npm run build` | Pass |
+| Full desktop suite with `LIVE_BASE` (28 tests, before the brainrot floor) | 26 pass. `thumbnails come from YouTube` fails only because this sandbox blocks `i.ytimg.com`; the main path failed on the brainrot timing above |
+| Main path after the fixes | 3/3 with `--repeat-each 3` |
+| `endings.spec.ts` after the fixes | 6/6, including the new checks: no song plays after LEAVE, and only "patience" plays at the end |
+| `tests/live-act4.spec.ts` (panel in the Bleood act) | Pass |
+| `tests/voices.spec.ts`, `tests/music.spec.ts` (two tabs) | Pass |
+| `scripts/check-live.mjs` | 22/22 |
+
+Not done here: deploying. This sandbox cannot reach Cloudflare; the owner runs `npm run deploy` locally. Nobody listened to the new music levels.

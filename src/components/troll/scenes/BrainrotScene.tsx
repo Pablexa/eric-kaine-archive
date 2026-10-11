@@ -94,7 +94,9 @@ export function BrainrotScene() {
     sfx.airhorn()
     await wait(4500, signal)
     setSkipReady(true)
-    await wait(10000, signal)
+    // Visitors: 10 s more, then mosh. Fast test runs (TIME.scale < 1) keep at least 6 real seconds here,
+    // or the whole cut lasts ~2 s and the tests cannot press its buttons.
+    await wait(TIME.scale < 1 ? Math.max(10000, 6000 / TIME.scale) : 10000, signal)
     finish()
   }, [])
 
