@@ -1,7 +1,7 @@
 import { createStore } from '../experience/store'
 import { sfx } from '../audio/sfx'
 import { chime, openMic, PcmPlayer, ring, type Mic } from './audio'
-import { audioDevices, chooseDevices, refreshDevices, type AudioDevices } from './devices'
+import { audioDevices, callGain, chooseDevices, chooseGain, refreshDevices, type AudioDevices, type CallGain } from './devices'
 import { ID_RE, LIVE_PATH, type VisitorIn, type VisitorOut, type VisitorState } from './protocol'
 
 /**
@@ -188,7 +188,7 @@ export function reportState(s: VisitorState) {
 export function answer() {
   if (liveCall.get().phase !== 'ringing') return
   stopRinging()
-  player = new PcmPlayer(audioDevices.get().output)
+  player = new PcmPlayer(audioDevices.get().output, callGain.get().peer)
   send({ t: 'accept' })
   liveCall.set({ phase: 'connected', since: Date.now(), mic: 'off', muted: false })
   sfx.setDuck(DUCK)
@@ -229,7 +229,7 @@ export async function chooseCallDevices(next: Partial<AudioDevices>) {
   mic.stop()
   mic = null
   try {
-    mic = await openMic(sendPcm, next.input)
+    mic = await openMic(sendPcm, next.input, callGain.get().mic)
     mic.setMuted(muted)
   } catch {
     const now = liveCall.get()
@@ -238,6 +238,13 @@ export async function chooseCallDevices(next: Partial<AudioDevices>) {
       liveCall.set({ ...now, mic: 'blocked' })
     }
   }
+}
+
+/** My mic loudness and how loud I hear the developer (0–3); applies live. */
+export function setCallGain(next: Partial<CallGain>) {
+  chooseGain(next)
+  if (next.mic !== undefined) mic?.setGain(callGain.get().mic)
+  if (next.peer !== undefined) player?.setVolume(callGain.get().peer)
 }
 
 export async function toggleMic() {
@@ -252,7 +259,7 @@ export async function toggleMic() {
   }
   liveCall.set({ ...c, mic: 'starting' })
   try {
-    const opened = await openMic(sendPcm, audioDevices.get().input)
+    const opened = await openMic(sendPcm, audioDevices.get().input, callGain.get().mic)
     const now = liveCall.get()
     if (now.phase !== 'connected') {
       opened.stop()

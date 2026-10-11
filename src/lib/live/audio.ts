@@ -13,6 +13,8 @@ const AudioCtx = (): AC => window.AudioContext || (window as unknown as { webkit
 export interface Mic {
   /** Silences outgoing frames without releasing the microphone. */
   setMuted(muted: boolean): void
+  /** Outgoing loudness, 0–3 (the worklet clips anything past full scale). */
+  setGain(gain: number): void
   /** Latest peak, 0–1. */
   level(): number
   stop(): void
@@ -27,7 +29,7 @@ export function routeTo(target: AudioContext | HTMLMediaElement, output: string)
 }
 
 /** Opens the microphone (a chosen one, or the default) and calls `onFrame` with each 40 ms PCM frame. */
-export async function openMic(onFrame: (pcm: ArrayBuffer) => void, deviceId = ''): Promise<Mic> {
+export async function openMic(onFrame: (pcm: ArrayBuffer) => void, deviceId = '', gain = 1): Promise<Mic> {
   const base = { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
   let stream: MediaStream
   try {
@@ -49,7 +51,9 @@ export async function openMic(onFrame: (pcm: ArrayBuffer) => void, deviceId = ''
   const node = new AudioWorkletNode(ctx, 'live-capture', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] })
   const sink = ctx.createGain()
   sink.gain.value = 0
-  source.connect(node).connect(sink).connect(ctx.destination)
+  const pre = ctx.createGain()
+  pre.gain.value = gain
+  source.connect(pre).connect(node).connect(sink).connect(ctx.destination)
   void ctx.resume()
 
   let muted = false
@@ -63,10 +67,14 @@ export async function openMic(onFrame: (pcm: ArrayBuffer) => void, deviceId = ''
     setMuted: (m) => {
       muted = m
     },
+    setGain: (g) => {
+      pre.gain.setTargetAtTime(Math.max(0, Math.min(3, g)), ctx.currentTime, 0.02)
+    },
     level: () => peak,
     stop: () => {
       node.port.onmessage = null
       source.disconnect()
+      pre.disconnect()
       node.disconnect()
       stream.getTracks().forEach((t) => t.stop())
       void ctx.close()
@@ -85,10 +93,11 @@ export class PcmPlayer {
   frames = 0
 
   /** Create inside a click/tap handler so the browser lets it start. */
-  constructor(output = '') {
+  constructor(output = '', volume = 1) {
     this.ctx = new (AudioCtx())()
     if (output) routeTo(this.ctx, output)
     this.out = this.ctx.createGain()
+    this.out.gain.value = volume
     this.analyser = this.ctx.createAnalyser()
     this.analyser.fftSize = 256
     this.out.connect(this.analyser)

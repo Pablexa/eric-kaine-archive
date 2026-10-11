@@ -15,11 +15,13 @@ import {
   liveId,
   liveOnline,
   reportState,
+  setCallGain,
   setCallMuted,
   startLive,
   toggleMic,
   type DevMessage,
 } from '../../lib/live/client'
+import { CallLevels } from './CallLevels'
 import { DevicePicker } from './DevicePicker'
 
 /**
@@ -112,7 +114,7 @@ function Bars({ active }: { active: boolean }) {
   }, [active])
   const v = Math.min(1, level * 3)
   return (
-    <span className="flex h-4 items-end gap-[2px]" aria-hidden="true" data-testid="call-bars" data-frames={frames}>
+    <span className="flex h-4 items-end gap-[2px]" aria-hidden="true" data-testid="call-bars" data-frames={frames} data-level={level.toFixed(3)}>
       {[0.25, 0.5, 0.75, 1, 0.6].map((k, i) => (
         <span key={i} className="w-[3px] bg-verity transition-[height] duration-75" style={{ height: `${Math.max(15, Math.min(100, v * 100 * k + 15))}%` }} />
       ))}
@@ -244,7 +246,8 @@ function CallUi({ id }: { id: string | null }) {
             </button>
           </div>
           {settings ? (
-            <div className="mt-3 border-t border-line-2 pt-3">
+            <div className="mt-3 space-y-3 border-t border-line-2 pt-3">
+              <CallLevels lang="en" onChange={setCallGain} testPrefix="call" />
               <DevicePicker lang="en" onChange={(next) => void chooseCallDevices(next)} testPrefix="call" />
             </div>
           ) : null}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useStore } from '../lib/experience/store'
 import { ID_RE, MAX_TEXT, type VisitorInfo } from '../lib/live/protocol'
-import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setMuted, setVisitorVolume, startCall, visitors } from './hub'
+import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setCallGain, setMuted, setVisitorVolume, startCall, visitors } from './hub'
+import { CallLevels } from '../components/live/CallLevels'
 import { DevicePicker } from '../components/live/DevicePicker'
 
 const SCENES: Record<string, string> = {
@@ -76,7 +77,7 @@ function Meter({ label, which }: { label: string; which: 'me' | 'them' }) {
     return () => cancelAnimationFrame(raf)
   }, [which])
   return (
-    <div className="flex items-center gap-3 text-[12px] text-paper-2" data-testid={`meter-${which}`} data-frames={which === 'them' ? frames : undefined}>
+    <div className="flex items-center gap-3 text-[12px] text-paper-2" data-testid={`meter-${which}`} data-frames={which === 'them' ? frames : undefined} data-level={v.toFixed(3)}>
       <span className="w-28 shrink-0">{label}</span>
       <span className="h-2 flex-1 bg-ink-4">
         <span className="block h-full bg-verity transition-[width] duration-75" style={{ width: `${Math.min(100, v * 160)}%` }} />
@@ -170,7 +171,8 @@ function CallCard({ target, setTarget }: { target: string; setTarget: (v: string
       </form>
       <details className="mt-3 border border-line-2 bg-ink px-3 py-2" open>
         <summary className="cursor-pointer text-[12px] text-paper-2">Audio de la llamada</summary>
-        <div className="mt-2">
+        <div className="mt-2 space-y-3">
+          <CallLevels lang="es" onChange={setCallGain} testPrefix="admin" />
           <DevicePicker lang="es" onChange={(next) => void chooseCallDevices(next)} testPrefix="admin" />
         </div>
       </details>

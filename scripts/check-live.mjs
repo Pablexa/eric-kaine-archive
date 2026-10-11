@@ -164,6 +164,36 @@ try {
   const ownerSwitch = await flow(visitor, atVisitor)
   if (!(ownerSwitch > 15)) fail(`owner switched mic and the visitor only got ${ownerSwitch} frames`)
   const outputs = await Promise.all([visitor, admin].map((p, i) => p.getByTestId(i ? 'admin-output' : 'call-output').count()))
+  // call volumes: my mic level and how loud I hear the other person, on both sides
+  const peak = async (page, read, ms = 1600) => {
+    let p = 0
+    const end = Date.now() + ms
+    while (Date.now() < end) {
+      p = Math.max(p, await read())
+      await page.waitForTimeout(80)
+    }
+    return p
+  }
+  const ownerHears = () => admin.getByTestId('meter-them').getAttribute('data-level').then(Number)
+  const visitorHears = () => visitor.getByTestId('call-bars').getAttribute('data-level').then(Number)
+  const levelsOk = async (label, setter, read) => {
+    await setter('0')
+    await read.page.waitForTimeout(300)
+    const quiet = await peak(read.page, read.fn)
+    if (quiet > 0.01) fail(`${label} at 0 % but the level was still ${quiet}`)
+    await setter('200')
+    await read.page.waitForTimeout(300)
+    const loud = await peak(read.page, read.fn)
+    if (!(loud > 0.02)) fail(`${label} at 200 % but the level was only ${loud}`)
+    await setter('100')
+    return `${quiet.toFixed(3)} → ${loud.toFixed(3)}`
+  }
+  const a1 = await levelsOk('owner turned the visitor', (v) => admin.getByTestId('admin-peer-gain').fill(v), { page: admin, fn: ownerHears })
+  const a2 = await levelsOk('visitor turned their own mic', (v) => visitor.getByTestId('call-mic-gain').fill(v), { page: admin, fn: ownerHears })
+  const a3 = await levelsOk('visitor turned the owner', (v) => visitor.getByTestId('call-peer-gain').fill(v), { page: visitor, fn: visitorHears })
+  const a4 = await levelsOk('owner turned their own mic', (v) => admin.getByTestId('admin-mic-gain').fill(v), { page: visitor, fn: visitorHears })
+  step(`call volumes 0 % → 200 % work both ways: owner hears visitor ${a1}; visitor mic ${a2}; visitor hears owner ${a3}; owner mic ${a4}`)
+
   step(`mic pickers switch mid-call on both sides (${vInputs.length}/${aInputs.length} mics listed; output pickers: ${outputs.join('/')})`)
 
   // owner hangs up

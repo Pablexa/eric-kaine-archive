@@ -1,6 +1,6 @@
 import { createStore } from '../lib/experience/store'
 import { openMic, PcmPlayer, ring, type Mic } from '../lib/live/audio'
-import { audioDevices, chooseDevices, refreshDevices, type AudioDevices } from '../lib/live/devices'
+import { audioDevices, callGain, chooseDevices, chooseGain, refreshDevices, type AudioDevices, type CallGain } from '../lib/live/devices'
 import { ID_RE, LIVE_PATH, type AdminIn, type AdminOut, type CallPhase, type VisitorInfo } from '../lib/live/protocol'
 
 /** The owner's end of the live developer line (admin panel). */
@@ -207,10 +207,10 @@ function finish(phase: AdminCallPhase, text: string) {
 export async function startCall(id: string) {
   if (!ID_RE.test(id) || conn.get() !== 'online') return
   if (ACTIVE.includes(call.get().phase)) hangup()
-  player = new PcmPlayer(audioDevices.get().output)
+  player = new PcmPlayer(audioDevices.get().output, callGain.get().peer)
   call.set({ id, phase: 'mic', since: null, muted: false, visitorMic: false })
   try {
-    mic = await openMic(sendPcm, audioDevices.get().input)
+    mic = await openMic(sendPcm, audioDevices.get().input, callGain.get().mic)
     void refreshDevices()
   } catch {
     finish('mic-blocked', 'No se pudo abrir tu micrófono (permiso bloqueado o sin micrófono)')
@@ -244,7 +244,7 @@ export async function chooseCallDevices(next: Partial<AudioDevices>) {
   mic.stop()
   mic = null
   try {
-    mic = await openMic(sendPcm, next.input)
+    mic = await openMic(sendPcm, next.input, callGain.get().mic)
     mic.setMuted(muted)
     note('Cambiaste de micrófono')
   } catch {
@@ -256,6 +256,13 @@ export async function chooseCallDevices(next: Partial<AudioDevices>) {
 export function setVisitorVolume(to: string, v: number) {
   if (!ID_RE.test(to)) return false
   return send({ t: 'volume', to, v: Math.max(0, Math.min(1, v)) })
+}
+
+/** Volumen de mi micrófono y volumen al que escucho al visitante (0–3); se aplica al instante. */
+export function setCallGain(next: Partial<CallGain>) {
+  chooseGain(next)
+  if (next.mic !== undefined) mic?.setGain(callGain.get().mic)
+  if (next.peer !== undefined) player?.setVolume(callGain.get().peer)
 }
 
 export function setMuted(muted: boolean) {

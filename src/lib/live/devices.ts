@@ -78,3 +78,35 @@ export function watchDevices() {
   navigator.mediaDevices.addEventListener?.('devicechange', () => void refreshDevices())
   void refreshDevices()
 }
+
+/** Call levels, 0–3 (300 %): how loud my mic goes out, and how loud I hear the other person. */
+export interface CallGain {
+  mic: number
+  peer: number
+}
+
+const GAIN_KEY = 'ek-archive:live-gain'
+const clampGain = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.min(3, v)) : 1)
+
+function readGain(): CallGain {
+  try {
+    const v = JSON.parse(localStorage.getItem(GAIN_KEY) ?? '{}') as Partial<CallGain>
+    return { mic: clampGain(v.mic), peer: clampGain(v.peer) }
+  } catch {
+    return { mic: 1, peer: 1 }
+  }
+}
+
+export const callGain = createStore<CallGain>(readGain())
+
+export function chooseGain(next: Partial<CallGain>) {
+  const v = { ...callGain.get(), ...next }
+  v.mic = clampGain(v.mic)
+  v.peer = clampGain(v.peer)
+  callGain.set(v)
+  try {
+    localStorage.setItem(GAIN_KEY, JSON.stringify(v))
+  } catch {
+    /* still applies to this call */
+  }
+}
