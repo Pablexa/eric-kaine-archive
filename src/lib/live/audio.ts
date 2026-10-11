@@ -119,7 +119,7 @@ export class PcmPlayer {
   }
 }
 
-/** Tiny synthesized cues (ringtone, message chime). Silent until the page has had a gesture. */
+/** Tiny synthesized cues (fallback ring, message chime). Silent until the page has had a gesture. */
 let cueCtx: AudioContext | null = null
 function cues() {
   cueCtx ??= new (AudioCtx())()
@@ -143,8 +143,29 @@ function beep(ctx: AudioContext, at: number, freqs: number[], dur: number, gain:
   }
 }
 
-/** Classic two-tone ring, repeating until stopped. */
+/** The owner's ringtone, looping until the call is answered, declined or ends. */
+export const RINGTONE = '/media/ringtone.mp3'
+
 export function ring(): () => void {
+  const audio = new Audio(RINGTONE)
+  audio.loop = true
+  audio.volume = 0.9
+  let fallback: (() => void) | null = null
+  let stopped = false
+  // Blocked or missing file: the synthesized two-tone ring still announces the call.
+  void audio.play().catch(() => {
+    if (!stopped) fallback = toneRing()
+  })
+  return () => {
+    stopped = true
+    audio.pause()
+    audio.currentTime = 0
+    fallback?.()
+  }
+}
+
+/** Classic two-tone ring, repeating until stopped (fallback when the MP3 can't play). */
+function toneRing(): () => void {
   let stopped = false
   let timer = 0
   const once = () => {

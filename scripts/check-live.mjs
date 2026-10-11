@@ -32,6 +32,14 @@ const fail = (s) => {
 try {
   const visitorCtx = await browser.newContext({ permissions: ['microphone'], viewport: { width: 1440, height: 900 } })
   const adminCtx = await browser.newContext({ permissions: ['microphone'], viewport: { width: 1280, height: 900 } })
+  // Remember the ringtone element so the check can see it play and stop.
+  await visitorCtx.addInitScript(() => {
+    const play = HTMLMediaElement.prototype.play
+    HTMLMediaElement.prototype.play = function () {
+      if ((this.currentSrc || this.src).includes('/media/ringtone.mp3')) window.__ringtone = this
+      return play.call(this)
+    }
+  })
   const visitor = await visitorCtx.newPage()
   const admin = await adminCtx.newPage()
   watch(visitor, 'visitor')
@@ -85,7 +93,13 @@ try {
   // call → answer
   await admin.getByTestId('admin-call').click()
   await visitor.getByTestId('incoming-call').waitFor({ timeout: 8000 })
+  await visitor.waitForFunction(() => window.__ringtone && !window.__ringtone.paused && window.__ringtone.currentTime > 0, null, { timeout: 5000 })
+    .catch(() => fail('ringtone.mp3 is not playing while the call rings'))
+  step('ringtone.mp3 plays while the call rings')
   await visitor.getByTestId('call-answer').click()
+  await visitor.waitForFunction(() => window.__ringtone?.paused === true, null, { timeout: 2000 })
+    .catch(() => fail('ringtone kept playing after answering'))
+  step('ringtone stops the moment the call is answered')
   await admin.locator('[data-testid=admin-call-status][data-phase=connected]').waitFor({ timeout: 5000 })
   await visitor.getByTestId('call-widget').waitFor({ timeout: 5000 })
   step('visitor answered; both sides connected')
