@@ -23,6 +23,18 @@
       ],
       "port": 8787,
       "url": "http://127.0.0.1:8787"
+    },
+    {
+      "name": "archive-preview-4174",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--port",
+        "4174",
+        "--strictPort"
+      ],
+      "port": 4174
     }
   ]
 }

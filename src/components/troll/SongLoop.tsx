@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useSfxState } from '../shared/useSfx'
 import { announce, type Track } from '../../lib/audio/nowPlaying'
+import { guardMusic } from '../../lib/audio/musicGuard'
 
 /**
  * One of the experience's songs, looping while its scenes run. Follows the
@@ -30,6 +31,7 @@ export function SongLoop({ src, track, level, testid }: { src: string; track: Tr
   }, [sound.enabled, sound.volume, sound.duck, sound.music, level])
 
   useEffect(() => () => audio.current?.pause(), [])
+  useEffect(() => (audio.current ? guardMusic(audio.current) : undefined), [])
   useEffect(() => (audio.current ? announce(track, audio.current) : undefined), [track])
 
   return <audio ref={audio} src={src} loop preload="auto" data-testid={testid} data-troll-ui />

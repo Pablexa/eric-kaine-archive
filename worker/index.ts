@@ -200,6 +200,11 @@ export class Hub extends DurableObject<Env> {
         for (const t of this.targets(m.to)) send(t, { t: 'volume', v: vol })
         return
       }
+      case 'reload': {
+        if (!this.validTarget(m.to)) return
+        for (const t of this.targets(m.to)) send(t, { t: 'reload' })
+        return
+      }
       case 'mix': {
         if (!this.validTarget(m.to)) return
         const music = level(m.music, 1)
@@ -238,6 +243,7 @@ export class Hub extends DurableObject<Env> {
           volume: level(s.volume, 1) ?? 0.9,
           music: level(s.music, 1) ?? 1,
           voice: level(s.voice, MAX_VOICE) ?? 1,
+          build: str(s.build, 16) ?? '',
         }
         tag.at = now
         ws.serializeAttachment(tag)

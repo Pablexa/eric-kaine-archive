@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // lets the live panel tell which open tabs still run an older deploy
+  define: { __BUILD__: JSON.stringify(Date.now().toString(36)) },
   server: { port: 5173, strictPort: true },
   build: {
     target: 'es2022',

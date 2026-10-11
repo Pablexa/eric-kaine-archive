@@ -1,6 +1,7 @@
 import { createStore } from '../experience/store'
 import { sfx } from './sfx'
 import { announce, TRACKS } from './nowPlaying'
+import { guardMusic } from './musicGuard'
 
 /**
  * The end credits song. When an ending is reached every other song stops and
@@ -44,6 +45,7 @@ let el: HTMLAudioElement | null = null
 let wantPlay = false
 let unsubscribe: (() => void) | null = null
 let unannounce: (() => void) | null = null
+let unguard: (() => void) | null = null
 
 const patch = (p: Partial<EndMusicState>) => endMusic.set({ ...endMusic.get(), ...p })
 
@@ -79,6 +81,7 @@ export function startEndMusic() {
   applyVolume()
   unsubscribe = sfx.subscribe(applyVolume)
   unannounce = announce(TRACKS.patience, el)
+  unguard = guardMusic(el)
   window.addEventListener('pointerdown', retry, { passive: true })
   window.addEventListener('keydown', retry)
   wantPlay = true
@@ -93,6 +96,8 @@ export function stopEndMusic() {
   unsubscribe = null
   unannounce?.()
   unannounce = null
+  unguard?.()
+  unguard = null
   if (el) {
     el.pause()
     el.removeEventListener('play', onPlay)

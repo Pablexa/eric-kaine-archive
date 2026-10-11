@@ -29,6 +29,7 @@ import { artistMedia, characterMedia, objectMedia, type RealMedia } from '../../
 import { EASE, TIME, pick, prefersReducedMotion, rand } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
 import { announce, TRACKS } from '../../../lib/audio/nowPlaying'
+import { guardMusic } from '../../../lib/audio/musicGuard'
 import './BeatScene.css'
 
 /**
@@ -139,6 +140,7 @@ export function BeatScene() {
     let audio: HTMLAudioElement | null = fast ? null : new Audio(TRACK.src)
     // song 2: "bloody" by 2Slimey (the card in the corner shows it while it is audible)
     const unannounce = audio ? announce(TRACKS.bloody, audio) : null
+    const unguard = audio ? guardMusic(audio) : null
     const clock = new SongClock(audio, fast ? FAST_RATE : 1)
     let blocked = false
     const syncAudio = () => {
@@ -259,6 +261,7 @@ export function BeatScene() {
       s.extra = null
       s.onStep = null
       unannounce?.()
+      unguard?.()
       if (audio) {
         audio.pause()
         audio.removeAttribute('src')

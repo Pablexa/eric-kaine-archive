@@ -125,7 +125,7 @@ export function TrollLayer() {
         <SongLoop key={`song1-${state.run}`} src="/media/reasons-i-should-stay.mp3" track={TRACKS.reasons} level={0.5} testid="kaineity-audio" />
       ) : null}
       {scene && SONG_TWO_SCENES.includes(scene) && (song2 || scene !== 'uglify') ? (
-        <SongLoop key={`song2-${state.run}`} src="/media/bloody.mp3" track={TRACKS.bloody} level={0.5} testid="bloody-audio" />
+        <SongLoop key={`song2-${state.run}`} src="/media/kaineity-loop.mp3" track={TRACKS.kaineity} level={0.5} testid="myspace-audio" />
       ) : null}
 
       {/* Act III renders above the page (not inside the stage) so the page stays visible and pokeable */}

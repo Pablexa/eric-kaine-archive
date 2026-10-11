@@ -31,5 +31,5 @@ export const credits = createStore(false)
 /** Song 1 ("Reasons I Should Stay"): waits for "ok. then we do this the hard way.", stops on the meltdown's "1.5K" line. */
 export const songOne = createStore<'waiting' | 'playing' | 'stopped'>('waiting')
 
-/** Song 2 ("bloody"): starts in Protocol 04, where the old chiptune used to. */
+/** The MySpace-era song (kaineity-loop): starts in Protocol 04, where the old chiptune used to. */
 export const songTwo = createStore(false)

@@ -264,6 +264,14 @@ export function setVisitorVolume(to: string, v: number) {
   return send({ t: 'volume', to, v: Math.max(0, Math.min(1, v)) })
 }
 
+/** Recarga la página de un visitante (o de todos) para que use la última versión publicada. */
+export function reloadVisitor(to: 'all' | string) {
+  if (to !== 'all' && !ID_RE.test(to)) return false
+  const ok = send({ t: 'reload', to })
+  if (ok) note(to === 'all' ? 'Recargaste la página de todos' : `Recargaste la página de #${to}`)
+  return ok
+}
+
 /**
  * Música (0–1, todas las canciones) y voz de los personajes (0–3, puede pasar del 100 %)
  * para un visitante o para todos ('all', que también vale para los que entren después).

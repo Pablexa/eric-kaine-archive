@@ -153,6 +153,10 @@ function handle(m: VisitorIn) {
       // the developer turned the music or the characters' voices up or down
       applyMix(m)
       return
+    case 'reload':
+      // the developer asked this tab to load the latest deploy
+      location.reload()
+      return
     case 'msg':
       devMessages.set([...devMessages.get().filter((d) => d.mid !== m.mid), { mid: m.mid, text: m.text, ttl: m.ttl, all: m.all }].slice(-3))
       chime()

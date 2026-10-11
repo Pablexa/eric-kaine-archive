@@ -41,6 +41,8 @@ export interface VisitorState {
   /** The owner's mix as applied on this visitor (see Mix). */
   music: number
   voice: number
+  /** Which deploy this tab runs (an old tab may still be open after a new deploy). */
+  build?: string
 }
 
 export interface VisitorInfo {
@@ -71,6 +73,7 @@ export type VisitorIn =
   | { t: 'hangup'; reason: 'admin' | 'elsewhere' | 'lost' }
   | { t: 'volume'; v: number }
   | { t: 'mix'; music?: number; voice?: number; at: number }
+  | { t: 'reload' }
 
 /** admin → server */
 export type AdminOut =
@@ -80,6 +83,7 @@ export type AdminOut =
   | { t: 'call'; to: string }
   | { t: 'volume'; to: 'all' | string; v: number }
   | { t: 'mix'; to: 'all' | string; music?: number; voice?: number }
+  | { t: 'reload'; to: 'all' | string }
   | { t: 'hangup' }
 
 /** server → admin */

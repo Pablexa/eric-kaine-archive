@@ -65,6 +65,7 @@ try {
   await admin.getByTestId('admin-login').click()
   await admin.getByTestId('admin-conn').filter({ hasText: 'conectado' }).waitFor({ timeout: 8000 })
   await admin.locator(`[data-testid=visitor-row][data-id="${id}"]`).waitFor({ timeout: 8000 })
+  if (await admin.locator(`[data-testid=visitor-row][data-id="${id}"] [data-testid=visitor-outdated]`).count()) fail('a tab on the current deploy is flagged as an old version')
   step('panel connected and lists the visitor')
 
   // broadcast message pops up on its own

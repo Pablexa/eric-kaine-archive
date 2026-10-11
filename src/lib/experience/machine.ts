@@ -166,7 +166,7 @@ export const PROTOCOLS: { scene: Scene; index: string; label: string }[] = [
 /** Song 1, "Reasons I Should Stay": from its cue in the intro until the meltdown's "1.5K" line. */
 export const SONG_ONE_SCENES: Scene[] = ['intro', 'redact', 'collapse', 'pile', 'lights', 'button', 'meltdown']
 
-/** Song 2, "bloody": from Protocol 04 (where the old chiptune used to start) until the beat. */
+/** The MySpace-era song (kaineity-loop): from Protocol 04 (where the old chiptune used to start) until the beat. */
 export const SONG_TWO_SCENES: Scene[] = ['uglify', 'popups', 'clones']
 
 /** Scenes during which the archive is in its "uglified" state. */

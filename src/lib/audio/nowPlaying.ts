@@ -14,7 +14,9 @@ export interface Track {
 export const TRACKS = {
   /** 1 · Acts II–III */
   reasons: { title: 'Reasons I Should Stay', artist: 'Jaydes', cover: '/media/covers/reasons.jpg' },
-  /** 2 · Protocol 07, the beat */
+  /** Protocols 04–06, the MySpace era */
+  kaineity: { title: 'kaineity-loop', artist: 'Eric Kaineity', cover: '/media/eric-kaineity.png' },
+  /** 2 · Protocol 07, the underground song you make on the beat */
   bloody: { title: 'bloody', artist: '2Slimey', cover: '/media/covers/bloody.jpg' },
   /** 3 · Bleoodity's act (Act IV) */
   money: { title: 'i aint start making money till i started doing drugs', artist: 'Bleood', cover: '/media/covers/money.jpg' },

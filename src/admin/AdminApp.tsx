@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useStore } from '../lib/experience/store'
 import { ID_RE, MAX_TEXT, MAX_VOICE, type VisitorInfo } from '../lib/live/protocol'
-import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, mixDefault, savedKey, sendMessage, setCallGain, setMix, setMuted, setVisitorVolume, startCall, visitors } from './hub'
+import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, mixDefault, reloadVisitor, savedKey, sendMessage, setCallGain, setMix, setMuted, setVisitorVolume, startCall, visitors } from './hub'
 import { CallLevels } from '../components/live/CallLevels'
 import { DevicePicker } from '../components/live/DevicePicker'
 
@@ -31,6 +31,19 @@ function where(v: VisitorInfo) {
   if (v.s.phase === 'foreshadow') return 'Web normal (guía acoplada)'
   return 'Web normal (todavía no empezó)'
 }
+
+/** The visitor number of the site open in this same browser (if any). */
+function ownVisitorId(): string | null {
+  try {
+    const id = (JSON.parse(localStorage.getItem('ek-archive:live') ?? 'null') as { id?: string } | null)?.id
+    return id && ID_RE.test(id) ? id : null
+  } catch {
+    return null
+  }
+}
+
+/** A tab opened before the latest deploy (it reports another build, or none). */
+const outdated = (v: VisitorInfo) => (v.s.build ?? '') !== __BUILD__
 
 const QUICK = [
   'Click the yellow orb in the corner 👀',
@@ -253,7 +266,18 @@ function SessionCard({ target, setTarget }: { target: string; setTarget: (v: str
         <div className="mt-3 space-y-3">
           <p className="text-[14px] text-paper-2">
             <span className="font-mono text-paper">#{v.id}</span> · {where(v)} · {v.s.sound ? '🔊 sonido on' : '🔇 sonido off'} · {v.s.visible ? 'mirando' : 'en otra pestaña'}
+            {v.tabs > 1 ? <> · <span className="text-verity">{v.tabs} pestañas abiertas</span></> : null}
           </p>
+          {outdated(v) || v.tabs > 1 ? (
+            <div className="flex flex-wrap items-center gap-2 border border-signal/60 bg-signal/10 p-2 text-[13px]" data-testid="session-warning">
+              <span className="flex-1">
+                {outdated(v) ? 'Tiene una versión vieja de la web abierta: no responde a todos los controles. Recargala (si no reacciona, cerrá esa pestaña a mano).' : 'Tiene la web abierta en varias pestañas: solo suena la que está mirando.'}
+              </span>
+              <button type="button" onClick={() => reloadVisitor(v.id)} className="bg-paper px-2 py-1 font-bold text-ink" data-testid="session-reload">
+                Recargar su página
+              </button>
+            </div>
+          ) : null}
           <div>
             <div className="flex items-center justify-between text-[12px] uppercase tracking-wide text-paper-2">
               <span>Volumen de su web (música, efectos y voces)</span>
@@ -486,6 +510,7 @@ function MessageCard({ target }: { target: string }) {
 
 function Visitors({ onPick, selected }: { onPick: (id: string) => void; selected: string }) {
   const map = useStore(visitors)
+  const mine = useMemo(() => ownVisitorId(), [map])
   const c = useStore(call)
   const now = useNow()
   const [q, setQ] = useState('')
@@ -534,6 +559,8 @@ function Visitors({ onPick, selected }: { onPick: (id: string) => void; selected
                   <td className="px-4 py-2 font-mono text-[15px] text-paper">
                     {v.id}
                     {v.tabs > 1 && <span className="ml-1 text-[11px] text-muted">×{v.tabs}</span>}
+                    {v.id === mine && <span className="ml-1.5 bg-paper px-1 font-sans text-[10px] font-bold text-ink" data-testid="visitor-mine">este navegador</span>}
+                    {outdated(v) && <span className="ml-1.5 bg-signal px-1 font-sans text-[10px] font-bold text-white" data-testid="visitor-outdated">versión vieja</span>}
                   </td>
                   <td className="px-2 py-2">
                     {where(v)}
@@ -584,6 +611,14 @@ function Log() {
 export function AdminApp() {
   const state = useStore(conn)
   const [target, setTarget] = useState('')
+  const map = useStore(visitors)
+
+  // if the site is open in this same browser, start with that session chosen
+  useEffect(() => {
+    if (target) return
+    const mine = ownVisitorId()
+    if (mine && map.has(mine)) setTarget(mine)
+  }, [map, target])
 
   useEffect(() => {
     const k = savedKey()

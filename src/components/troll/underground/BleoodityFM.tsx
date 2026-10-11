@@ -4,6 +4,7 @@ import { useStore } from '../../../lib/experience/store'
 import { useSfxState } from '../../shared/useSfx'
 import { announce, TRACKS } from '../../../lib/audio/nowPlaying'
 import { speaking } from '../../../lib/audio/voice'
+import { guardMusic } from '../../../lib/audio/musicGuard'
 
 /** The loop (normalised to about -16 LUFS) plays at full level for its first seconds, then sits lower under Bleoodity. */
 const START_LEVEL = 1
@@ -38,7 +39,13 @@ export function BleoodityFM() {
 
   useEffect(() => {
     if (state !== 'on' || !audio.current) return
-    return announce(TRACKS.money, audio.current)
+    const el = audio.current
+    const unguard = guardMusic(el)
+    const unannounce = announce(TRACKS.money, el)
+    return () => {
+      unguard()
+      unannounce()
+    }
   }, [state])
 
   useEffect(() => {

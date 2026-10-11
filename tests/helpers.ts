@@ -112,10 +112,10 @@ export async function playActThree(page: Page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.className), { timeout: 60_000 }).toContain('ug-font')
   await page.getByTestId('choice-hideous').click({ timeout: 90_000 })
   await expect.poll(() => page.evaluate(() => document.documentElement.className), { timeout: 20_000 }).toContain('ug-tilt')
-  // song 1 stopped on the meltdown's "1.5K" line; song 2 ("bloody") plays where the old chiptune used to
+  // song 1 stopped on the meltdown's "1.5K" line; the MySpace-era song plays where the old chiptune used to
   await expect(page.getByTestId('kaineity-audio')).toHaveCount(0)
-  await expect(page.getByTestId('bloody-audio')).toHaveCount(1)
-  await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'bloody', { timeout: 10_000 })
+  await expect(page.getByTestId('myspace-audio')).toHaveCount(1)
+  await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'kaineity-loop', { timeout: 10_000 })
 
   // 05 popups — close until it gives up
   await expect(page.getByTestId('popup').first()).toBeVisible({ timeout: 30_000 })

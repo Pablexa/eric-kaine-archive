@@ -82,18 +82,19 @@ export function BrainrotScene() {
   useScript(async (signal) => {
     objective.set('Watch the actual videos · add useless tabs · spam the meme button')
     chat.post('fine. ACTUAL subway surfers. two videos. why stop at one.', 'bleoodity')
-    await wait(12000, signal)
+    // the exit unlocks at 15 s (owner's request; it was 40 s)
+    await wait(4500, signal)
     setSection('subtitles')
     chat.post('added subtitles to a video with no dialogue. huge upgrade.', 'bleoodity')
     sfx.errorDing(4)
-    await wait(20000, signal)
+    await wait(6000, signal)
     setSection('quad')
     setSpam((n) => n + 2)
     chat.post('MAXIMUM BRAINROT. EVERY TAB IS THE MAIN TAB.', 'bleoodity', 'loud')
     sfx.airhorn()
-    await wait(8000, signal)
+    await wait(4500, signal)
     setSkipReady(true)
-    await wait(22000, signal)
+    await wait(10000, signal)
     finish()
   }, [])
 
@@ -122,7 +123,7 @@ export function BrainrotScene() {
       <div className="br08-tools" role="group" aria-label="Brainrot collage controls">
         <button type="button" onClick={meme} data-testid="brainrot-meme">☢ PRESS FOR BRAINROT</button>
         <button type="button" onClick={() => { setExtraPanes((n) => Math.min(4, n + 1)); setSpam((n) => n + 1); sfx.errorDing(3) }} data-testid="brainrot-add-pane" disabled={paneCount >= 6}>+ OPEN ANOTHER TAB</button>
-        {skipReady ? <button type="button" onClick={finish} data-testid="brainrot-skip">MY BRAIN IS DONE →</button> : <span>Exit to mosh unlocks at 40s</span>}
+        {skipReady ? <button type="button" onClick={finish} data-testid="brainrot-skip">MY BRAIN IS DONE →</button> : <span>Exit to mosh unlocks at 15s</span>}
       </div>
       <div className="br08-status"><span>▓▓▓▓▓▓░░░ DOWNLOADING ATTENTION SPAN.EXE</span><span>{section === 'quad' ? 'MAXIMUM BRAINROT' : section.toUpperCase()} · {Math.min(6, paneCount)} TABS · {spam * 1000} AURA</span></div>
       <span className="sr-only" aria-live="polite">{section === 'quad' ? 'Maximum brainrot: four real video panels. Use the buttons to add tabs or make memes.' : 'Real Subway Surfers gameplay videos. Each player has playback controls and a source link.'}</span>

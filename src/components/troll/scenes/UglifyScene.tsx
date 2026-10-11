@@ -103,7 +103,7 @@ export function UglifyScene() {
       sfx.enable()
       await say('i turned your sound back on. you’re welcome.', { tone: 'loud' })
     }
-    // song 2, "bloody" by 2Slimey (it replaced the old chiptune here)
+    // the MySpace-era song (kaineity-loop) replaced the old chiptune here
     songTwo.set(true)
     await step(() => chaos.widget('construction'), 'step six: a soundcloud player. it only plays snippets.', () => sfx.errorDing(3), STAMPS.player)
     await step(
