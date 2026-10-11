@@ -78,9 +78,11 @@ test.describe('Foreshadowing and the reveal', () => {
     await expect(page.getByTestId('troll-stage')).toHaveAttribute('data-scene', 'intro')
   })
 
-  test('sound only starts after explicit permission and can be muted', async ({ page }) => {
+  test('sound is ON by default after the reveal (no question) and can be muted', async ({ page }) => {
     await openFast(page)
     await reveal(page, { sound: true })
+    await expect(page.getByTestId('choice-on')).toHaveCount(0)
+    await expect(page.getByTestId('choice-off')).toHaveCount(0)
     const toggle = page.getByTestId('sound-toggle')
     await expect(toggle).toHaveAttribute('aria-pressed', 'true')
     // the intro is quiet; song 1 kicks in on "ok. then we do this the hard way." and the corner card names it

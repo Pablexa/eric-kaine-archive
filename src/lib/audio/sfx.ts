@@ -597,3 +597,21 @@ class Sfx {
 }
 
 export const sfx = new Sfx()
+
+/**
+ * Sound is ON by default. Browsers only allow audio after a gesture, so the
+ * first tap, click or key anywhere turns it on. Muting from the HUD counts as
+ * an answer (`asked`), so it is never turned back on behind the visitor's back.
+ */
+export function soundOnByDefault() {
+  const on = () => {
+    off()
+    if (!sfx.asked) sfx.enable()
+  }
+  const off = () => {
+    window.removeEventListener('pointerdown', on, true)
+    window.removeEventListener('keydown', on, true)
+  }
+  window.addEventListener('pointerdown', on, { capture: true, passive: true })
+  window.addEventListener('keydown', on, true)
+}

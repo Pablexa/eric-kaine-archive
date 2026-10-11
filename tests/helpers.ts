@@ -24,7 +24,13 @@ export async function reveal(page: Page, { sound = false }: { sound?: boolean } 
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await sleep(500)
   await page.getByTestId('share').click()
-  await page.getByTestId(sound ? 'choice-on' : 'choice-off').click({ timeout: 20_000 })
+  // sound is ON by default after the reveal; tests that want silence mute it from the HUD
+  const toggle = page.getByTestId('sound-toggle')
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true', { timeout: 20_000 })
+  if (!sound) {
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  }
 }
 
 export async function toPile(page: Page) {

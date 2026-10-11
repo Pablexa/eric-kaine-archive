@@ -34,7 +34,7 @@ await page.waitForTimeout(1500)
 await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
 await page.waitForTimeout(500)
 await page.getByTestId('share').click()
-await page.getByTestId('choice-on').click({ timeout: 20000 })
+await page.getByTestId('sound-toggle').waitFor({ timeout: 20000 }) // sound is on by default
 await page.getByTestId('choice-refuse').click({ timeout: 30000 })
 await page.waitForSelector('[data-scene=pile]', { timeout: 30000 })
 const thumbs = await page.evaluate(() => [...document.images].filter((i) => i.complete && i.naturalWidth > 0).length)

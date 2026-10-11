@@ -51,6 +51,7 @@ export function IntroScene() {
 
     await say(OPENERS[state.revealSource ?? 'orb'])
 
+    // Sound is ON by default (the reveal click turns it on), so this only runs if audio could not start then.
     if (!sfx.asked) {
       await say('before i continue: i talk in beeps and voice notes.', { hold: 300 })
       const s = await ask(

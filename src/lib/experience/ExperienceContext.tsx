@@ -63,6 +63,8 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     if (isTrollActive(s)) return
     bubble.hide()
     lockScroll()
+    // sound is ON by default; the reveal always comes from a click, so the browser lets it start
+    if (!sfx.asked) sfx.enable()
     dispatch({ type: 'REVEAL', source })
   }, [])
 

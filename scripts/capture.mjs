@@ -23,7 +23,7 @@ async function toPile(page, fast = true) {
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await sleep(700)
   await page.getByTestId('share').click()
-  await page.getByTestId('choice-off').click({ timeout: 20000 })
+  await page.getByTestId('sound-toggle').click({ timeout: 20000 })
   await page.getByTestId('choice-refuse').click({ timeout: 40000 })
   await page.waitForSelector('[data-scene=pile]', { timeout: 40000 })
 }
@@ -166,7 +166,7 @@ async function playActThree(page, prefix, { fast = true } = {}) {
 async function playCooperative(page) {
   await page.goto(`${base}/?fast=1`)
   await page.getByTestId('hero-period').click({ clickCount: 3 })
-  await page.getByTestId('choice-off').click({ timeout: 20000 })
+  await page.getByTestId('sound-toggle').click({ timeout: 20000 })
   await page.getByTestId('choice-help').click({ timeout: 40000 })
   await page.waitForSelector('[data-scene=redact]', { timeout: 20000 })
   for (let i = 0; i < 8; i++) {
@@ -245,7 +245,7 @@ const jobs = {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await sleep(600)
     await page.getByTestId('share').tap()
-    await page.getByTestId('choice-off').tap({ timeout: 20000 })
+    await page.getByTestId('sound-toggle').tap({ timeout: 20000 })
     await page.getByTestId('choice-help').tap({ timeout: 40000 })
     await sleep(800)
     for (let i = 0; i < 8; i++) {
@@ -316,7 +316,7 @@ const jobs = {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await sleep(700)
     await page.getByTestId('share').click()
-    await page.getByTestId('choice-on').click({ timeout: 30000 })
+    await page.getByTestId('sound-toggle').waitFor({ timeout: 20000 }) // sound is on by default
     await page.getByTestId('choice-refuse').click({ timeout: 60000 })
     await page.waitForSelector('[data-scene=pile]', { timeout: 60000 })
     console.log('  pile at', ((Date.now() - t0) / 1000).toFixed(1), 's')
@@ -377,7 +377,7 @@ const jobs = {
     await page.goto(`${base}/?fast=1`)
     await sleep(1000)
     await page.getByTestId('hero-period').click({ clickCount: 3 })
-    await page.getByTestId('choice-off').click({ timeout: 20000 })
+    await page.getByTestId('sound-toggle').click({ timeout: 20000 })
     await page.getByTestId('choice-help').click({ timeout: 40000 })
     await sleep(1500)
     const targets = page.locator('[data-redact]:not([data-redacted])')
@@ -417,7 +417,7 @@ const jobs = {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await sleep(800)
     await page.getByTestId('share').tap()
-    await page.getByTestId('choice-off').tap({ timeout: 20000 })
+    await page.getByTestId('sound-toggle').tap({ timeout: 20000 })
     await page.getByTestId('choice-refuse').tap({ timeout: 40000 })
     await page.waitForSelector('[data-scene=pile]', { timeout: 40000 })
     await sleep(1200)
@@ -489,7 +489,7 @@ const jobs = {
     await page.getByTestId('verity').click()
     await sleep(2600)
     await shot(page, '07-reveal-1440')
-    await page.getByTestId('choice-on').click({ timeout: 20000 })
+    await page.getByTestId('sound-toggle').waitFor({ timeout: 20000 }) // sound is on by default
     await sleep(5200)
     await shot(page, '08-exhibit-a-1440')
     await page.getByTestId('choice-refuse').click({ timeout: 40000 })
