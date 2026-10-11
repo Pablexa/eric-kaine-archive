@@ -3,7 +3,7 @@ import { animate, motion, useMotionValue } from 'motion/react'
 import { useExperience } from '../../lib/experience/ExperienceContext'
 import { CHAOS_SCENES, SONG_ONE_SCENES, SONG_TWO_SCENES, UNDERGROUND_SCENES, isTrollActive } from '../../lib/experience/machine'
 import { SongLoop } from './SongLoop'
-import { TRACKS } from '../../lib/audio/nowPlaying'
+import { TRACKS, SONG_LEVEL } from '../../lib/audio/nowPlaying'
 import { chat } from '../../lib/experience/chat'
 import { objective, useStore } from '../../lib/experience/store'
 import { backdrop, introCard, pileDim, shake, songOne, songTwo, streamOverlay } from '../../lib/experience/stage'
@@ -122,10 +122,10 @@ export function TrollLayer() {
         {scene === 'meltdown' ? <MeltdownScene key={`meltdown-${state.run}`} /> : null}
       </motion.div>
       {scene && SONG_ONE_SCENES.includes(scene) && (song1 === 'playing' || (song1 === 'waiting' && scene !== 'intro')) ? (
-        <SongLoop key={`song1-${state.run}`} src="/media/reasons-i-should-stay.mp3" track={TRACKS.reasons} level={0.5} testid="kaineity-audio" />
+        <SongLoop key={`song1-${state.run}`} src="/media/reasons-i-should-stay.mp3" track={TRACKS.reasons} level={SONG_LEVEL} testid="kaineity-audio" />
       ) : null}
       {scene && SONG_TWO_SCENES.includes(scene) && (song2 || scene !== 'uglify') ? (
-        <SongLoop key={`song2-${state.run}`} src="/media/kaineity-loop.mp3" track={TRACKS.bloody} level={0.5} testid="myspace-audio" />
+        <SongLoop key={`song2-${state.run}`} src="/media/kaineity-loop.mp3" track={TRACKS.bloody} level={SONG_LEVEL} testid="myspace-audio" />
       ) : null}
 
       {/* Act III renders above the page (not inside the stage) so the page stays visible and pokeable */}

@@ -160,12 +160,16 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await expect(page.getByTestId('now-playing-artist')).toHaveText('Bleood')
     // The loop has no pause, stop or mute control, and plays even though sound was declined.
     await expect(page.getByTestId('sound-toggle')).toHaveCount(0)
-    // No volume slider for the visitor either: only the site owner sets the music level (live panel).
-    await expect(page.getByTestId('volume')).toHaveCount(0)
     const audio = page.getByTestId('cheese-audio')
-    // normal level at first, lower later so Bleoodity is heard
-    await expect(page.getByTestId('background-music')).toHaveAttribute('data-level', /start|under/)
-    await expect.poll(() => audio.evaluate((el) => (el as HTMLAudioElement).volume)).toBeGreaterThan(0.2)
+    const level = () => audio.evaluate((el) => (el as HTMLAudioElement).volume)
+    // Bleood's loop plays exactly like "bloody" in Protocols 04–06: SONG_LEVEL (0.5) × the site volume
+    await page.getByTestId('volume').fill('0.9')
+    await expect.poll(level).toBeCloseTo(0.45, 2)
+    // the visitor's VOL slider is back in this act and takes the loop down to silence
+    await page.getByTestId('volume').fill('0')
+    await expect.poll(level).toBe(0)
+    await page.getByTestId('volume').fill('0.9')
+    await expect.poll(level).toBeCloseTo(0.45, 2)
     expect(await audio.evaluate((el) => { const a = el as HTMLAudioElement; return { loop: a.loop, muted: a.muted, paused: a.paused, controls: a.controls } })).toEqual({ loop: true, muted: false, paused: false, controls: false })
     const t0 = await audio.evaluate((el) => (el as HTMLAudioElement).currentTime)
     await sleep(1200)

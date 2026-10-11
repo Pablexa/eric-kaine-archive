@@ -24,6 +24,9 @@ export const TRACKS = {
   patience: { title: 'patience', artist: 'revivle', cover: '/media/patience-cover.png' },
 } satisfies Record<string, Track>
 
+/** Every looping song plays at this level (× site volume × the owner's Música × call duck), so they all sound alike. */
+export const SONG_LEVEL = 0.5
+
 export const nowPlaying = createStore<{ track: Track; el: HTMLMediaElement } | null>(null)
 
 /** Marks `el` as the song playing now; the returned function clears it again (if it is still this one). */

@@ -242,9 +242,9 @@ function HudContent({ hazard }: { hazard: boolean }) {
           <Icon name={snd.enabled ? 'sound-on' : 'sound-off'} size={16} />
           <span className="hidden sm:inline">{snd.enabled ? 'ON' : 'OFF'}</span>
         </button>}
-        {snd.enabled && !musicLocked ? (
-          <label className="hidden items-center xl:flex">
-            <span className="sr-only">Volume</span>
+        {snd.enabled || musicLocked ? (
+          <label className={`${musicLocked ? 'flex gap-1.5' : 'hidden xl:flex'} items-center`}>
+            <span className={musicLocked ? 'pixel text-[12px] text-pixel/60' : 'sr-only'}>{musicLocked ? 'VOL' : 'Volume'}</span>
             <input
               type="range"
               min={0}
