@@ -94,7 +94,8 @@ class VerityController {
 
   dockPosition() {
     const small = window.innerWidth < 640
-    const size = small ? 40 : 46
+    // big enough to notice and click: he is the way into the takeover
+    const size = small ? 54 : 68
     const pad = small ? 18 : 28
     return { x: window.innerWidth - pad - size / 2, y: window.innerHeight - pad - size / 2, size }
   }

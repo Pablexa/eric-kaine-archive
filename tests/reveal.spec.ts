@@ -14,6 +14,17 @@ test.describe('Foreshadowing and the reveal', () => {
     expect(errors).toEqual([])
   })
 
+  test('Eric Kaineity docks on his own without any scrolling', async ({ page }) => {
+    const errors = trackErrors(page)
+    await page.goto('/')
+    await expect(page.getByTestId('verity')).toHaveAttribute('data-mode', 'docked', { timeout: 6_000 })
+    await expect(page.getByTestId('guide-photo')).toHaveAttribute('data-character', 'kaineity')
+    expect(await page.evaluate(() => window.scrollY)).toBe(0)
+    await page.getByTestId('verity').click()
+    await expect(page.getByTestId('site-header')).toHaveAttribute('data-mode', 'hud')
+    expect(errors).toEqual([])
+  })
+
   test('clicking the docked guide starts the reveal; Leave restores the archive', async ({ page }) => {
     await openFast(page)
     await page.getByTestId('bio-quote').scrollIntoViewIfNeeded()

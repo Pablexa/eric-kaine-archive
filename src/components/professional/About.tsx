@@ -3,8 +3,9 @@ import { motion, useInView, useReducedMotion } from 'motion/react'
 import { channel } from '../../lib/content/channel'
 import { useExperience } from '../../lib/experience/ExperienceContext'
 import { verity } from '../../lib/experience/verity'
+import { bubble } from '../../lib/experience/chat'
 import { sfx } from '../../lib/audio/sfx'
-import { EASE, wait, isAborted } from '../../lib/animation/timeline'
+import { EASE, TIME, wait, isAborted } from '../../lib/animation/timeline'
 import { LineReveal, Reveal } from '../shared/Reveal'
 import { SectionHeading } from '../shared/SectionHeading'
 
@@ -38,6 +39,21 @@ export function About() {
   }, [state.phase, state.witnessed, stage])
 
   useEffect(() => () => run.current?.abort(), [])
+
+  // Eric Kaineity is always reachable: if the quote has not woken him yet, he docks on his own.
+  useEffect(() => {
+    if (state.phase !== 'professional') return
+    const t = window.setTimeout(() => {
+      if (started.current) return
+      started.current = true
+      setStage('gone')
+      dispatch({ type: 'FORESHADOW' })
+      const d = verity.dockPosition()
+      verity.jump(d.x, window.innerHeight + d.size, d.size)
+      void verity.dock({ duration: 0.9 }).then(() => bubble.show('psst. i gatekeep this archive. click me.', 6000)).catch(() => {})
+    }, (reduce ? 400 : 1500) * TIME.scale)
+    return () => window.clearTimeout(t)
+  }, [state.phase, reduce, dispatch])
 
   useEffect(() => {
     if (!inView || state.phase !== 'professional' || started.current) return
