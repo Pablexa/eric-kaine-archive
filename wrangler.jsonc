@@ -12,6 +12,11 @@
     // only the live API runs the script; every other request is a plain static file
     "run_worker_first": ["/api/*"]
   },
+  // erickaine.site (zone on Cloudflare); custom domains create their own DNS records and certificates
+  "routes": [
+    { "pattern": "erickaine.site", "custom_domain": true },
+    { "pattern": "www.erickaine.site", "custom_domain": true }
+  ],
   "durable_objects": {
     "bindings": [{ "name": "HUB", "class_name": "Hub" }]
   },

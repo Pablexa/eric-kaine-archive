@@ -35,9 +35,9 @@ These files use Wikimedia’s existing 500px previews. Browser presentation may 
 ## Full underground pass (2026-10-11)
 
 Music (all supplied by the site owner as their own cursed adaptations; not downloaded by the assistant):
-- `kaineity-loop.mp3` (59.5 s): Eric Kaineity's loop under Acts II–III. Follows the HUD sound toggle.
-- `bleoodity-loop.mp3` (107.3 s): cursed 2Slimey bootleg, loops for all of Act IV with no page control.
-- `beat-scene.mp3`: first 42 s of the owner's 199.8 s file with a 3 s fade-out (ffmpeg, 160 kbps). The drop lands at 12.55 s after a gap from 11.40 s; Protocol 07 is synced to it.
+- `reasons-i-should-stay.mp3` (83.8 s): "Reasons I Should Stay", supplied by the site owner on 2026-10-11 as the first song of the experience; loops under Acts II–III (replaces the earlier `kaineity-loop.mp3`) and follows the HUD sound toggle. The supplied file measured −4.3 LUFS with +4 dBTP clipped peaks, so it was only loudness-normalised (ffmpeg two-pass `loudnorm`, linear, to −16 LUFS; no EQ), giving −16.5 LUFS and −8.5 dBTP.
+- `bleoodity-loop.mp3` (107.3 s): "i aint start making money till i started doing drugs" by Bleood (song 3, as identified by the owner on 2026-10-11; earlier notes called it a cursed 2Slimey bootleg), loops for all of Act IV with no visitor control (the owner sets its level from the live panel). Tamed on 2026-10-11 at the owner's request: the original measured −4.6 LUFS with +9 dBTP peaks and almost all energy under 120 Hz; it was re-encoded with ffmpeg (`highpass=f=28, bass=g=-10:f=140:w=0.7`, two-pass `loudnorm` to −16 LUFS / −1.5 dBTP, 160 kbps), giving −16.5 LUFS and −2 dBTP at the same length so the loop still joins.
+- `beat-scene.mp3`: first 42 s of the owner's 199.8 s file with a 3 s fade-out (ffmpeg, 160 kbps). The drop lands at 12.55 s after a gap from 11.40 s; Protocol 07 is synced to it. The owner identified it on 2026-10-11 as "bloody" by 2Slimey (song 2 of the experience).
 
 Images:
 - `eric-pfp.png`: Eric Kaine's channel avatar, supplied by the site owner (160 px, upscaled to 256 px).
@@ -52,3 +52,11 @@ Voices:
 
 - `bleoodity.png` (replaced): photo of Bleood supplied by the site owner, square crop on the face (Pillow), grayscale → violet colorize. The violet dreads around it are drawn SVG in `VerityOrb.tsx`, as the owner asked.
 - `ringtone.mp3` (30.1 s): supplied by the site owner; loops while a live call rings and stops on answer.
+
+## End credits (2026-10-11)
+
+- `patience.mp3` (118.3 s, unchanged): "patience" by revivle, supplied by the site owner. Plays only at the end, in the credits page player; the cover links to https://soundcloud.com/revivle/patience (tracking parameters from the shared link removed).
+- `patience-cover.png` (157 × 157): the song's cover art, supplied by the site owner.
+- `dev-avatar.png`: the developer's (757valentino) Discord avatar, cropped from a profile screenshot they shared for the credits signature. The banner photo and the names in their profile bio were deliberately not used.
+
+The "currently playing" card (top right) names each song while it is audible. Its covers are, for now, the artists' existing photos above (Jaydes, 2Slimey, Bleood); the owner's own cover images can replace them in `src/lib/audio/nowPlaying.ts`.

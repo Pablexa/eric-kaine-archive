@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useStore } from '../lib/experience/store'
-import { ID_RE, MAX_TEXT, type VisitorInfo } from '../lib/live/protocol'
-import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setCallGain, setMuted, setVisitorVolume, startCall, visitors } from './hub'
+import { ID_RE, MAX_TEXT, MAX_VOICE, type VisitorInfo } from '../lib/live/protocol'
+import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, mixDefault, savedKey, sendMessage, setCallGain, setMix, setMuted, setVisitorVolume, startCall, visitors } from './hub'
 import { CallLevels } from '../components/live/CallLevels'
 import { DevicePicker } from '../components/live/DevicePicker'
 
@@ -306,6 +306,107 @@ function SessionCard({ target, setTarget }: { target: string; setTarget: (v: str
   )
 }
 
+function MixSlider({ label, hint, value, max, step, onChange, testid }: { label: string; hint: string; value: number; max: number; step: number; onChange: (pct: number) => void; testid: string }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[12px] uppercase tracking-wide text-paper-2">
+        <span>{label}</span>
+        <span className={`font-mono text-[14px] ${value > 100 ? 'text-verity' : 'text-paper'}`} data-testid={`${testid}-value`}>{value} %</span>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-1 w-full accent-[var(--color-verity)]"
+        aria-label={label}
+        data-testid={`${testid}-slider`}
+      />
+      <p className="text-[11px] text-muted">{hint}</p>
+    </div>
+  )
+}
+
+/** Music (every song, including Bleood's act) and the characters' voices, for everyone or one session. */
+function MixCard({ target }: { target: string }) {
+  const map = useStore(visitors)
+  const def = useStore(mixDefault)
+  const [to, setTo] = useState<'all' | 'one'>('all')
+  const v = ID_RE.test(target) ? map.get(target) : undefined
+  const dest = to === 'all' ? 'all' : target
+  const reported = to === 'all' ? def : { music: v?.s.music ?? 1, voice: v?.s.voice ?? 1 }
+  const [draft, setDraft] = useState<{ music?: number; voice?: number }>({})
+  const music = draft.music ?? Math.round(reported.music * 100)
+  const voice = draft.voice ?? Math.round(reported.voice * 100)
+  const ok = to === 'all' || !!v
+
+  // follow what the visitors report once they have applied a change
+  useEffect(() => setDraft({}), [to, target])
+  useEffect(() => {
+    setDraft((d) => ({
+      ...(d.music !== undefined && d.music !== Math.round(reported.music * 100) ? { music: d.music } : {}),
+      ...(d.voice !== undefined && d.voice !== Math.round(reported.voice * 100) ? { voice: d.voice } : {}),
+    }))
+  }, [reported.music, reported.voice])
+
+  const push = (part: { music?: number; voice?: number }) => {
+    setDraft((d) => ({ ...d, ...part }))
+    setMix(dest, { music: part.music === undefined ? undefined : part.music / 100, voice: part.voice === undefined ? undefined : part.voice / 100 })
+  }
+
+  return (
+    <section className="border border-line-2 bg-ink-2 p-5" aria-labelledby="mix-h" data-testid="mix-card">
+      <h2 id="mix-h" className="pixel text-[16px] text-verity">MÚSICA Y VOCES</h2>
+      <div className="mt-3 grid grid-cols-2 gap-1 border border-line-2 p-1 text-[13px]" role="radiogroup" aria-label="A quién">
+        {(['all', 'one'] as const).map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="radio"
+            aria-checked={to === k}
+            onClick={() => setTo(k)}
+            className={`px-2 py-1.5 font-bold ${to === k ? 'bg-paper text-ink' : 'text-paper-2 hover:bg-ink-3'}`}
+            data-testid={`mix-to-${k}`}
+          >
+            {k === 'all' ? 'Todos (y los que entren)' : `Solo #${ID_RE.test(target) ? target : '_____'}`}
+          </button>
+        ))}
+      </div>
+      {!ok ? (
+        <p className="mt-3 text-[13px] text-paper-2">Elegí una sesión conectada para cambiarle solo a ella.</p>
+      ) : (
+        <div className="mt-4 space-y-4">
+          <MixSlider
+            label="Música (todas las canciones)"
+            hint="Incluye la música del acto de Bleood: el visitante no puede bajarla, solo vos."
+            value={music}
+            max={100}
+            step={5}
+            onChange={(pct) => push({ music: pct })}
+            testid="mix-music"
+          />
+          <MixSlider
+            label="Voz de los personajes"
+            hint="100 % es lo normal; podés subirla hasta 300 %."
+            value={voice}
+            max={MAX_VOICE * 100}
+            step={10}
+            onChange={(pct) => push({ voice: pct })}
+            testid="mix-voice"
+          />
+          <div className="grid grid-cols-3 gap-1.5 text-[13px]">
+            <button type="button" onClick={() => push({ music: 30 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid="mix-music-low">Música baja</button>
+            <button type="button" onClick={() => push({ voice: 200 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid="mix-voice-up">Voz ×2</button>
+            <button type="button" onClick={() => push({ music: 100, voice: 100 })} className="border border-line-2 bg-ink-3 py-1.5" data-testid="mix-reset">Normal</button>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 function MessageCard({ target }: { target: string }) {
   const [text, setText] = useState('')
   const [to, setTo] = useState<'all' | 'one'>('all')
@@ -526,6 +627,7 @@ export function AdminApp() {
         </div>
         <div className="space-y-4 lg:col-span-5">
           <SessionCard target={target} setTarget={setTarget} />
+          <MixCard target={target} />
           <CallCard target={target} setTarget={setTarget} />
           <MessageCard target={target} />
         </div>

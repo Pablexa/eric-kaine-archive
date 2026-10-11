@@ -10,6 +10,7 @@ import { Links } from './components/professional/Links'
 import { TrollLayer } from './components/troll/TrollLayer'
 import { VerityOrb } from './components/troll/VerityOrb'
 import { LiveLayer } from './components/live/LiveLayer'
+import { NowPlaying } from './components/troll/NowPlaying'
 
 function ColumnRules() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
       </div>
       <TrollLayer />
       <VerityOrb />
+      <NowPlaying />
       <LiveLayer />
       <div className="grain" aria-hidden="true" />
     </ExperienceProvider>

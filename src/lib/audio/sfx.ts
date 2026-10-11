@@ -37,6 +37,8 @@ interface NoiseOpts {
 class Sfx {
   private ctx: AudioContext | null = null
   private master: GainNode | null = null
+  /** Character voices: master volume and call duck, then only a safety limiter (no glue compression). */
+  private voiceBus: GainNode | null = null
   private humNodes: { osc: OscillatorNode[]; gain: GainNode } | null = null
   private listeners = new Set<Listener>()
   private lastChirp = 0
@@ -52,6 +54,9 @@ class Sfx {
   forced = false
   /** Everything is lowered while the visitor is on a call with the developer (1 = normal). */
   duck = 1
+  /** The site owner's mix (live panel): every song (0–1) and the characters' voices (0–3). */
+  musicMix = 1
+  voiceMix = 1
 
   constructor() {
     try {
@@ -101,6 +106,16 @@ class Sfx {
       limiter.attack.value = 0.002
       limiter.release.value = 0.08
       this.master.connect(glue).connect(limiter).connect(this.ctx.destination)
+      // voices keep their own sound at 100 %; the limiter only catches the owner's boost above 100 %
+      this.voiceBus = this.ctx.createGain()
+      this.voiceBus.gain.value = this.volume * this.duck
+      const voiceLimiter = this.ctx.createDynamicsCompressor()
+      voiceLimiter.threshold.value = -1.5
+      voiceLimiter.knee.value = 0
+      voiceLimiter.ratio.value = 20
+      voiceLimiter.attack.value = 0.002
+      voiceLimiter.release.value = 0.1
+      this.voiceBus.connect(voiceLimiter).connect(this.ctx.destination)
       // a suspended context (no gesture yet) wakes on the next tap
       const wake = () => void this.ctx?.resume()
       window.addEventListener('pointerdown', wake, { passive: true })
@@ -127,13 +142,39 @@ class Sfx {
   setVolume(v: number) {
     this.volume = Math.min(1, Math.max(0, v))
     if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.volume * this.duck, this.ctx.currentTime, 0.02)
+    if (this.voiceBus && this.ctx) this.voiceBus.gain.setTargetAtTime(this.volume * this.duck, this.ctx.currentTime, 0.02)
     this.emit()
   }
 
   setDuck(v: number) {
     this.duck = Math.min(1, Math.max(0, v))
     if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.volume * this.duck, this.ctx.currentTime, 0.05)
+    if (this.voiceBus && this.ctx) this.voiceBus.gain.setTargetAtTime(this.volume * this.duck, this.ctx.currentTime, 0.05)
     this.emit()
+  }
+
+  setMix({ music, voice }: { music?: number; voice?: number }) {
+    if (typeof music === 'number' && Number.isFinite(music)) this.musicMix = Math.min(1, Math.max(0, music))
+    if (typeof voice === 'number' && Number.isFinite(voice)) this.voiceMix = Math.min(3, Math.max(0, voice))
+    this.emit()
+  }
+
+  /**
+   * Plays a character voice through the voice bus (master volume, call duck,
+   * safety limiter) with its own gain, which may go above 1. Returns null when
+   * there is no running audio, so the caller can fall back to `element.volume`.
+   */
+  route(el: HTMLMediaElement, gain: number): GainNode | null {
+    const ctx = this.ready()
+    if (!ctx || !this.voiceBus) return null
+    try {
+      const g = ctx.createGain()
+      g.gain.value = gain
+      ctx.createMediaElementSource(el).connect(g).connect(this.voiceBus)
+      return g
+    } catch {
+      return null
+    }
   }
 
   /** AudioContext time, or null if there is no running audio. */

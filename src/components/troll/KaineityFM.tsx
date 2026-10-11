@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useSfxState } from '../shared/useSfx'
+import { announce, TRACKS } from '../../lib/audio/nowPlaying'
 
-/** Eric Kaineity's cursed underground loop under Acts II–III. Follows the HUD sound toggle. */
+/** The first song of the experience ("Reasons I Should Stay"), looping under Acts II–III. Follows the HUD sound toggle. */
 export function KaineityFM() {
   const sound = useSfxState()
   const audio = useRef<HTMLAudioElement>(null)
@@ -9,7 +10,7 @@ export function KaineityFM() {
   useEffect(() => {
     const el = audio.current
     if (!el) return
-    el.volume = sound.volume * 0.45 * sound.duck
+    el.volume = sound.volume * 0.5 * sound.duck * sound.music
     if (!sound.enabled) {
       el.pause()
       return
@@ -22,9 +23,10 @@ export function KaineityFM() {
       window.removeEventListener('pointerdown', play)
       window.removeEventListener('keydown', play)
     }
-  }, [sound.enabled, sound.volume, sound.duck])
+  }, [sound.enabled, sound.volume, sound.duck, sound.music])
 
   useEffect(() => () => audio.current?.pause(), [])
+  useEffect(() => (audio.current ? announce(TRACKS.reasons, audio.current) : undefined), [])
 
-  return <audio ref={audio} src="/media/kaineity-loop.mp3" loop preload="auto" data-testid="kaineity-audio" data-troll-ui />
+  return <audio ref={audio} src="/media/reasons-i-should-stay.mp3" loop preload="auto" data-testid="kaineity-audio" data-troll-ui />
 }

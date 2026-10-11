@@ -24,3 +24,6 @@ export const fm = createStore<'off' | 'on' | 'closed'>('off')
 
 /** Act IV: the fake stream overlay (chat + donation alerts). */
 export const streamOverlay = createStore(false)
+
+/** The end: the credits page (with the patience player) is on top of the ending card. */
+export const credits = createStore(false)

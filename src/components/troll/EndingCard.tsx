@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react'
+import { useStore } from '../../lib/experience/store'
 import { motion } from 'motion/react'
 import { useExperience } from '../../lib/experience/ExperienceContext'
 import { ENDINGS, type EndingId } from '../../lib/experience/machine'
 import { channel } from '../../lib/content/channel'
 import { artistMedia, characterMedia, objectMedia } from '../../lib/assets/realMedia'
 import { EASE } from '../../lib/animation/timeline'
+import { credits } from '../../lib/experience/stage'
+import { PATIENCE } from '../../lib/audio/endMusic'
 import { Icon } from '../shared/Icon'
 import './EndingCard.css'
 
@@ -27,15 +30,17 @@ const TOP_8 = [
 export function EndingCard() {
   const { state, endings, replay, leave } = useExperience()
   const first = useRef<HTMLAnchorElement>(null)
+  // the credits page sits on top at first; the card stays out of reach until it closes
+  const behindCredits = useStore(credits)
   const id = state.ending
   useEffect(() => {
-    first.current?.focus()
-  }, [])
+    if (!behindCredits) first.current?.focus()
+  }, [behindCredits])
   if (!id) return null
   const e = ENDINGS[id]
 
   return (
-    <div className="fixed inset-0 z-[49] grid place-items-center overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="ending-title" data-testid="ending">
+    <div className="fixed inset-0 z-[49] grid place-items-center overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="ending-title" inert={behindCredits} data-testid="ending">
       <motion.div
         className="ks-end relative w-full max-w-[680px]"
         initial={{ opacity: 0, y: 40, scale: 0.94, rotate: -3 }}
@@ -107,6 +112,9 @@ export function EndingCard() {
             </button>
             <button type="button" className="ks-end__btn" onClick={() => void leave({ quiet: true })} data-testid="back-to-archive">
               Back to the archive
+            </button>
+            <button type="button" className="ks-end__btn" onClick={() => credits.set(true)} data-testid="open-credits">
+              ♫ Credits · {PATIENCE.title} by {PATIENCE.artist}
             </button>
           </div>
 

@@ -26,6 +26,7 @@ export type CallUi =
   | { phase: 'ended'; reason: string }
 
 const STORAGE_KEY = 'ek-archive:live'
+const MIX_KEY = 'ek-archive:mix'
 const RING_FOR = 45_000
 const DUCK = 0.2
 
@@ -79,6 +80,29 @@ function saveIdentity(v: { id: string; token: string }) {
 
 let ident: { id: string; token: string } | null = null
 
+/** The owner's music/voice mix, remembered across reloads; the newest one (server time) wins. */
+let mixAt = 0
+
+function applyMix(m: { music?: number; voice?: number; at: number }) {
+  if (m.at < mixAt) return
+  mixAt = m.at
+  sfx.setMix(m)
+  try {
+    localStorage.setItem(MIX_KEY, JSON.stringify({ music: sfx.musicMix, voice: sfx.voiceMix, at: m.at }))
+  } catch {
+    /* applies for this page load */
+  }
+}
+
+function restoreMix() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MIX_KEY) ?? 'null') as { music?: number; voice?: number; at?: number } | null
+    if (saved && typeof saved.at === 'number') applyMix({ music: saved.music, voice: saved.voice, at: saved.at })
+  } catch {
+    /* defaults */
+  }
+}
+
 function send(m: VisitorOut) {
   if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(m))
 }
@@ -123,6 +147,11 @@ function handle(m: VisitorIn) {
         saveIdentity(ident)
       }
       liveId.set(m.id)
+      if (m.mix) applyMix(m.mix)
+      return
+    case 'mix':
+      // the developer turned the music or the characters' voices up or down
+      applyMix(m)
       return
     case 'msg':
       devMessages.set([...devMessages.get().filter((d) => d.mid !== m.mid), { mid: m.mid, text: m.text, ttl: m.ttl, all: m.all }].slice(-3))
@@ -174,6 +203,7 @@ function endCall(reason: string | null) {
 export function startLive() {
   if (started || !liveEnabled() || typeof WebSocket === 'undefined') return
   started = true
+  restoreMix()
   connect()
 }
 

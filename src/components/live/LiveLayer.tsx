@@ -293,8 +293,8 @@ export function LiveLayer() {
   }, [])
 
   useEffect(() => {
-    reportState({ phase: state.phase, scene: state.scene, route: state.route, sound: sound.enabled, visible, volume: sound.volume })
-  }, [state.phase, state.scene, state.route, sound.enabled, visible, sound.volume])
+    reportState({ phase: state.phase, scene: state.scene, route: state.route, sound: sound.enabled, visible, volume: sound.volume, music: sound.music, voice: sound.voice })
+  }, [state.phase, state.scene, state.route, sound.enabled, visible, sound.volume, sound.music, sound.voice])
 
   return (
     <>

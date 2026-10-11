@@ -171,7 +171,7 @@ function HudContent({ hazard }: { hazard: boolean }) {
   const { state, leave } = useExperience()
   const snd = useSfxState()
   const override = useStore(subsOverride)
-  // The Bleoodity loop has no mute while it plays, but the volume slider stays. Esc/LEAVE still exit.
+  // The Bleoodity loop has no mute or volume for the visitor (only the site owner sets it, from the live panel). Esc/LEAVE still exit.
   const musicLocked = useStore(fm) === 'on'
   const redact = state.scene === 'redact'
   const current = PROTOCOLS.findIndex((p) => p.scene === state.scene)
@@ -242,9 +242,9 @@ function HudContent({ hazard }: { hazard: boolean }) {
           <Icon name={snd.enabled ? 'sound-on' : 'sound-off'} size={16} />
           <span className="hidden sm:inline">{snd.enabled ? 'ON' : 'OFF'}</span>
         </button>}
-        {snd.enabled || musicLocked ? (
-          <label className={`${musicLocked ? 'flex gap-1.5' : 'hidden xl:flex'} items-center`}>
-            <span className={musicLocked ? 'pixel text-[12px] text-pixel/60' : 'sr-only'}>{musicLocked ? 'VOL' : 'Volume'}</span>
+        {snd.enabled && !musicLocked ? (
+          <label className="hidden items-center xl:flex">
+            <span className="sr-only">Volume</span>
             <input
               type="range"
               min={0}

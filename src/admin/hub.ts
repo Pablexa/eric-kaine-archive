@@ -1,7 +1,7 @@
 import { createStore } from '../lib/experience/store'
 import { openMic, PcmPlayer, ring, type Mic } from '../lib/live/audio'
 import { audioDevices, callGain, chooseDevices, chooseGain, refreshDevices, type AudioDevices, type CallGain } from '../lib/live/devices'
-import { ID_RE, LIVE_PATH, type AdminIn, type AdminOut, type CallPhase, type VisitorInfo } from '../lib/live/protocol'
+import { DEFAULT_MIX, ID_RE, LIVE_PATH, MAX_VOICE, type AdminIn, type AdminOut, type CallPhase, type Mix, type VisitorInfo } from '../lib/live/protocol'
 
 /** The owner's end of the live developer line (admin panel). */
 
@@ -30,6 +30,8 @@ export const conn = createStore<Conn>('login')
 export const visitors = createStore<Map<string, VisitorInfo>>(new Map())
 export const call = createStore<AdminCall>({ id: null, phase: 'idle', since: null, muted: false, visitorMic: false })
 export const log = createStore<LogEntry[]>([])
+/** The music/voice mix every visitor gets (including ones who arrive later). */
+export const mixDefault = createStore<Mix>(DEFAULT_MIX)
 
 let ws: WebSocket | null = null
 let key = ''
@@ -125,6 +127,7 @@ function handle(m: AdminIn) {
       retry = 0
       conn.set('online')
       visitors.set(new Map(m.visitors.map((v) => [v.id, v])))
+      mixDefault.set(m.mix ?? DEFAULT_MIX)
       note(`Conectado. ${m.visitors.length} visitante(s) en la web.`, 'ok')
       return
     case 'denied':
@@ -177,6 +180,9 @@ function handle(m: AdminIn) {
       }
       return
     }
+    case 'mix-default':
+      mixDefault.set(m.mix)
+      return
     case 'visitor-mic': {
       const c = call.get()
       if (c.id === m.id) call.set({ ...c, visitorMic: m.on })
@@ -256,6 +262,17 @@ export async function chooseCallDevices(next: Partial<AudioDevices>) {
 export function setVisitorVolume(to: string, v: number) {
   if (!ID_RE.test(to)) return false
   return send({ t: 'volume', to, v: Math.max(0, Math.min(1, v)) })
+}
+
+/**
+ * Música (0–1, todas las canciones) y voz de los personajes (0–3, puede pasar del 100 %)
+ * para un visitante o para todos ('all', que también vale para los que entren después).
+ */
+export function setMix(to: 'all' | string, part: Partial<Mix>) {
+  if (to !== 'all' && !ID_RE.test(to)) return false
+  const music = part.music === undefined ? undefined : Math.max(0, Math.min(1, part.music))
+  const voice = part.voice === undefined ? undefined : Math.max(0, Math.min(MAX_VOICE, part.voice))
+  return send({ t: 'mix', to, music, voice })
 }
 
 /** Volumen de mi micrófono y volumen al que escucho al visitante (0–3); se aplica al instante. */

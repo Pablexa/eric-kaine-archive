@@ -9,6 +9,7 @@ import { backdrop, introCard, pileDim, shake, streamOverlay } from '../../lib/ex
 import { prefersReducedMotion } from '../../lib/animation/timeline'
 import { ChatLog, Objective } from './ChatLog'
 import { EndingCard } from './EndingCard'
+import { Credits, EndMusic } from './credits/Credits'
 import { IntroScene } from './scenes/IntroScene'
 import { RedactScene } from './scenes/RedactScene'
 import { CollapseScene } from './scenes/CollapseScene'
@@ -141,7 +142,13 @@ export function TrollLayer() {
       <div data-troll-ui>
         <Objective />
         <ChatLog />
-        {state.scene === 'ending' && !leaving ? <EndingCard /> : null}
+        {state.scene === 'ending' && !leaving ? (
+          <>
+            <EndMusic />
+            <EndingCard />
+            <Credits />
+          </>
+        ) : null}
       </div>
     </>
   )

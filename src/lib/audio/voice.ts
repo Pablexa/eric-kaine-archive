@@ -58,7 +58,8 @@ export const voice = {
         if (!src) return done()
         current?.pause()
         const audio = new Audio(src)
-        audio.volume = Math.min(1, sfx.volume * sfx.duck)
+        // through the effects chain so the owner's voice level can go above 100 %
+        if (!sfx.route(audio, sfx.voiceMix)) audio.volume = Math.min(1, sfx.volume * sfx.duck * sfx.voiceMix)
         if (author === 'bleoodity') {
           audio.preservesPitch = false
           audio.playbackRate = 0.85 + Math.random() * 0.35

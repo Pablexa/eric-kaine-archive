@@ -178,7 +178,8 @@ try {
   const visitorHears = () => visitor.getByTestId('call-bars').getAttribute('data-level').then(Number)
   const levelsOk = async (label, setter, read) => {
     await setter('0')
-    await read.page.waitForTimeout(300)
+    // let audio already queued in the jitter buffer (up to ~0.6 s) play out first
+    await read.page.waitForTimeout(900)
     const quiet = await peak(read.page, read.fn)
     if (quiet > 0.01) fail(`${label} at 0 % but the level was still ${quiet}`)
     await setter('200')
@@ -221,6 +222,41 @@ try {
   await admin.locator(`[data-testid=visitor-row][data-id="${id}"] [data-testid=visitor-volume]`).filter({ hasText: /^10 %$/ }).waitFor({ timeout: 5000 })
     .catch(() => fail('visitor did not report volume 10 after +10'))
   step('panel picks the session and sets its volume (0 %, then +10 → 10 %); the visitor applies and reports it')
+
+  // music and characters' voices: one session, then everyone (newcomers included)
+  const savedMix = () => visitor.evaluate(() => JSON.parse(localStorage.getItem('ek-archive:mix') ?? 'null'))
+  const mixIs = async (page, music, voice, what) => {
+    const deadline = Date.now() + 5000
+    let got = null
+    while (Date.now() < deadline) {
+      got = await page.evaluate(() => JSON.parse(localStorage.getItem('ek-archive:mix') ?? 'null'))
+      if (got && got.music === music && got.voice === voice) return
+      await page.waitForTimeout(150)
+    }
+    fail(`${what}: expected music ${music} / voice ${voice}, got ${JSON.stringify(got)}`)
+  }
+  await admin.getByTestId('mix-to-one').click()
+  await admin.getByTestId('mix-music-low').click()
+  await admin.getByTestId('mix-voice-up').click()
+  await mixIs(visitor, 0.3, 2, 'visitor after "Música baja" + "Voz ×2"')
+  await admin.getByTestId('mix-voice-slider').fill('250')
+  await mixIs(visitor, 0.3, 2.5, 'visitor after voice slider 250 %')
+  await admin.getByTestId('mix-voice-value').filter({ hasText: '250 %' }).waitFor({ timeout: 5000 })
+  step('panel sets one session\'s music to 30 % and the characters\' voice to 200 % then 250 %; the visitor applies it')
+  await admin.getByTestId('mix-to-all').click()
+  await admin.getByTestId('mix-music-slider').fill('50')
+  await mixIs(visitor, 0.5, 2.5, 'visitor after "everyone" music 50 %')
+  const late = await (await browser.newContext()).newPage()
+  watch(late, 'late visitor')
+  await late.goto(`${base}/?live=1`)
+  await late.getByTestId('live-id').waitFor({ timeout: 10_000 })
+  await mixIs(late, 0.5, 1, 'visitor who arrived later')
+  await admin.getByTestId('mix-reset').click()
+  await mixIs(visitor, 1, 1, 'visitor after "Normal"')
+  await mixIs(late, 1, 1, 'late visitor after "Normal"')
+  await late.context().close()
+  if ((await savedMix())?.music !== 1) fail('mix reset did not stick')
+  step('"everyone" mix reaches current visitors and ones who arrive later; "Normal" resets it')
 
   // offline target
   await admin.getByTestId('call-target').fill('10000')

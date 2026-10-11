@@ -28,6 +28,7 @@ import {
 import { artistMedia, characterMedia, objectMedia, type RealMedia } from '../../../lib/assets/realMedia'
 import { EASE, TIME, pick, prefersReducedMotion, rand } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
+import { announce, TRACKS } from '../../../lib/audio/nowPlaying'
 import './BeatScene.css'
 
 /**
@@ -136,11 +137,13 @@ export function BeatScene() {
 
     // the MP3 is the music (fast/test mode never depends on it: a virtual clock runs instead)
     let audio: HTMLAudioElement | null = fast ? null : new Audio(TRACK.src)
+    // song 2: "bloody" by 2Slimey (the card in the corner shows it while it is audible)
+    const unannounce = audio ? announce(TRACKS.bloody, audio) : null
     const clock = new SongClock(audio, fast ? FAST_RATE : 1)
     let blocked = false
     const syncAudio = () => {
       if (!audio) return
-      audio.volume = clamp01(sfx.volume * sfx.duck)
+      audio.volume = clamp01(sfx.volume * sfx.duck * sfx.musicMix)
       audio.muted = blocked || !sfx.enabled
     }
     // any tap: unmute a muted autoplay, or restart a track the browser paused (where the scene is now)
@@ -255,6 +258,7 @@ export function BeatScene() {
       unsub()
       s.extra = null
       s.onStep = null
+      unannounce?.()
       if (audio) {
         audio.pause()
         audio.removeAttribute('src')

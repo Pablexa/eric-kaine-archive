@@ -83,8 +83,16 @@ test.describe('Foreshadowing and the reveal', () => {
     await reveal(page, { sound: true })
     const toggle = page.getByTestId('sound-toggle')
     await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    // song 1 starts with the sound, and the corner card says what it is
+    const card = page.getByTestId('now-playing')
+    await expect(card).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByTestId('now-playing-title')).toHaveText('Reasons I Should Stay')
+    await expect(page.getByTestId('now-playing-artist')).toHaveText('Jaydes')
+    await expect(card).toContainText(/currently playing/i)
     await toggle.click()
     await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    // muted: nothing is playing, so the card goes away
+    await expect(card).toHaveCount(0, { timeout: 5_000 })
   })
 
   test('Escape leaves from the middle of the wreckage and the page reassembles', async ({ page }) => {

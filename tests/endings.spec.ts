@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { beatTheButton, findAllVideos, openFast, passPile, playActFour, playActThree, reveal, sleep, toPile, trackErrors } from './helpers'
+import { beatTheButton, findAllVideos, openFast, passPile, playActFour, playActThree, reveal, sleep, toPile, trackErrors, seeEnding } from './helpers'
 
 test.describe.configure({ timeout: 180_000 })
 
@@ -20,6 +20,42 @@ test.describe('Acts II–IV — protocols and endings', () => {
 
     await playActThree(page)
     await playActFour(page, { capture: true, media: true })
+
+    // the end: every other song stops and only "patience" plays, with its own player on the credits page
+    const credits = page.getByTestId('credits')
+    await expect(credits).toBeVisible({ timeout: 30_000 })
+    await expect(credits).toContainText('Made by')
+    await expect(page.getByTestId('credits-author')).toHaveText('757valentino')
+    await expect(page.getByTestId('dev-card')).toContainText('757valentino')
+    await expect(page.getByTestId('dev-link')).toHaveAttribute('href', 'https://e-z.bio/ar')
+    await expect(page.getByTestId('player-title')).toHaveText('patience by revivle')
+    await expect(page.getByTestId('player-cover')).toHaveAttribute('href', 'https://soundcloud.com/revivle/patience')
+    await expect(page.getByTestId('player-cover')).toHaveAttribute('target', '_blank')
+    await expect(page.getByTestId('music-player')).toHaveAttribute('data-playing', 'true', { timeout: 10_000 })
+    await expect(page.getByTestId('cheese-audio')).toHaveCount(0)
+    await expect(page.getByTestId('kaineity-audio')).toHaveCount(0)
+    await expect(page.getByTestId('player-duration')).toHaveText('1:58', { timeout: 10_000 })
+    const songTime = async () => {
+      const [m, sec] = (await page.getByTestId('player-time').innerText()).split(':').map(Number)
+      return m * 60 + sec
+    }
+    const before = await songTime()
+    await page.getByTestId('player-skip').click()
+    await expect.poll(songTime).toBeGreaterThanOrEqual(before + 9)
+    await page.getByTestId('player-toggle').click()
+    await expect(page.getByTestId('music-player')).toHaveAttribute('data-playing', 'false')
+    await page.getByTestId('player-toggle').click()
+    await expect(page.getByTestId('music-player')).toHaveAttribute('data-playing', 'true')
+    await page.getByTestId('player-volume').fill('0.3')
+    await expect(page.getByTestId('player-volume')).toHaveValue('0.3')
+    await page.getByTestId('credits-to-ending').click()
+    await expect(credits).toHaveCount(0)
+    await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'patience')
+    // the card can bring the credits back; the song never stopped
+    await page.getByTestId('open-credits').click()
+    await expect(credits).toBeVisible()
+    await expect(page.getByTestId('music-player')).toHaveAttribute('data-playing', 'true')
+    await page.getByTestId('credits-to-ending').click()
 
     const ending = page.getByTestId('ending')
     await expect(ending).toContainText('One More Subscriber', { timeout: 30_000 })
@@ -52,6 +88,7 @@ test.describe('Acts II–IV — protocols and endings', () => {
     }
     await playActThree(page)
     await playActFour(page)
+    await seeEnding(page)
     await expect(page.getByTestId('ending')).toContainText('Certified Gatekeeper', { timeout: 30_000 })
     await page.getByTestId('back-to-archive').click()
     await expect(page.locator('[data-redacted]')).toHaveCount(0)
@@ -64,6 +101,7 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await page.getByTestId('choice-skip').click({ timeout: 20_000 })
     await expect(page.getByTestId('troll-stage')).toHaveAttribute('data-scene', 'lights', { timeout: 20_000 })
     await page.getByTestId('choice-stop').click({ timeout: 30_000 })
+    await seeEnding(page)
     await expect(page.getByTestId('ending')).toContainText('Safely Obscure')
     await page.reload()
     await expect(page.getByTestId('footer-endings')).toContainText('Safely Obscure')
@@ -74,6 +112,7 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await toPile(page)
     await page.getByTestId('choice-skip').click({ timeout: 20_000 })
     await page.getByTestId('choice-stop').click({ timeout: 30_000 })
+    await seeEnding(page)
     await page.getByTestId('replay').click()
     await expect(page.getByTestId('troll-stage')).toHaveAttribute('data-scene', 'intro', { timeout: 10_000 })
     await expect(page.getByTestId('chat-log')).toContainText('back again?')
@@ -114,13 +153,15 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await playActThree(page)
     await expect(page.getByTestId('label')).toBeVisible({ timeout: 30_000 })
     await expect(page.getByTestId('background-music')).toHaveAttribute('data-playing', 'true')
+    // song 3 is in the corner card even though sound was declined (the loop always plays in this act)
+    await expect(page.getByTestId('now-playing')).toHaveAttribute('data-track', 'i aint start making money till i started doing drugs')
+    await expect(page.getByTestId('now-playing-artist')).toHaveText('Bleood')
     // The loop has no pause, stop or mute control, and plays even though sound was declined.
     await expect(page.getByTestId('sound-toggle')).toHaveCount(0)
-    // ...but the volume slider stays, and the loop follows it down to silence.
-    await page.getByTestId('volume').fill('0')
-    await expect.poll(() => page.getByTestId('cheese-audio').evaluate((el) => (el as HTMLAudioElement).volume)).toBe(0)
-    await page.getByTestId('volume').fill('0.9')
+    // No volume slider for the visitor either: only the site owner sets the music level (live panel).
+    await expect(page.getByTestId('volume')).toHaveCount(0)
     const audio = page.getByTestId('cheese-audio')
+    await expect.poll(() => audio.evaluate((el) => (el as HTMLAudioElement).volume)).toBeCloseTo(0.7, 2)
     expect(await audio.evaluate((el) => { const a = el as HTMLAudioElement; return { loop: a.loop, muted: a.muted, paused: a.paused, controls: a.controls } })).toEqual({ loop: true, muted: false, paused: false, controls: false })
     const t0 = await audio.evaluate((el) => (el as HTMLAudioElement).currentTime)
     await sleep(1200)

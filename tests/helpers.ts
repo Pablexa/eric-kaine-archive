@@ -206,3 +206,16 @@ export async function playActFour(page: Page, { touch = false, capture = false, 
   await expect(page.getByTestId('live-chat')).toHaveCount(0)
   await expect(page.getByTestId('ending')).toBeVisible({ timeout: 30_000 })
 }
+
+/** The end opens the credits ("patience" playing) on top of the ending card: check them, then show the card. */
+export async function seeEnding(page: Page, { tap = false }: { tap?: boolean } = {}) {
+  const credits = page.getByTestId('credits')
+  await expect(credits).toBeVisible({ timeout: 30_000 })
+  await expect(page.getByTestId('credits-author')).toHaveText('757valentino')
+  await expect(page.getByTestId('player-title')).toHaveText('patience by revivle')
+  await expect(page.getByTestId('music-player')).toHaveAttribute('data-src', '/media/patience.mp3')
+  const go = page.getByTestId('credits-to-ending')
+  if (tap) await go.tap()
+  else await go.click()
+  await expect(credits).toHaveCount(0)
+}

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { findAllVideos, openFast, playActFour, playActThree, reveal, sleep, trackErrors } from './helpers'
+import { findAllVideos, openFast, playActFour, playActThree, reveal, sleep, trackErrors, seeEnding } from './helpers'
 
 test.describe('Mobile', () => {
   test('menu opens, navigates and closes', async ({ page }) => {
@@ -60,6 +60,7 @@ test.describe('Mobile', () => {
     }
     await playActThree(page)
     await playActFour(page, { touch: true, capture: true })
+    await seeEnding(page, { tap: true })
     await expect(page.getByTestId('ending')).toContainText('Certified Gatekeeper')
     await page.getByTestId('back-to-archive').tap()
     await expect(page.getByTestId('troll-stage')).toHaveCount(0)

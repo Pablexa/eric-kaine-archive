@@ -163,3 +163,31 @@ Design notes:
 - **Off in tests.** The client never connects on `localhost` or with `?fast=1` unless `?live=1` is passed, so the existing suite is unaffected.
 
 Not verified: real microphones and speakers (only Chrome's fake device), echo when a visitor talks back without headphones (browser echo cancellation may not cover Web Audio playback), Safari/Firefox, and behaviour with hundreds of simultaneous visitors.
+
+## Bleood act loudness and owner mix — verification 2026-10-11
+
+At the owner's request: the Act IV loop is no longer extremely bass boosted and loud, only the owner can turn it down, and the owner can set every song's level and raise the characters' voices above normal from the live panel.
+
+| Check | Result |
+|---|---|
+| `bleoodity-loop.mp3` before → after (ffmpeg `loudnorm`/`volumedetect`) | −4.6 LUFS, +9.0 dBTP, bass ≈ all of the energy → **−16.5 LUFS, −2.0 dBTP**, bass 5–6 dB under the full mix; same 107.28 s length |
+| `tsc -b`, `tsc -p worker`, `vite build` | Pass |
+| `node scripts/check-live.mjs` (wrangler dev) | Pass, including the new checks: one session's music 30 % and voice 200 % → 250 %; "everyone" music 50 % reaches current visitors and a visitor who connects later; "Normal" resets both. The first run failed an existing check (mic at 0 % still read 0.057) because it sampled 300 ms after the change while ~0.6 s of audio was still queued; the check now waits 900 ms and passed |
+| Voice boost, measured end to end (panel → visitor, real intro lines, tap after the per-voice gain) | Same three lines: average peak 0.796 at 100 % → 1.991 at 250 % (ratio 2.50). Voices go through their own bus with only a −1.5 dB limiter, so at 100 % they sound as before and above 100 % they get louder without clipping |
+| Act IV HUD | No mute and no volume slider for the visitor; the loop plays at 0.7 × the owner's music level (test updated in `endings.spec.ts`) |
+
+Not verified by ear: how the tamed loop and boosted voices sound. Loudness and gain were measured, not listened to.
+
+## Songs, "currently playing" card and end credits — verification 2026-10-11
+
+At the owner's request: song 1 is now "Reasons I Should Stay" (Jaydes); the songs are named as 1 Reasons (Acts II–III), 2 "bloody" by 2Slimey (the Protocol 07 beat), 3 "i aint start making money till i started doing drugs" by Bleood (Act IV); a small "currently playing" card sits top right; every ending stops all music and opens a link-in-bio style credits page ("Made by 757valentino", the developer's Discord avatar and links, and a player for "patience" by revivle).
+
+| Check | Result |
+|---|---|
+| `reasons-i-should-stay.mp3` | Supplied at −4.3 LUFS with +4 dBTP clipping; loudness-normalised only (no EQ) to −16.5 LUFS / −8.5 dBTP, same 83.8 s length. Plays at 0.5 × the site volume × the owner's music level |
+| `tsc -b`, `vite build` | Pass |
+| Full suite on the bio-style build | 28/29 on the first run; the failure was the cooperative path timing out while the 1.5B counter was still at 1.5M (a scene before the ending, unchanged this round). Re-run twice with `--repeat-each 2`: both pass. The previous build (same logic, first credits layout) passed 29/29 |
+| New assertions | Corner card shows "Reasons I Should Stay" / "Jaydes" once sound is on and disappears when muted; shows song 3 in Act IV and "patience" at the end. The credits show "Made by" / "757valentino", the developer card and link, "patience by revivle", the SoundCloud cover link (new tab), playing state, 1:58 duration, skip +10 s, pause/play, volume; the ending card can reopen them; no other music element remains |
+| Screenshots | `86-credits.png` (desktop), `88-credits-mobile.png` (Pixel 7, no horizontal overflow), `89-now-playing.png`, `90-ending-now-playing.png`; no console errors |
+
+Notes: the three song covers the owner sent were not available as files, so the corner card uses the artists' existing photos for now. The developer avatar is cropped from a profile screenshot (about 120 px source); the banner photo and the names in the profile bio were left out on purpose. Nobody listened to the normalised song.

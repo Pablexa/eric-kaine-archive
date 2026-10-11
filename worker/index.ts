@@ -10,12 +10,15 @@
  */
 import { DurableObject } from 'cloudflare:workers'
 import {
+  DEFAULT_MIX,
   ID_RE,
   LIVE_PATH,
   MAX_TEXT,
   MAX_TTL,
+  MAX_VOICE,
   type AdminIn,
   type AdminOut,
+  type Mix,
   type VisitorIn,
   type VisitorInfo,
   type VisitorOut,
@@ -48,9 +51,16 @@ interface AdminTag {
 
 type Tag = VisitorTag | AdminTag
 
-const EMPTY: VisitorState = { phase: 'professional', scene: null, route: null, sound: false, visible: true, volume: 0.9 }
+const EMPTY: VisitorState = { phase: 'professional', scene: null, route: null, sound: false, visible: true, volume: 0.9, music: 1, voice: 1 }
 const MAX_FRAME = 4096
 const MAX_JSON = 2048
+
+/** A finite number clamped to [0, max], rounded to 2 decimals; null if absent or invalid. */
+function level(v: unknown, max: number): number | null {
+  if (v === undefined || v === null || v === '') return null
+  const n = Number(v)
+  return Number.isFinite(n) ? Math.round(Math.max(0, Math.min(max, n)) * 100) / 100 : null
+}
 
 function send(ws: WebSocket, msg: VisitorIn | AdminIn) {
   try {
@@ -93,7 +103,9 @@ export class Hub extends DurableObject<Env> {
     this.ctx.acceptWebSocket(server, ['visitor', `v:${id}`])
     const now = Date.now()
     server.serializeAttachment({ role: 'visitor', id, token, since: now, at: now, s: EMPTY, call: 'idle' } satisfies VisitorTag)
-    send(server, { t: 'welcome', id })
+    // the owner's latest mix for everyone (if any) so newcomers hear the same balance
+    const mix = await this.ctx.storage.get<Mix & { at: number }>('mix')
+    send(server, { t: 'welcome', id, ...(mix ? { mix } : {}) })
     this.announce(id)
     return new Response(null, { status: 101, webSocket: client })
   }
@@ -134,7 +146,7 @@ export class Hub extends DurableObject<Env> {
       }
       tag.authed = true
       ws.serializeAttachment(tag)
-      send(ws, { t: 'authed', visitors: this.list() })
+      send(ws, { t: 'authed', visitors: this.list(), mix: (await this.ctx.storage.get<Mix>('mix')) ?? DEFAULT_MIX })
       return
     }
 
@@ -188,6 +200,23 @@ export class Hub extends DurableObject<Env> {
         for (const t of this.targets(m.to)) send(t, { t: 'volume', v: vol })
         return
       }
+      case 'mix': {
+        if (!this.validTarget(m.to)) return
+        const music = level(m.music, 1)
+        const voice = level(m.voice, MAX_VOICE)
+        if (music === null && voice === null) return
+        const at = Date.now()
+        const part = { ...(music !== null ? { music } : {}), ...(voice !== null ? { voice } : {}) }
+        if (m.to === 'all') {
+          // remembered, so visitors who arrive later get it too
+          const prev = (await this.ctx.storage.get<Mix>('mix')) ?? DEFAULT_MIX
+          const mix = { music: part.music ?? prev.music, voice: part.voice ?? prev.voice }
+          await this.ctx.storage.put('mix', { ...mix, at })
+          this.toAdmins({ t: 'mix-default', mix })
+        }
+        for (const t of this.targets(m.to)) send(t, { t: 'mix', ...part, at })
+        return
+      }
     }
   }
 
@@ -206,7 +235,9 @@ export class Hub extends DurableObject<Env> {
           route: str(s.route, 12),
           sound: s.sound === true,
           visible: s.visible !== false,
-          volume: Number.isFinite(Number(s.volume)) ? Math.max(0, Math.min(1, Number(s.volume))) : 0.9,
+          volume: level(s.volume, 1) ?? 0.9,
+          music: level(s.music, 1) ?? 1,
+          voice: level(s.voice, MAX_VOICE) ?? 1,
         }
         tag.at = now
         ws.serializeAttachment(tag)
