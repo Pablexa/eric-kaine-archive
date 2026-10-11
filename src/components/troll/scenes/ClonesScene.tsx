@@ -1,21 +1,42 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useExperience } from '../../../lib/experience/ExperienceContext'
 import { chat } from '../../../lib/experience/chat'
 import { verity } from '../../../lib/experience/verity'
 import { objective } from '../../../lib/experience/store'
 import { sfx } from '../../../lib/audio/sfx'
 import { pointer } from '../../../lib/interactions/pointer'
+import { artistMedia, characterMedia, type RealMedia } from '../../../lib/assets/realMedia'
 import { clamp, prefersReducedMotion, rand, wait } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
+import './ClonesScene.css'
 
 /**
  * Protocol 06 — "if there are more of me, i can gatekeep faster."
- * Verity splits until there are 20 of her. You pop them. They chirp.
- * The last few run away. Space pops one at random (keyboard path).
+ * Eric Kaineity splits until there are 20 fake fans: industry plant clones,
+ * each one a real photo (his yellow avatar, or a bootleg wearing an
+ * underground artist's face). You pop them. They chirp. The last few run
+ * away. Space pops one at random (keyboard path).
  */
 
 const TOTAL = 20
-const SPLIT_LINES = ['two of me.', 'four.', 'eight.', 'sixteen.', 'twenty. payroll said stop.']
+const SPLIT_LINES = ['two of me.', 'four fake fans.', 'eight plants.', 'sixteen. all me.', 'twenty. the label said stop.']
+
+/** What a clone can look like. Index 0 is the real guide photo; the rest are bootlegs. */
+const LOOKS: { media: RealMedia; ring: string }[] = [
+  { media: characterMedia.kaineity, ring: '#ffe600' },
+  { media: artistMedia.bleood, ring: '#ff2bd6' },
+  { media: artistMedia.slayr, ring: '#39ff14' },
+  { media: artistMedia.osamason, ring: '#00e5ff' },
+  { media: artistMedia.carti, ring: '#ff5500' },
+  { media: artistMedia.jaydes, ring: '#b026ff' },
+  { media: artistMedia.slimey, ring: '#00ff9c' },
+]
+
+/** Sticker slapped under each clone. */
+const TAGS = ['FAKE FAN', 'PLANT', 'BOOTLEG', 'CLONE', 'NOT HIM', 'TYPE BEAT', 'NPC', 'LEAKER']
+
+const MARQUEE =
+  '*** WARNING: INDUSTRY PLANTS DETECTED *** 0 REAL FANS ONLINE *** POP THEM ALL *** they never heard the unreleased *** gatekeep the soundcloud *** not trying to be famous *** slatt *** '
 
 interface Clone {
   x: number
@@ -26,35 +47,29 @@ interface Clone {
   alive: boolean
   wild: boolean
   pop: number // 0 = alive, >0 = pop animation progress
+  look: number // index into LOOKS
+  tag: number // index into TAGS
+  tilt: number // resting sticker tilt, degrees
 }
 
-function makeSprite(size: number) {
-  const c = document.createElement('canvas')
-  c.width = c.height = size
-  const g = c.getContext('2d')!
-  const grad = g.createRadialGradient(size * 0.36, size * 0.3, size * 0.05, size * 0.5, size * 0.5, size * 0.5)
-  grad.addColorStop(0, '#fff6c2')
-  grad.addColorStop(0.48, '#ffd21f')
-  grad.addColorStop(1, '#d99a00')
-  g.fillStyle = grad
-  g.beginPath()
-  g.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2)
-  g.fill()
-  g.fillStyle = 'rgba(255,255,255,.55)'
-  g.beginPath()
-  g.ellipse(size * 0.34, size * 0.27, size * 0.12, size * 0.07, -0.4, 0, Math.PI * 2)
-  g.fill()
-  return c
+interface Slot {
+  look: number
+  tag: number
 }
+
+/** A child either keeps the parent's face or turns into a bootleg of someone else. */
+const childLook = (parent: number) => (Math.random() < 0.5 ? parent : Math.random() < 0.4 ? 0 : 1 + Math.floor(Math.random() * (LOOKS.length - 1)))
 
 export function ClonesScene() {
   const { dispatch } = useExperience()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const slotRefs = useRef<(HTMLDivElement | null)[]>([])
   const clones = useRef<Clone[]>([])
   const phase = useRef<'split' | 'hunt' | 'done'>('split')
   const combo = useRef({ n: 0, last: 0 })
   const allPopped = useRef<(() => void) | null>(null)
   const [left, setLeft] = useState(TOTAL)
+  const [slots, setSlots] = useState<Slot[]>([])
 
   const popAt = (i: number) => {
     const c = clones.current[i]
@@ -69,13 +84,13 @@ export function ClonesScene() {
     setLeft(remaining)
     if (remaining === 0) allPopped.current?.()
     else if (remaining === 8) chat.post('wait. wait wait wait.')
-    else if (remaining === 3) chat.post('please don’t.')
+    else if (remaining === 3) chat.post('please don’t. they have my unreleased.')
   }
 
   // clicking / tapping pops the nearest clone under the pointer
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const root = rootRef.current
+    if (!root) return
     const onDown = (e: PointerEvent) => {
       if (phase.current !== 'hunt') return
       let best = -1
@@ -97,29 +112,19 @@ export function ClonesScene() {
       const aliveIdx = clones.current.map((c, i) => (c.alive ? i : -1)).filter((i) => i >= 0)
       if (aliveIdx.length) popAt(aliveIdx[Math.floor(Math.random() * aliveIdx.length)])
     }
-    canvas.addEventListener('pointerdown', onDown)
+    root.addEventListener('pointerdown', onDown)
     window.addEventListener('keydown', onKey)
     return () => {
-      canvas.removeEventListener('pointerdown', onDown)
+      root.removeEventListener('pointerdown', onDown)
       window.removeEventListener('keydown', onKey)
     }
   }, [])
 
-  // simulation + drawing
+  // simulation + positioning the photo clones (DOM transforms, no drawing)
   useEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx) return
-    const dpr = Math.min(2, window.devicePixelRatio || 1)
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    }
-    resize()
-    window.addEventListener('resize', resize)
-    const sprite = makeSprite(96)
     const reduce = prefersReducedMotion()
+    const sizes: number[] = []
+    const states: string[] = []
     let raf = 0
     let last = performance.now()
     let lastChirp = 0
@@ -193,58 +198,54 @@ export function ClonesScene() {
         sfx.chirp(String.fromCharCode(97 + Math.floor(Math.random() * 26)), Math.random() < 0.3 ? 'unhinged' : 'calm')
       }
 
-      ctx.clearRect(0, 0, w, h)
-      for (const c of list) {
-        if (!c.alive) {
-          if (c.pop > 0 && c.pop < 1) {
-            // pixel burst
-            ctx.fillStyle = c.pop < 0.5 ? '#ffd21f' : '#ff5a2a'
-            for (let k = 0; k < 8; k++) {
-              const a = (k / 8) * Math.PI * 2
-              const dist = c.r * (0.6 + c.pop * 2.2)
-              const s = 6 * (1 - c.pop)
-              ctx.fillRect(c.x + Math.cos(a) * dist - s / 2, c.y + Math.sin(a) * dist - s / 2, s, s)
-            }
+      // move every photo sticker to its clone
+      const t = now / 1000
+      const els = slotRefs.current
+      for (let i = 0; i < els.length; i++) {
+        const el = els[i]
+        if (!el) continue
+        const c = list[i]
+        if (!c || (!c.alive && (c.pop <= 0 || c.pop >= 1))) {
+          if (states[i] !== 'gone') {
+            el.style.visibility = 'hidden'
+            states[i] = 'gone'
           }
           continue
         }
-        ctx.drawImage(sprite, c.x - c.r, c.y - c.r, c.r * 2, c.r * 2)
-        // eyes follow the pointer
-        const dx = pointer.x - c.x
-        const dy = pointer.y - c.y
-        const d = Math.hypot(dx, dy) || 1
-        const ox = (dx / d) * c.r * 0.12
-        const oy = (dy / d) * c.r * 0.1
-        ctx.fillStyle = '#1a1400'
-        if (c.wild) {
-          ctx.fillStyle = '#fff'
-          ctx.beginPath()
-          ctx.arc(c.x - c.r * 0.3, c.y - c.r * 0.12, c.r * 0.24, 0, Math.PI * 2)
-          ctx.arc(c.x + c.r * 0.3, c.y - c.r * 0.12, c.r * 0.24, 0, Math.PI * 2)
-          ctx.fill()
-          ctx.fillStyle = '#1a1400'
-          ctx.beginPath()
-          ctx.arc(c.x - c.r * 0.3 + ox, c.y - c.r * 0.12 + oy, c.r * 0.07, 0, Math.PI * 2)
-          ctx.arc(c.x + c.r * 0.3 + ox, c.y - c.r * 0.12 + oy, c.r * 0.07, 0, Math.PI * 2)
-          ctx.fill()
-        } else {
-          ctx.beginPath()
-          ctx.ellipse(c.x - c.r * 0.24 + ox, c.y - c.r * 0.08 + oy, c.r * 0.1, c.r * 0.16, 0, 0, Math.PI * 2)
-          ctx.ellipse(c.x + c.r * 0.24 + ox, c.y - c.r * 0.08 + oy, c.r * 0.1, c.r * 0.16, 0, 0, Math.PI * 2)
-          ctx.fill()
+        const state = c.alive ? (c.wild ? 'wild' : 'calm') : 'pop'
+        if (states[i] !== state) {
+          if (states[i] === undefined || states[i] === 'gone') el.style.visibility = 'visible'
+          el.dataset.state = state
+          states[i] = state
         }
-        ctx.strokeStyle = '#1a1400'
-        ctx.lineWidth = Math.max(1.5, c.r * 0.07)
-        ctx.beginPath()
-        ctx.arc(c.x, c.y + c.r * 0.18, c.r * 0.22, 0.15 * Math.PI, 0.85 * Math.PI)
-        ctx.stroke()
+        const d = c.r * 2
+        if (sizes[i] !== d) {
+          el.style.width = `${d}px`
+          el.style.height = `${d}px`
+          el.style.setProperty('--d', `${d}px`)
+          sizes[i] = d
+        }
+        // lean toward the pointer like they're listening in; wild ones twitch
+        const lean = clamp((pointer.x - c.x) / 40, -8, 8)
+        const twitch = c.wild && !reduce ? Math.sin(t * 14 + i * 1.7) * 9 : 0
+        let rot = c.tilt + lean + twitch
+        let scale = 1
+        let alpha = 1
+        if (!c.alive) {
+          alpha = clamp(1 - c.pop, 0, 1)
+          if (!reduce) {
+            scale = 1 + c.pop * 0.9
+            rot += c.pop * 35
+          }
+        }
+        el.style.transform = `translate3d(${(c.x - c.r).toFixed(1)}px, ${(c.y - c.r).toFixed(1)}px, 0) rotate(${rot.toFixed(1)}deg) scale(${scale.toFixed(3)})`
+        el.style.opacity = alpha.toFixed(3)
       }
       raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener('resize', resize)
     }
   }, [])
 
@@ -256,36 +257,48 @@ export function ClonesScene() {
     const cy = window.innerHeight / 2
     await verity.moveTo(cx, cy, { size: 80, duration: 0.8, signal })
     await say('if there are more of me…', { hold: 700 })
-    await say('i can gatekeep faster.', { hold: 500 })
+    await say('i can gatekeep the underground faster.', { hold: 500 })
 
-    // mitosis: the real Verity hands over to the clone canvas
+    // mitosis: the real Eric Kaineity hands over to the photo clones
     verity.setMode('hidden')
     const small = window.innerWidth < 640
-    clones.current = [{ x: cx, y: cy, vx: 0, vy: 0, r: small ? 22 : 30, alive: true, wild: false, pop: 0 }]
+    clones.current = [
+      { x: cx, y: cy, vx: 0, vy: 0, r: small ? 22 : 30, alive: true, wild: false, pop: 0, look: 0, tag: 3, tilt: 0 },
+    ]
     for (let gen = 0; gen < SPLIT_LINES.length; gen++) {
       const next: Clone[] = []
       for (const c of clones.current) {
         const a = rand(0, Math.PI * 2)
         const s = rand(140, 260)
         next.push({ ...c, vx: Math.cos(a) * s, vy: Math.sin(a) * s, wild: Math.random() < 0.25 })
-        next.push({ ...c, x: c.x + 2, vx: -Math.cos(a) * s, vy: -Math.sin(a) * s, wild: Math.random() < 0.25 })
+        next.push({
+          ...c,
+          x: c.x + 2,
+          vx: -Math.cos(a) * s,
+          vy: -Math.sin(a) * s,
+          wild: Math.random() < 0.25,
+          look: childLook(c.look),
+          tag: Math.floor(Math.random() * TAGS.length),
+          tilt: rand(-9, 9),
+        })
       }
       clones.current = next.slice(0, TOTAL).map((c) => ({ ...c, r: clamp(c.r * (gen < 2 ? 1 : 0.94), small ? 14 : 18, 40) }))
       sfx.mitosis(gen)
+      setSlots(clones.current.map((c) => ({ look: c.look, tag: c.tag })))
       setLeft(clones.current.length)
       void say(SPLIT_LINES[gen], { hold: 200, tone: gen === 4 ? 'loud' : 'normal' }).catch(() => {})
       await wait(gen < 3 ? 450 : 350, signal)
     }
 
     phase.current = 'hunt'
-    objective.set(`Pop the clones · ${TOTAL} left`)
-    chat.post('click or tap to pop them. space works too.', 'system')
+    objective.set(`Pop the clones · ${TOTAL} industry plants left`)
+    chat.post('click or tap to pop the plants. space works too.', 'system')
     const done = new Promise<void>((resolve) => (allPopped.current = resolve))
-    // she gets impatient
+    // he gets impatient
     const impatience = (async () => {
       await wait(22000, signal)
       if (phase.current !== 'hunt') return
-      await say('you’re taking forever. i’ll pop myself.', { hold: 300 })
+      await say('you’re taking forever. i’ll pop my own plants.', { hold: 300 })
       const idx = clones.current.map((c, i) => (c.alive ? i : -1)).filter((i) => i >= 0)
       for (const i of idx) {
         popAt(i)
@@ -304,27 +317,73 @@ export function ClonesScene() {
     await verity.moveTo(cx, cy, { size: 76, duration: 0.6, ease: 'spring', signal })
     await say('…ow.', { hold: 1100 })
     await say('ok. i have one more idea.', { hold: 600 })
-    await say('if he’s going to be famous anyway…', { hold: 600 })
+    await say('if he’s going to blow up on soundcloud anyway…', { hold: 600 })
     await say('he needs a HIT.', { tone: 'loud' })
     dispatch({ type: 'SCENE', scene: 'beat' })
   }, [])
 
   useEffect(() => {
-    if (phase.current === 'hunt') objective.set(`Pop the clones · ${left} left`)
+    if (phase.current === 'hunt') objective.set(`Pop the clones · ${left} industry plants left`)
   }, [left])
 
   useEffect(() => () => objective.set(null), [])
 
+  const plantsShown = slots.length ? left : 0
+
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 z-[45] h-full w-full touch-none"
+    <div
+      ref={rootRef}
+      className="kcl-root fixed inset-0 z-[45] h-full w-full touch-none select-none overflow-hidden"
       style={{ cursor: 'crosshair' }}
-      aria-label={`Verity clones. ${left} left. Click, tap or press space to pop them.`}
+      aria-label={`Eric Kaineity clones posing as industry plants. ${left} left. Click, tap or press space to pop them.`}
       role="img"
       data-testid="clones"
       data-left={left}
-    />
+    >
+      {slots.length ? (
+        <div aria-hidden="true" className="pointer-events-none">
+          <div className="kcl-alert absolute left-3 top-[112px] sm:left-6 sm:top-[126px]">
+            <p className="kcl-alert__title">INDUSTRY PLANT ALERT</p>
+            <p className="kcl-alert__sub">eric kaineity cloned himself into fake fans</p>
+            <p className="kcl-alert__count">
+              plants online <span className="kcl-digits">{String(plantsShown).padStart(4, '0')}</span>
+            </p>
+            <p className="kcl-alert__count">
+              real fans online <span className="kcl-digits kcl-digits--real">0001</span>
+            </p>
+          </div>
+
+          <div className="kcl-dl absolute bottom-12 right-4 hidden sm:block sm:right-8">
+            <span className="kcl-dl__main">DOWNLOAD 20 MORE CLONES</span>
+            <span className="kcl-dl__fine">100% free · no virus · plants.zip</span>
+          </div>
+
+          <div className="kcl-marquee absolute inset-x-0 bottom-0 overflow-hidden">
+            <div className="kcl-marquee__track">
+              <span>{MARQUEE}</span>
+              <span>{MARQUEE}</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {slots.map((s, i) => {
+        const look = LOOKS[s.look] ?? LOOKS[0]
+        return (
+          <div
+            key={i}
+            ref={(el) => {
+              slotRefs.current[i] = el
+            }}
+            className={`kcl-clone${s.look === 0 ? ' kcl-clone--kaineity' : ''}`}
+            style={{ '--ring': look.ring } as CSSProperties}
+          >
+            <img className="kcl-photo" src={look.media.src} alt="" draggable={false} decoding="async" />
+            <span className="kcl-tag">{TAGS[s.tag] ?? TAGS[0]}</span>
+            <span className="kcl-stamp">EXPOSED</span>
+          </div>
+        )
+      })}
+    </div>
   )
 }
-

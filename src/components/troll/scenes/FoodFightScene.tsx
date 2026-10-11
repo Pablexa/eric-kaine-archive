@@ -4,7 +4,7 @@ import { useExperience } from '../../../lib/experience/ExperienceContext'
 import { chat } from '../../../lib/experience/chat'
 import { objective } from '../../../lib/experience/store'
 import { verity } from '../../../lib/experience/verity'
-import { objectImage, type ObjectMediaId } from '../../../lib/assets/realMedia'
+import { characterMedia, objectImage, type ObjectMediaId } from '../../../lib/assets/realMedia'
 import { sfx } from '../../../lib/audio/sfx'
 import { clamp, loop, prefersReducedMotion, wait, waitFor } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
@@ -12,7 +12,9 @@ import { useScript } from '../useScript'
 const TARGET = 18
 const FOOD: ObjectMediaId[] = ['seal', 'burger', 'cheese', 'cheese', 'drink', 'draco', 'slime', 'cheese']
 const LINES = ['the catering budget is gone.', 'do not feed me the draco. cheese only.', 'this is a food fight and also a payroll dispute.', 'seals are flying. normal label meeting.', 'mhm yeah. more cheese.']
-type Piece = { body: Matter.Body; sprite: ObjectMediaId; size: number; thrown: boolean }
+type Piece = { body: Matter.Body; kind: ObjectMediaId; size: number; thrown: boolean }
+/** The feeding target: Bleoodity's real photo, framed like a 2008 profile pic. */
+const FACE = 104
 type Burst = { x: number; y: number; at: number; text: string; color: string }
 
 export function FoodFightScene() {
@@ -71,6 +73,9 @@ export function FoodFightScene() {
       let ratio = 1
       let nextSpawn = performance.now() + 1600
       let lastBoom = 0
+      let chompAt = -Infinity
+      const face = new Image()
+      face.src = characterMedia.bleoodity.src
       let drag: { piece: Piece; joint: Matter.Constraint; pointer: number; start: { x: number; y: number }; last: { x: number; y: number; t: number }; vx: number; vy: number } | null = null
       const mouth = () => ({ x: w / 2, y: h - 165 })
       const resize = () => {
@@ -84,16 +89,17 @@ export function FoodFightScene() {
         walls = [M.Bodies.rectangle(w / 2, h + 35, w + 100, 80, { isStatic: true }), M.Bodies.rectangle(-35, h / 2, 80, h * 2, { isStatic: true }), M.Bodies.rectangle(w + 35, h / 2, 80, h * 2, { isStatic: true }), M.Bodies.rectangle(w / 2, 45, w + 100, 80, { isStatic: true })]
         M.Composite.add(engine.world, walls)
         pieces.forEach((p) => M.Body.setPosition(p.body, { x: clamp(p.body.position.x, p.size / 2, w - p.size / 2), y: clamp(p.body.position.y, 100, h - p.size / 2) }))
-        verity.jump(w / 2, h - 225, Math.min(110, w * 0.25))
+        // The guide hovers beside its own feeding photo instead of covering it.
+        verity.jump(w / 2 + FACE / 2 + Math.min(72, w * 0.17), h - 275, Math.min(80, w * 0.2))
       }
       resize()
-      const spawn = (sprite = FOOD[Math.floor(Math.random() * FOOD.length)], nearMouth = false) => {
+      const spawn = (kind = FOOD[Math.floor(Math.random() * FOOD.length)], nearMouth = false) => {
         const size = reduce ? 58 : 62 + Math.random() * 38
         const m = mouth()
         const body = M.Bodies.circle(nearMouth ? m.x - 95 : 35 + Math.random() * Math.max(1, w - 70), nearMouth ? m.y - 75 : 125 + Math.random() * Math.max(1, h * 0.58 - 125), size * 0.37, { restitution: 0.92, friction: 0.03, frictionAir: reduce ? 0.02 : 0.003, density: 0.001 })
         M.Body.setVelocity(body, nearMouth ? { x: 7, y: 0 } : { x: (Math.random() - 0.5) * (reduce ? 2 : 16), y: (Math.random() - 0.5) * (reduce ? 2 : 12) })
         if (!reduce) M.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.18)
-        const piece = { body, sprite, size, thrown: nearMouth }
+        const piece = { body, kind, size, thrown: nearMouth }
         pieces.push(piece)
         M.Composite.add(engine.world, body)
         return piece
@@ -105,7 +111,11 @@ export function FoodFightScene() {
         if (index >= 0) pieces.splice(index, 1)
       }
       const burst = (x: number, y: number, text: string, color = '#ffd21f') => bursts.push({ x, y, at: performance.now(), text, color })
-      feedVisual.current = () => burst(mouth().x, mouth().y - 35, '+1 CHEESE')
+      const chomp = () => {
+        chompAt = performance.now()
+        burst(mouth().x, mouth().y - 35, '+1 CHEESE')
+      }
+      feedVisual.current = chomp
       const explode = (piece: Piece) => {
         const { x, y } = piece.body.position
         remove(piece)
@@ -173,39 +183,52 @@ export function FoodFightScene() {
         M.Engine.update(engine, Math.min(dt, 32))
         ctx.clearRect(0, 0, w, h)
         const m = mouth()
-        // The mouth is the target; the one real Bleoodity orb sits just above it.
-        ctx.fillStyle = '#12000c'
-        ctx.strokeStyle = '#ff3fbf'
-        ctx.lineWidth = 3
-        ctx.beginPath()
-        ctx.ellipse(m.x, m.y, 58, 25, 0, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.stroke()
-        ctx.fillStyle = '#fff5c0'
-        ctx.fillRect(m.x - 31, m.y - 22, 17, 8)
-        ctx.fillRect(m.x + 14, m.y - 22, 17, 8)
+        // The "mouth" hitbox stays the same; Bleoodity's real photo marks it.
+        const chewing = reduce ? 0 : Math.max(0, 1 - (now - chompAt) / 220)
+        ctx.save()
+        ctx.translate(m.x, m.y - 40)
+        ctx.rotate(reduce ? -0.04 : -0.04 + Math.sin(now / 280) * 0.05)
+        ctx.scale(1 + chewing * 0.14, 1 + chewing * 0.14)
+        ctx.fillStyle = '#ffff00'
+        ctx.fillRect(-FACE / 2 - 7, -FACE / 2 - 7, FACE + 14, FACE + 14)
+        ctx.lineWidth = 4
+        ctx.strokeStyle = '#ff00ff'
+        ctx.strokeRect(-FACE / 2 - 7, -FACE / 2 - 7, FACE + 14, FACE + 14)
+        if (face.complete && face.naturalWidth) ctx.drawImage(face, -FACE / 2, -FACE / 2, FACE, FACE)
+        ctx.rotate(0.12)
+        ctx.font = 'bold 15px Impact, Arial Black, sans-serif'
+        ctx.textAlign = 'center'
+        const sticker = ctx.measureText('FEED ME CHEESE').width + 14
+        ctx.fillStyle = '#00ff00'
+        ctx.fillRect(-sticker / 2, -FACE / 2 - 30, sticker, 22)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#000'
+        ctx.strokeRect(-sticker / 2, -FACE / 2 - 30, sticker, 22)
+        ctx.fillStyle = '#0000ff'
+        ctx.fillText('FEED ME CHEESE', 0, -FACE / 2 - 13)
+        ctx.restore()
         for (const piece of [...pieces]) {
           const { x, y } = piece.body.position
-          if (piece.sprite === 'cheese' && piece.thrown && Math.hypot(x - m.x, (y - m.y) * 1.6) < 63 && drag?.piece !== piece) {
+          if (piece.kind === 'cheese' && piece.thrown && Math.hypot(x - m.x, (y - m.y) * 1.6) < 63 && drag?.piece !== piece) {
             remove(piece)
             feedCurrent.current()
-            burst(m.x, m.y - 35, '+1 CHEESE')
+            chomp()
             spawn('cheese')
             continue
           }
-          const image = objectImage(piece.sprite)
+          const image = objectImage(piece.kind)
           if (!image.complete || !image.naturalWidth) continue
           ctx.save()
           ctx.translate(x, y)
           ctx.rotate(reduce ? 0 : piece.body.angle)
           const photoWidth = piece.size * clamp(image.naturalWidth / image.naturalHeight, 0.65, 1.7)
-          ctx.fillStyle = piece.sprite === 'cheese' ? '#ffff00' : '#fff'
+          ctx.fillStyle = piece.kind === 'cheese' ? '#ffff00' : '#fff'
           ctx.fillRect(-photoWidth / 2 - 2, -piece.size / 2 - 2, photoWidth + 4, piece.size + 15)
           ctx.drawImage(image, -photoWidth / 2, -piece.size / 2, photoWidth, piece.size)
           ctx.font = 'bold 10px Arial, sans-serif'
           ctx.textAlign = 'center'
           ctx.fillStyle = '#000'
-          ctx.fillText(piece.sprite === 'drink' ? 'DOUBLE CUP' : piece.sprite.toUpperCase(), 0, piece.size / 2 + 10)
+          ctx.fillText(piece.kind === 'drink' ? 'DOUBLE CUP' : piece.kind.toUpperCase(), 0, piece.size / 2 + 10)
           ctx.restore()
         }
         bursts = bursts.filter((b) => now - b.at < 1000)
@@ -282,7 +305,7 @@ export function FoodFightScene() {
       <div className="pointer-events-none absolute inset-x-3 top-[146px] mx-auto max-w-[560px] border-2 border-[#ffd21f] bg-[#150511e8] px-4 py-3 text-center shadow-[5px_5px_0_#ff3fbf]">
         <p className="pixel text-[11px] tracking-widest text-[#ff3fbf]">PROTOCOL 09 · CATERING EMERGENCY</p>
         <h2 className="text-[clamp(27px,5vw,42px)] leading-none text-[#ffd21f]" style={{ fontFamily: 'Impact, Arial Black, sans-serif' }}>MHM. YEAH. I GOT THE CHEESE.</h2>
-        <p className="pixel mt-2 text-[12px] sm:text-[14px]">Drag &amp; fling cheese into the mouth. Click anything to explode it.</p>
+        <p className="pixel mt-2 text-[12px] sm:text-[14px]">Drag &amp; fling cheese at Bleoodity's photo. Click anything to explode it.</p>
       </div>
       <div className="pointer-events-auto absolute bottom-[76px] left-1/2 flex w-[min(94vw,420px)] -translate-x-1/2 flex-col items-center gap-2 border-2 border-[#ff3fbf] bg-black/90 px-3 py-2">
         <div className="flex w-full items-center gap-3">

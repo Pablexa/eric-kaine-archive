@@ -1,0 +1,287 @@
+/*
+ * The persistent "2008 underground fan page" layer (Act III + IV).
+ * Everything here is keyed to widgets ChaosLayer renders or to html.ug-* classes
+ * that chaos.reset() removes, so leaving always puts the archive back.
+ */
+
+:root {
+  --ck-orange: #ff5500;
+  --ck-orange-hi: #ff8a3d;
+  --ck-myspace: #6699cc;
+  --ck-myspace-lo: #003399;
+  --ck-pink: #ff2bd6;
+  --ck-lime: #39ff14;
+  --ck-yellow: #ffff00;
+  --ck-comic: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive;
+  --ck-impact: Impact, 'Haettenschweiler', 'Arial Narrow Bold', 'Arial Black', sans-serif;
+  --ck-verdana: Verdana, Tahoma, Geneva, sans-serif;
+}
+
+/* ---------- tiled wallpaper: the stripes stay, the real cheese photo goes under them ---------- */
+
+html.ug-rainbow:not(.ug-vamp),
+html.ug-rainbow:not(.ug-vamp) body {
+  background-color: #1a0026 !important;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgb(255 255 255 / 0.9) 0 1px, transparent 2px),
+    repeating-linear-gradient(45deg, rgb(255 0 204 / 0.55) 0 60px, rgb(255 204 0 / 0.45) 60px 120px, rgb(0 255 204 / 0.45) 120px 180px, rgb(51 0 255 / 0.55) 180px 240px),
+    var(--ck-wall, none) !important;
+  background-size: 90px 90px, 340px 340px, 150px 150px !important;
+  background-repeat: repeat !important;
+  background-attachment: fixed !important;
+  animation: ck-wall-slide 9s linear infinite !important;
+}
+@keyframes ck-wall-slide {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 90px 90px, 340px 0, 150px 150px; }
+}
+
+/* plain neon arrow cursor (UI chrome, no drawn face) */
+html.ug-cursor.ug-cursor,
+html.ug-cursor.ug-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpolygon points='3,2 3,23 9,17 13,26 17,24 13,15 22,15' fill='%2339ff14' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, auto !important;
+}
+
+/* ---------- marquee ---------- */
+
+.ck-marquee {
+  border-block: 4px double var(--ck-yellow);
+  background: repeating-linear-gradient(90deg, #000080 0 220px, #3b0066 220px 440px);
+  box-shadow: 0 4px 0 #ff2bd6;
+}
+.ck-marquee-track {
+  font-family: var(--ck-comic);
+  color: var(--ck-yellow);
+  text-shadow: 2px 2px 0 #ff0000;
+}
+.ck-marquee-pic {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  margin-inline: 6px;
+  vertical-align: middle;
+  object-fit: cover;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 #000;
+}
+/* ug-borders gives every page image a 7px ridge; keep the tiny ones readable */
+html.ug-borders main img.ck-marquee-pic {
+  border: 2px solid #fff !important;
+  border-radius: 999px !important;
+}
+html.ug-borders main .ck-top8-grid img {
+  border: 3px ridge #c0c0c0 !important;
+}
+
+/* ---------- photo stickers bolted onto the page ---------- */
+
+.ck-sticker {
+  width: clamp(92px, 9vw, 138px);
+  margin: 0;
+  padding: 6px 6px 4px;
+  background: #fffef0;
+  border: 3px dashed var(--ck-pink);
+  box-shadow: 6px 6px 0 #000;
+  pointer-events: auto;
+}
+.ck-sticker img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px solid #000;
+}
+.ck-sticker figcaption {
+  margin-top: 4px;
+  color: #000080;
+  font: 700 clamp(10px, 0.9vw, 13px) / 1.1 var(--ck-comic);
+  text-align: center;
+  text-transform: uppercase;
+}
+.ck-sticker::before {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 56px;
+  height: 18px;
+  translate: -50% 0;
+  rotate: -4deg;
+  background: rgb(255 255 160 / 0.78);
+  border: 1px solid rgb(0 0 0 / 0.2);
+}
+.ck-sticker[data-tone='lime'] { border-color: var(--ck-lime); }
+.ck-sticker[data-tone='yellow'] { border-color: var(--ck-yellow); }
+.ck-sticker[data-tone='orange'] { border-color: var(--ck-orange); }
+
+/* ---------- NEW LEAK starburst ---------- */
+
+.ck-badge-text {
+  font-family: var(--ck-impact);
+  color: var(--ck-yellow);
+  text-shadow: 2px 2px 0 #000;
+  line-height: 0.95;
+  animation: ug-blink 1s steps(1) infinite;
+}
+
+/* ---------- MySpace Top 8 ---------- */
+
+.ck-top8 {
+  width: 324px;
+  background: #fff;
+  border: 2px solid var(--ck-myspace-lo);
+  box-shadow: 8px 8px 0 #ff2bd6, 8px 8px 0 3px #000;
+  font-family: var(--ck-verdana);
+  color: #000;
+  rotate: -3deg;
+}
+.ck-top8-head {
+  background: var(--ck-myspace);
+  color: #fff;
+  padding: 3px 8px;
+  font: 700 13px / 1.3 var(--ck-verdana);
+}
+.ck-top8-count {
+  padding: 4px 8px 0;
+  font-size: 11px;
+  color: #000;
+}
+.ck-top8-count b { color: #cc0000; }
+.ck-top8-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 6px;
+  padding: 6px 8px;
+  margin: 0;
+  list-style: none;
+}
+.ck-top8-grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+.ck-top8-grid img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 1px solid #999;
+}
+.ck-top8-grid span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ck-myspace-lo);
+  font-size: 11px;
+  text-decoration: underline;
+}
+.ck-top8-foot {
+  padding: 0 8px 6px;
+  font-size: 11px;
+  text-align: right;
+}
+.ck-top8-foot u { color: #0000ee; }
+
+/* ---------- visitor counter ---------- */
+
+.ck-counter {
+  background: #000;
+  border: 4px outset #c0c0c0;
+  font-family: var(--ck-verdana);
+}
+.ck-counter-digits {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+}
+.ck-counter-digits span {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 24px;
+  background: linear-gradient(180deg, #2a2a2a 0 50%, #111 50% 100%);
+  border: 1px solid #555;
+  color: #ff2020;
+  font: 700 18px / 1 'Courier New', monospace;
+  text-shadow: 0 0 6px #ff0000;
+}
+
+/* ---------- SoundCloud rip player ---------- */
+
+.ck-player {
+  background: #f2f2f2;
+  border: 3px solid #000;
+  box-shadow: 6px 6px 0 var(--ck-orange), 6px 6px 0 3px #000;
+  color: #333;
+  font-family: var(--ck-verdana);
+}
+.ck-player-bar {
+  background: linear-gradient(180deg, var(--ck-orange-hi), var(--ck-orange));
+  color: #fff;
+  padding: 3px 6px;
+  font: 700 11px / 1.2 var(--ck-verdana);
+  letter-spacing: 0.04em;
+  text-shadow: 1px 1px 0 #a33400;
+}
+.ck-player-play {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--ck-orange);
+  color: #fff;
+  font-size: 11px;
+}
+.ck-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 34px;
+  padding: 0 6px;
+}
+.ck-wave i {
+  display: block;
+  flex: 1;
+  height: var(--h);
+  background: #b3b3b3;
+  transform-origin: bottom;
+  animation: ck-bar 0.9s ease-in-out infinite alternate;
+  animation-delay: var(--d);
+}
+.ck-wave i[data-played] {
+  background: var(--ck-orange);
+}
+@keyframes ck-bar {
+  from { transform: scaleY(0.55); }
+  to { transform: scaleY(1); }
+}
+.ck-player-dl {
+  margin: 4px 6px 6px;
+  padding: 2px 4px;
+  background: var(--ck-lime);
+  border: 2px outset #fff;
+  color: #000;
+  font: 700 11px / 1.2 var(--ck-comic);
+  text-align: center;
+  animation: ug-blink 0.8s steps(1) infinite;
+}
+
+/* ---------- cursor trail of tiny real photos ---------- */
+
+.ck-trail-pic {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow: 1px 1px 0 #000;
+}

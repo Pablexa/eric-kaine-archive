@@ -34,11 +34,11 @@ test.describe('Mobile', () => {
     await expect(page.getByTestId('troll-stage')).toHaveAttribute('data-scene', 'button', { timeout: 20_000 })
     // tapping the dodging button makes it run; four taps summon the shield
     for (let i = 0; i < 6; i++) {
-      if ((await page.getByTestId('objective').textContent().catch(() => ''))?.includes('Verity')) break
+      if ((await page.getByTestId('objective').textContent().catch(() => ''))?.includes('Kaineity')) break
       await page.getByTestId('subscribe').tap({ force: true }).catch(() => {})
       await sleep(450)
     }
-    await expect(page.getByTestId('objective')).toContainText('Get Verity off the button')
+    await expect(page.getByTestId('objective')).toContainText('Get Eric Kaineity off the button')
     await page.getByTestId('leave').tap()
     await expect(page.getByTestId('troll-stage')).toHaveCount(0, { timeout: 10_000 })
     expect(errors).toEqual([])

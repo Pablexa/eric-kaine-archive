@@ -150,17 +150,17 @@ export const isTrollActive = (s: ExperienceState) =>
   s.phase === 'reveal' || s.phase === 'troll' || s.phase === 'finale'
 
 export const PROTOCOLS: { scene: Scene; index: string; label: string }[] = [
-  { scene: 'pile', index: '01', label: 'Collapse' },
-  { scene: 'lights', index: '02', label: 'Lights out' },
-  { scene: 'button', index: '03', label: 'The button' },
-  { scene: 'uglify', index: '04', label: 'Uglify' },
-  { scene: 'popups', index: '05', label: 'Popups' },
-  { scene: 'clones', index: '06', label: 'Clones' },
-  { scene: 'beat', index: '07', label: 'The beat' },
+  { scene: 'pile', index: '01', label: 'The pile' },
+  { scene: 'lights', index: '02', label: 'Leak hunt' },
+  { scene: 'button', index: '03', label: 'The follow button' },
+  { scene: 'uglify', index: '04', label: 'MySpace era' },
+  { scene: 'popups', index: '05', label: 'Free leaks' },
+  { scene: 'clones', index: '06', label: 'Industry plants' },
+  { scene: 'beat', index: '07', label: 'The cursed beat' },
   { scene: 'label', index: '08', label: 'The label' },
-  { scene: 'foodfight', index: '09', label: 'Food fight' },
-  { scene: 'brainrot', index: '10', label: 'Brainrot' },
-  { scene: 'mosh', index: '11', label: 'Mosh pit' },
+  { scene: 'foodfight', index: '09', label: 'Cheese fight' },
+  { scene: 'brainrot', index: '10', label: 'Snippet brainrot' },
+  { scene: 'mosh', index: '11', label: 'Rage mosh pit' },
 ]
 
 /** Scenes scored by Eric Kaineity's loop (everything before the beat). */

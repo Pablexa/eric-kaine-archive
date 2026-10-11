@@ -148,7 +148,7 @@ export function TrollLayer() {
 }
 
 function WorldType() {
-  const rows = ['GATEKEPT · DO NOT SHARE · ', 'NOT FAMOUS · NOT FAMOUS · ', 'CONTAINED · 1.5K · CONTAINED · ']
+  const rows = ['GATEKEPT · DO NOT LEAK · ', 'NOT TRYING TO BE FAMOUS · ', 'UNRELEASED · 1.5K FANS · SLATT · ']
   return (
     <div className="absolute inset-0 flex flex-col justify-around opacity-100">
       {rows.map((r, i) => (

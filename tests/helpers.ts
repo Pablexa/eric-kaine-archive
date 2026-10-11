@@ -84,13 +84,13 @@ export async function beatTheButton(page: Page) {
   await expect(page.getByTestId('subscribe')).toBeVisible({ timeout: 15_000 })
   await sleep(800)
   for (let i = 0; i < 12; i++) {
-    if ((await page.getByTestId('objective').textContent().catch(() => ''))?.includes('Verity')) break
+    if ((await page.getByTestId('objective').textContent().catch(() => ''))?.includes('Kaineity')) break
     const b = await page.getByTestId('subscribe').boundingBox()
     if (!b) break
     await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 4 })
     await sleep(450)
   }
-  await expect(page.getByTestId('objective')).toContainText('Get Verity off the button')
+  await expect(page.getByTestId('objective')).toContainText('Get Eric Kaineity off the button')
   await sleep(900)
   const v = (await page.getByTestId('verity').boundingBox())!
   await page.mouse.move(v.x + v.width / 2, v.y + v.height / 2)

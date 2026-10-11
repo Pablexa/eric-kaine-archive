@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { sfx } from '../../../lib/audio/sfx'
-import { type SpriteId } from '../../../lib/assets/sprites'
-import { artistMedia, objectMedia } from '../../../lib/assets/realMedia'
+import { artistMedia, characterMedia, objectMedia, type RealMedia } from '../../../lib/assets/realMedia'
 import { TIME, EASE, pick } from '../../../lib/animation/timeline'
 
 /**
- * Eric streams a lot, so Act IV is "live": a fake chat column scrolls with
- * channel in-jokes and brainrot, and donation alerts pop with a chime.
+ * Act IV is "live": a fake underground chat column scrolls with in-jokes and
+ * brainrot, and donation alerts pop with a chime and a real photo.
  * All usernames are made up.
  */
 
@@ -15,39 +14,40 @@ const CHATTERS = [
   ['sealenjoyer_99', '#7fd4ff'],
   ['slatt_master', '#ff4fd8'],
   ['cheese_guy_fan', '#ffd21f'],
-  ['verity_hater', '#ff7a1f'],
+  ['bleoodity_hater', '#ff7a1f'],
   ['lil_gartic', '#5be36b'],
   ['not_bleood', '#c53cff'],
   ['ukrap_refugee', '#26d0ce'],
   ['eric_kaine_fan_2024', '#ffffff'],
   ['fl_studio_loop', '#ffb347'],
-  ['mod_verity', '#ffd21f'],
+  ['mod_bleoodity', '#ffd21f'],
   ['im10fr', '#9bff6a'],
   ['2slimey_enjoyer', '#7bed3f'],
 ] as const
 
 const LINES = [
-  'W', 'L', 'W STREAM', 'slatt', '!discord', '!discord', 'bleoodity???', 'I’m 10.', '+1000 aura', 'who let verity cook', 'BLEOODITY FM GOATED',
+  'W', 'L', 'W STREAM', 'slatt', '!discord', '!discord', 'bleoodity???', 'I’m 10.', '+1000 aura', 'who let bleoodity cook', 'BLEOODITY FM GOATED',
   'seals', 'play haunted hills', 'UK rap is straight poo', 'bro donated at the wrong time ☠️', 'cheese', 'cheese', 'is this the 2slimey stream',
-  'please dont click this stream its so bad', 'IM BOUT TO HIT 1000 SUBS', 'gatekeep him', 'chat is this real', 'first', 'skibidi', 'ohio',
-  'mewing rn', 'fanum tax', 'sigma', 'osamason on the aux', 'carti dropped??', 'slayr burger arc', 'jaydes!!', 'lil verity type beat', '1.5K+1 W',
+  'please dont click this stream its so bad', 'IM BOUT TO HIT 1000 PLAYS', 'gatekeep him', 'chat is this real', 'first', 'skibidi', 'ohio',
+  'mewing rn', 'fanum tax', 'sigma', 'osamason on the aux', 'carti dropped??', 'slayr burger arc', 'jaydes!!', 'lil bleoodity type beat', '1.5K+1 W',
   'the website is CRYING', 'who turned on comic sans', 'my ears', 'LOUDER', 'grape soda 🍇', 'dragon spotted', 'torta arc', 'aura farming',
-  'not the clones again', 'verity fell off', 'bleoodity rise up', '67', 'six seven', 'this is peak', 'eric pls', 'gatekept 😭',
+  'not the clones again', 'eric kaineity fell off', 'bleoodity rise up', '67', 'six seven', 'this is peak', 'eric pls', 'gatekept 😭',
   'double cup 💜', 'pour one up', 'DRACO SPOTTED', 'the dracos are flying', 'lean on the website', 'who brought dragons AND dracos'
 ]
 
-const DONATIONS: { name: string; amount: string; msg: string; sprite: SpriteId }[] = [
-  { name: 'sealenjoyer_99', amount: '$5.00', msg: 'play haunted hills', sprite: 'seal' },
-  { name: 'xX_cheese_Xx', amount: '$1.00', msg: 'cheese.', sprite: 'cheese' },
-  { name: 'gartic_god', amount: '$2.50', msg: 'draw bleoodity rn', sprite: 'sealdreads' },
-  { name: 'im10fr', amount: '$0.10', msg: 'I’m 10.', sprite: 'burger' },
-  { name: 'verity_main', amount: '$4.20', msg: 'gatekeep him harder', sprite: 'lilverity' },
-  { name: 'ukrap_refugee', amount: '$3.00', msg: 'uk rap is NOT poo', sprite: 'poo' },
-  { name: 'not_eric', amount: '$1,501', msg: '1.5K + 1', sprite: 'coin' },
-  { name: 'wrong_timer', amount: '$5.00', msg: 'bro donated at the wrong time ☠️', sprite: 'flame' },
-  { name: 'dragon_rider', amount: '$7.00', msg: 'add more dracos (and the dragons stay)', sprite: 'draco' },
-  { name: 'double_cup_dan', amount: '$4.00', msg: 'pour one up for the website', sprite: 'drank' },
-  { name: 'torta_lover', amount: '$6.00', msg: 'more tortas. the sandwich.', sprite: 'torta' },
+const DONATIONS: { name: string; amount: string; msg: string; photo: RealMedia }[] = [
+  { name: 'sealenjoyer_99', amount: '$5.00', msg: 'play haunted hills', photo: objectMedia.seal },
+  { name: 'xX_cheese_Xx', amount: '$1.00', msg: 'cheese.', photo: objectMedia.cheese },
+  { name: 'gartic_god', amount: '$2.50', msg: 'draw bleoodity rn', photo: artistMedia.bleood },
+  { name: 'im10fr', amount: '$0.10', msg: 'I’m 10.', photo: objectMedia.burger },
+  { name: 'bleoodity_main', amount: '$4.20', msg: 'gatekeep him harder', photo: characterMedia.bleoodity },
+  { name: 'ukrap_refugee', amount: '$3.00', msg: 'uk rap is NOT poo', photo: objectMedia.slime },
+  { name: 'not_eric', amount: '$1,501', msg: '1.5K + 1', photo: characterMedia.ericPfp },
+  { name: 'wrong_timer', amount: '$5.00', msg: 'bro donated at the wrong time ☠️', photo: artistMedia.osamason },
+  { name: 'dragon_rider', amount: '$7.00', msg: 'add more dracos (and the dragons stay)', photo: objectMedia.draco },
+  { name: 'double_cup_dan', amount: '$4.00', msg: 'pour one up for the website', photo: objectMedia.drink },
+  { name: 'torta_lover', amount: '$6.00', msg: 'more tortas. (this is a burger.)', photo: objectMedia.burger },
+  { name: 'kaineity_was_better', amount: '$0.67', msg: 'bring back eric kaineity', photo: characterMedia.kaineity },
 ]
 
 interface Msg {
@@ -55,16 +55,6 @@ interface Msg {
   name: string
   color: string
   text: string
-}
-
-const alertPhoto = (id: SpriteId) => {
-  if (id === 'sealdreads') return artistMedia.bleood.src
-  if (id === 'lilverity') return artistMedia.verity.src
-  if (id === 'burger') return objectMedia.burger.src
-  if (id === 'seal') return objectMedia.seal.src
-  if (id === 'drank') return objectMedia.drink.src
-  if (id === 'draco') return objectMedia.draco.src
-  return objectMedia.cheese.src
 }
 
 export function StreamOverlay() {
@@ -104,7 +94,7 @@ export function StreamOverlay() {
     <div data-troll-ui aria-hidden="true">
       <div className="pointer-events-none fixed right-3 top-[120px] z-[44] hidden w-[250px] flex-col justify-end overflow-hidden border-2 border-black bg-black/70 lg:flex" style={{ bottom: 300 }} data-testid="live-chat">
         <p className="pixel flex items-center gap-2 border-4 border-double border-[#00ff00] bg-[#000080] px-2 py-1 text-[13px] text-[#ffff00]">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-alarm" /> LIVE CHAT · {Math.floor(1500 + msgs.length * 3)} watching
+          <span className="h-2 w-2 animate-pulse rounded-full bg-alarm" /> LIVE SHOUTBOX · {Math.floor(1500 + msgs.length * 3)} lurking
         </p>
         <ol className="flex flex-col gap-0.5 px-2 py-1.5">
           {msgs.map((m) => (
@@ -126,7 +116,7 @@ export function StreamOverlay() {
             transition={{ duration: 0.45, ease: EASE.snap }}
             data-testid="donation"
           >
-            <img src={alertPhoto(alert.sprite)} alt="" className="h-14 w-14 shrink-0 border-4 border-ridge border-red-600 object-cover" style={{ animation: 'ug-spin-y 1.2s linear infinite' }} />
+            <img src={alert.photo.src} alt="" className="h-14 w-14 shrink-0 border-4 border-red-600 object-cover [border-style:ridge]" style={{ animation: 'ug-spin-y 1.2s linear infinite' }} />
             <span className="min-w-0">
               <span className="pixel block text-[16px]">
                 <b>{alert.name}</b> donated <b className="text-[#b3001b]">{alert.amount}</b>

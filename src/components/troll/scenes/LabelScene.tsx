@@ -16,7 +16,7 @@ const ROSTER = [
   { name: 'JAYDES', key: 'jaydes', color: '#b600ff', title: 'TOP 8 FRIENDS', line: 'jaydes gets the purple card. label policy.' },
   { name: 'THE CHEESE GUY', key: 'cheese', color: '#ffff00', title: 'HIRED A BLOCK OF CHEESE', line: 'hired a block of cheese. excellent credentials.' },
   { name: '2SLIMEY', key: 'slimey', color: '#00ff00', title: 'SIGNED FROM THE SWAMP', line: 'the swamp has an A&R department now.' },
-  { name: 'LIL VERITY', key: 'verity', color: '#00ffff', title: 'NEPOTISM DOT COM', line: 'my son. nepotism is real.' },
+  { name: 'LIL BLEOODITY', key: 'verity', color: '#00ffff', title: 'NEPOTISM DOT COM', line: 'signed myself. nepotism is real.' },
 ] as const
 
 const STYLES = `

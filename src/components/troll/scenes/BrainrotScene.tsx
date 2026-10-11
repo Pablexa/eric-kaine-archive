@@ -21,7 +21,7 @@ const MEDIA: VideoSource[] = [
 ]
 const WORDS = ['SIGMA', 'RIZZ', 'OHIO', 'FANUM TAX', 'MEWING', '+1000 AURA', 'SKIBIDI', '6 7', "I’M 10.", '!discord', 'SLATT', 'CHEESE ACQUIRED', 'BRO DONATED AT THE WRONG TIME']
 const CAPTIONS = ['please gatekeep me im not trying to be famous', 'making a beat but every tab chooses the sounds', 'bro opened subway surfers inside subway surfers', 'the cheese has a commuter pass', 'I found 2slimey in internet explorer', 'your attention span has left the server']
-const SPAM = ['YOUR RAM IS NOW CHEESE', 'CLICK HERE TO DOWNLOAD MORE RIZZ', 'CONGRATULATIONS!! YOU ARE VISITOR 6,700,000', 'VIRUS SCAN: FOUND !DISCORD', 'MYSPACE TOP 8: EVERYONE IS BLEOOD', 'FREE IPOD* (*it is a train)', 'THERE ARE 67 ORBS IN YOUR AREA', 'TURN DOWN FOR WHAT .WMV']
+const SPAM = ['YOUR RAM IS NOW CHEESE', 'CLICK HERE TO DOWNLOAD MORE RIZZ', 'CONGRATULATIONS!! YOU ARE VISITOR 6,700,000', 'VIRUS SCAN: FOUND !DISCORD', 'MYSPACE TOP 8: EVERYONE IS BLEOOD', 'FREE IPOD* (*it is a train)', 'THERE ARE 67 BLEOODITYS IN YOUR AREA', 'TURN DOWN FOR WHAT .WMV']
 
 function VideoPane({ source, index, fast }: { source: VideoSource; index: number; fast: boolean }) {
   const [playing, setPlaying] = useState(!fast)
@@ -33,7 +33,7 @@ function VideoPane({ source, index, fast }: { source: VideoSource; index: number
       <div className="br08-title"><span>▣ {index < 2 ? 'SUBWAY SURFERS' : 'BLEOOD.TV'} - Windows Media Player</span><span aria-hidden="true">_ □ ×</span></div>
       <div className="br08-menubar">File　Edit　View　Favorites　Tools　Help</div>
       <div className="br08-video">
-        {!fast ? <img src={poster} alt={`${source.title} video thumbnail`} className="br08-poster" /> : <div className="br08-test-poster"><b>REAL YOUTUBE VIDEO</b><span>{source.id}</span><span>{source.uploader}</span></div>}
+        {!fast ? <img src={poster} alt={`${source.title} video still`} className="br08-poster" /> : <div className="br08-test-poster"><b>REAL YOUTUBE VIDEO</b><span>{source.id}</span><span>{source.uploader}</span></div>}
         {playing && !fast ? <iframe
           key={revision}
           src={`https://www.youtube-nocookie.com/embed/${source.id}?autoplay=1&mute=1&controls=1&playsinline=1&loop=1&playlist=${source.id}&rel=0`}
@@ -110,7 +110,7 @@ export function BrainrotScene() {
     <section className={`br08-screen ${reduced ? 'br08-reduced' : ''}`} aria-label="Real Subway Surfers video brainrot portal" data-testid="brainrot" data-section={section} data-pane-count={Math.min(6, paneCount)} data-memes={spam} data-troll-ui>
       <style>{STYLES}</style>
       <div className="br08-site-header"><span>☠ BLEOODITY'S EPIC VIDEOZONE ☠</span><small>BEST VIEWED IN INTERNET EXPLORER 6 · 800×600 · DO NOT FIX THIS WEBSITE</small></div>
-      <div className="br08-navigation">[ HOME ] [ VIDEOS ] [ FREE RIZZ ] [ GUESTBOOK ] <b>● LIVE</b> <span>{Math.max(0, 62 - Math.floor(elapsed))} sec until brain failure</span></div>
+      <div className="br08-navigation">[ HOME ] [ LEAKS ] [ FREE RIZZ ] [ GUESTBOOK ] <b>● LIVE</b> <span>{Math.max(0, 62 - Math.floor(elapsed))} sec until brain failure</span></div>
       <div className="br08-ticker" aria-hidden="true"><span>★ REAL SUBWAY SURFERS VIDEOS ★ NO REFUNDS ★ PLEASE RATE MY WEBSITE ★ SLATT ★ MHMM I GOT THE CHEESE ★ !DISCORD ★ 6 7 ★</span></div>
       <div className="br08-collage" data-testid="brainrot-video-collage">
         {Array.from({ length: Math.min(6, paneCount) }, (_, index) => <VideoPane key={index} index={index} source={MEDIA[index % MEDIA.length]} fast={fast} />)}

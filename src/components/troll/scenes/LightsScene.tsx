@@ -7,31 +7,74 @@ import { ask, objective } from '../../../lib/experience/store'
 import { pileDim } from '../../../lib/experience/stage'
 import { sfx } from '../../../lib/audio/sfx'
 import { pointer } from '../../../lib/interactions/pointer'
-import { byId, curation, thumb, type Video } from '../../../lib/content/channel'
+import { artistMedia, type RealMedia } from '../../../lib/assets/realMedia'
 import { clamp, EASE, TIME, prefersReducedMotion, rand, wait } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
+import './LightsScene.css'
 
 /**
  * Protocol 02 — "Lights out". The Verity mod's flashlight, rebuilt for a
- * website: the room goes dark, your pointer is the only light, the battery
- * drains, and five of Eric's real videos are hidden somewhere in the wreckage.
+ * website: the basement goes dark, your pointer is the only light, the battery
+ * drains, and Eric Kaineity has hidden five unreleased leaks somewhere in the
+ * wreckage. Every leak you dig up is one more play.
  */
 
-const VIDEOS = curation.hidden.map(byId)
+interface Leak {
+  id: string
+  file: string
+  tag: string
+  length: string
+  sticker: string
+  photo: RealMedia
+  /** Fake waveform bar heights, 0..1. */
+  wave: number[]
+}
+
+const waveform = (seed: number) =>
+  Array.from({ length: 22 }, (_, i) => 0.2 + 0.8 * Math.abs(Math.sin(seed * 7.13 + i * 1.77) * Math.cos(seed * 1.31 + i * 0.61)))
+
+const LEAKS: Leak[] = [
+  { id: 'slayr', file: 'slayr_unreleased_FINAL(2).mp3', tag: 'UNRELEASED', length: '1:47', sticker: 'FREE DL', photo: artistMedia.slayr },
+  { id: 'carti', file: 'carti_snippet_leak.wav', tag: 'SNIPPET', length: '0:29', sticker: 'NO TAG', photo: artistMedia.carti },
+  { id: 'osamason', file: 'osamason_rage_v3_NO_TAGS.mp3', tag: 'LEAKED', length: '2:13', sticker: 'HQ!!', photo: artistMedia.osamason },
+  { id: 'jaydes', file: 'jaydes_plugg_bootleg_(real).m4a', tag: 'BOOTLEG', length: '1:02', sticker: '320 KBPS', photo: artistMedia.jaydes },
+  { id: 'slimey', file: '2slimey_slatt_demo_DONT_LEAK.mp3', tag: 'CURSED', length: '0:58', sticker: 'DL NOW', photo: artistMedia.slimey },
+].map((leak, i) => ({ ...leak, wave: waveform(i + 1) }))
+
 const FOUND_LINES = [
-  'that’s one view. calm down.',
-  'two views. people are going to talk.',
-  'three. this is how it starts.',
-  'four views. i’m calling someone.',
-  'FIVE. THIS IS AN EMERGENCY.',
+  'that’s one play. calm down.',
+  'two plays. people are going to talk.',
+  'three plays. this is how a leak spreads.',
+  'four plays. i’m calling the gatekeepers.',
+  'FIVE PLAYS. THIS IS AN EMERGENCY.',
 ]
 
+/** Words that glow in the dark and scatter when the beam touches them. */
+const WHISPERS = ['slatt', 'leak?', 'plugg', 'who got the link', 'dm 4 link', 'gatekeep', 'snippet', 'rage', 'unreleased', 'free dl', '???', 'cdq', 'woah', 'not famous', 'fake', 'he heard it']
+const GLOW = ['rgba(255, 43, 214, 0.8)', 'rgba(57, 255, 20, 0.75)', 'rgba(255, 230, 0, 0.8)', 'rgba(0, 229, 255, 0.75)']
+
+/** Basement wall stickers, only ever seen inside the beam. */
+const DECOR: { text: string; x: string; y: string; r: number; kind: 'a' | 'b' | 'c' | 'd' | 'e' }[] = [
+  { text: 'LEAK ALERT!!!', x: '4%', y: '22%', r: -8, kind: 'a' },
+  { text: 'not trying to be famous', x: '62%', y: '19%', r: 6, kind: 'b' },
+  { text: 'DO NOT DM FOR LINKS', x: '30%', y: '41%', r: -4, kind: 'd' },
+  { text: 'gatekept since 2008', x: '74%', y: '47%', r: -10, kind: 'c' },
+  { text: 'SLATT', x: '9%', y: '63%', r: 11, kind: 'e' },
+  { text: 'plugg 4 life', x: '46%', y: '69%', r: 5, kind: 'b' },
+  { text: 'RAGE ROOM', x: '83%', y: '76%', r: -6, kind: 'a' },
+  { text: 'bring ur own flashlight', x: '22%', y: '84%', r: -3, kind: 'c' },
+]
+
+const NEWS =
+  ' +++ 5 unreleased snippets went missing in the basement +++ eric kaineity says nobody is allowed to hear them +++ every leak you find is one more play +++ not trying to be famous +++ do not refresh +++'
+
 interface Tile {
-  video: Video
+  leak: Leak
   x: number
   y: number
   w: number
   h: number
+  tilt: number
   progress: number
   found: boolean
 }
@@ -46,7 +89,7 @@ function layoutTiles(): Tile[] {
   const vw = window.innerWidth
   const vh = window.innerHeight
   const w = clamp(vw * 0.15, 120, 210)
-  const h = (w * 9) / 16
+  const h = w * 0.8
   const top = 150
   const bottom = vh - 140
   const cols = vw < 640 ? 2 : 4
@@ -58,16 +101,16 @@ function layoutTiles(): Tile[] {
       const ch = (bottom - top) / rows
       cells.push({ x: c * cw + rand(16, Math.max(17, cw - w - 16)), y: top + r * ch + rand(0, Math.max(1, ch - h)), taken: false })
     }
-  return VIDEOS.map((video) => {
+  return LEAKS.map((leak) => {
     const free = cells.filter((c) => !c.taken)
     const cell = free[Math.floor(Math.random() * free.length)]
     cell.taken = true
-    return { video, x: cell.x, y: cell.y, w, h, progress: 0, found: false }
+    return { leak, x: cell.x, y: cell.y, w, h, tilt: rand(-6, 6), progress: 0, found: false }
   })
 }
 
 export function LightsScene() {
-  const { dispatch, finishEnding } = useExperience()
+  const { state, dispatch, finishEnding } = useExperience()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const tilesRef = useRef<Tile[]>([])
   const [tiles, setTiles] = useState<Tile[]>([])
@@ -130,13 +173,15 @@ export function LightsScene() {
     let last = performance.now()
     let lastPointerMove = pointer.lastMove
     let lastShown = 100
-    // eyes in the dark: they watch the light and vanish when it touches them
-    const eyes = Array.from({ length: 16 }, () => ({
+    // glowing words in the dark: they lean toward the light and scatter when it touches them
+    const whispers = Array.from({ length: 16 }, (_, i) => ({
       x: rand(30, window.innerWidth - 30),
       y: rand(140, window.innerHeight - 40),
-      s: rand(0.7, 1.4),
+      s: rand(0.85, 1.35),
       gone: 0,
       blink: rand(0, 4000),
+      word: WHISPERS[i % WHISPERS.length],
+      color: GLOW[i % GLOW.length],
     }))
 
     const frame = (now: number) => {
@@ -163,7 +208,7 @@ export function LightsScene() {
       const radius = g.battery <= 0 ? 0 : base * (0.5 + 0.5 * (g.battery / 100))
 
       if (g.on) {
-        // Verity hunts the light, a little faster for every video found
+        // Eric Kaineity hunts the light, a little faster for every leak found
         const found = tilesRef.current.filter((t) => t.found).length
         const speed = (reduce ? 40 : 70) + found * 18
         const dx = g.light.x - vx
@@ -207,8 +252,8 @@ export function LightsScene() {
             const n = tilesRef.current.filter((x) => x.found).length
             sfx.found(n * 2)
             dispatch({ type: 'VIEW' })
-            setFoundIds(tilesRef.current.filter((x) => x.found).map((x) => x.video.id))
-            objective.set(`Find Eric’s videos in the dark · ${n}/5`)
+            setFoundIds(tilesRef.current.filter((x) => x.found).map((x) => x.leak.id))
+            objective.set(`Dig up the unreleased leaks · ${n}/5`)
             chat.post(FOUND_LINES[n - 1], 'verity', n === 5 ? 'loud' : 'normal')
             if (n === 3) dispatch({ type: 'MOOD', mood: 'angry' })
             if (n === 5) g.onWin?.()
@@ -231,7 +276,7 @@ export function LightsScene() {
       ctx.clearRect(0, 0, w, h)
       if (g.dark > 0) {
         ctx.globalCompositeOperation = 'source-over'
-        ctx.fillStyle = `rgba(2, 2, 1, ${0.988 * g.dark})`
+        ctx.fillStyle = `rgba(6, 0, 10, ${0.988 * g.dark})`
         ctx.fillRect(0, 0, w, h)
         ctx.globalCompositeOperation = 'destination-out'
         if (radius > 0) {
@@ -246,7 +291,7 @@ export function LightsScene() {
           ctx.arc(g.light.x, g.light.y, r, 0, Math.PI * 2)
           ctx.fill()
         }
-        // Verity carries her own light
+        // Eric Kaineity carries his own light
         const vg = ctx.createRadialGradient(vx, vy, vr * 0.5, vx, vy, vr * 2.4)
         vg.addColorStop(0, 'rgba(0,0,0,0.55)')
         vg.addColorStop(1, 'rgba(0,0,0,0)')
@@ -256,9 +301,11 @@ export function LightsScene() {
         ctx.fill()
         ctx.globalCompositeOperation = 'source-over'
 
-        // the eyes
+        // the whispers
         if (g.dark > 0.9) {
-          for (const e of eyes) {
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          for (const e of whispers) {
             if (e.gone > now) continue
             const ddx = g.light.x - e.x
             const ddy = g.light.y - e.y
@@ -269,39 +316,37 @@ export function LightsScene() {
               e.y = rand(140, h - 40)
               continue
             }
-            const blinking = (now + e.blink) % 4200 < 140
-            const px = (ddx / dd) * 2.2 * e.s
-            const py = (ddy / dd) * 2 * e.s
-            ctx.fillStyle = 'rgba(255, 244, 190, 0.85)'
-            for (const side of [-1, 1]) {
-              ctx.beginPath()
-              ctx.ellipse(e.x + side * 9 * e.s, e.y, 5 * e.s, blinking ? 0.6 : 3.4 * e.s, 0, 0, Math.PI * 2)
-              ctx.fill()
-            }
-            if (!blinking) {
-              ctx.fillStyle = '#000'
-              for (const side of [-1, 1]) {
-                ctx.beginPath()
-                ctx.arc(e.x + side * 9 * e.s + px, e.y + py, 1.6 * e.s, 0, Math.PI * 2)
-                ctx.fill()
-              }
-              ctx.fillStyle = 'rgba(255, 244, 190, 0.85)'
-            }
+            if ((now + e.blink) % 4200 < 140) continue
+            ctx.save()
+            ctx.translate(e.x, e.y)
+            ctx.rotate(clamp(ddx / 900, -0.35, 0.35))
+            ctx.font = `700 ${Math.round(12 * e.s)}px 'Comic Sans MS', 'Comic Neue', cursive`
+            ctx.fillStyle = e.color
+            ctx.fillText(e.word, 0, 0)
+            ctx.restore()
           }
         }
 
-        // search progress rings
+        // download progress rings
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
         for (const t of tilesRef.current) {
           if (t.found || t.progress <= 0) continue
-          ctx.strokeStyle = 'rgba(255, 210, 31, 0.95)'
-          ctx.lineWidth = 3
+          const cx = t.x + t.w / 2
+          const cy = t.y + t.h / 2
+          const rr = Math.min(t.w, t.h) * 0.42
+          ctx.strokeStyle = 'rgba(57, 255, 20, 0.95)'
+          ctx.lineWidth = 4
           ctx.beginPath()
-          ctx.arc(t.x + t.w / 2, t.y + t.h / 2, Math.min(t.w, t.h) * 0.42, -Math.PI / 2, -Math.PI / 2 + t.progress * Math.PI * 2)
+          ctx.arc(cx, cy, rr, -Math.PI / 2, -Math.PI / 2 + t.progress * Math.PI * 2)
           ctx.stroke()
+          ctx.font = `700 12px 'Comic Sans MS', 'Comic Neue', cursive`
+          ctx.fillStyle = 'rgba(255, 230, 0, 0.95)'
+          ctx.fillText(`downloading ${Math.round(t.progress * 100)}%`, cx, cy + rr + 12)
         }
         // the beam's edge, as a faint ring
         if (radius > 0) {
-          ctx.strokeStyle = 'rgba(255, 246, 194, 0.12)'
+          ctx.strokeStyle = 'rgba(255, 43, 214, 0.22)'
           ctx.lineWidth = 1.5
           ctx.beginPath()
           ctx.arc(g.light.x, g.light.y, radius * 0.98, 0, Math.PI * 2)
@@ -321,7 +366,7 @@ export function LightsScene() {
     const g = game.current
     const say = (t: string, o: Parameters<typeof chat.say>[1] = {}) => chat.say(t, { signal, ...o })
     objective.set(null)
-    await say('if you can’t see him, he can’t get famous.')
+    await say('if nobody can hear his leaks, he can’t get famous.')
     sfx.lightSwitch()
     // fade the darkness in quickly but not as a flash
     const t0 = performance.now()
@@ -335,9 +380,9 @@ export function LightsScene() {
     })
     sfx.hum(true)
     verity.glow.set(1)
-    objective.set('Find Eric’s videos in the dark · 0/5')
-    await say('i hid five of his videos in here. good luck.', { hold: 900 })
-    chat.post('move your light with the mouse, a finger, or the arrow keys.', 'system')
+    objective.set('Dig up the unreleased leaks · 0/5')
+    await say('i hid five unreleased leaks down here. good luck.', { hold: 900 })
+    chat.post('move your flashlight with the mouse, a finger, or the arrow keys.', 'system')
 
     let round = 0
     while (true) {
@@ -379,11 +424,11 @@ export function LightsScene() {
       sfx.hum(false)
       dispatch({ type: 'MOOD', mood: 'calm' })
       await say('battery’s dead.', { hold: 700 })
-      await say('he’s safe in the dark now. we could just… stop here.')
+      await say('the leaks stay gatekept down here. we could just stop.')
       const c = await ask(
         [
-          { id: 'retry', label: 'New battery, try again', tone: 'yellow' },
-          { id: 'stop', label: 'Leave him obscure' },
+          { id: 'retry', label: 'New battery, dig again', tone: 'yellow' },
+          { id: 'stop', label: 'Keep the leaks gatekept' },
         ],
         signal,
       )
@@ -407,69 +452,117 @@ export function LightsScene() {
   )
 
   const foundSet = new Set(foundIds)
+  const plays = String(Math.max(0, state.views)).padStart(7, '0')
 
   return (
-    <div className="absolute inset-0" data-testid="lights-scene">
-      {/* hidden videos, under the darkness */}
+    <div className="lx-scene absolute inset-0" data-testid="lights-scene">
+      {/* the basement wall, only ever seen inside the beam */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {DECOR.map((d) => (
+          <span key={d.text} className={`lx-decor lx-decor-${d.kind}`} style={{ left: d.x, top: d.y, transform: `rotate(${d.r}deg)` }}>
+            {d.text}
+          </span>
+        ))}
+        <div className="lx-news">
+          <span className="lx-news-label">UNDERGROUND NEWS</span>
+          <div className="lx-marquee">
+            <span className="lx-marquee-track">
+              {NEWS}
+              {NEWS}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* hidden leaks, under the darkness */}
       {tiles.map((t) =>
-        foundSet.has(t.video.id) ? null : (
+        foundSet.has(t.leak.id) ? null : (
           <div
-            key={t.video.id}
-            className="absolute overflow-hidden ring-1 ring-white/10"
-            style={{ left: t.x, top: t.y, width: t.w, height: t.h }}
+            key={t.leak.id}
+            className="absolute"
+            style={{ left: t.x, top: t.y, width: t.w, height: t.h, transform: `rotate(${t.tilt}deg)` }}
             data-testid="hidden-video"
-            data-video-id={t.video.id}
+            data-video-id={t.leak.id}
           >
-            <img src={thumb(t.video, 'hq')} alt="" referrerPolicy="no-referrer" className="h-full w-full scale-[1.34] object-cover" draggable={false} />
+            <div className="lx-leak-card">
+              <div className="lx-leak-photo">
+                <img src={t.leak.photo.src} alt="" draggable={false} />
+                <span className="lx-leak-tag">{t.leak.tag}</span>
+                <span className="lx-leak-play" />
+                <span className="lx-leak-len">{t.leak.length}</span>
+              </div>
+              <span className="lx-leak-name">{t.leak.file}</span>
+              <span className="lx-leak-wave">
+                {t.leak.wave.map((v, i) => (
+                  <i key={i} style={{ height: `${Math.round(v * 100)}%` }} />
+                ))}
+              </span>
+            </div>
+            <span className="lx-leak-sticker">{t.leak.sticker}</span>
           </div>
         ),
       )}
       {batteries.map((b) => (
         <div key={b.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: b.x, top: b.y }} data-testid="battery-pickup">
-          <svg width="34" height="20" viewBox="0 0 34 20" aria-hidden="true">
-            <rect x="1" y="1" width="28" height="18" fill="#111" stroke="#f4f1e6" strokeWidth="2" />
-            <rect x="29" y="6" width="4" height="8" fill="#f4f1e6" />
-            <rect x="4" y="4" width="22" height="12" fill="#5be36b" />
-          </svg>
+          <span className="lx-pickup-inner" aria-hidden="true">
+            +BATTERY
+            <small>free dl, not a virus</small>
+          </span>
         </div>
       ))}
 
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" data-testid="darkness" />
 
       {/* battery meter */}
-      <div className="pointer-events-none fixed left-3 top-[118px] z-[47] flex items-center gap-2 sm:left-6 sm:top-[132px]" aria-label={`Battery ${battery}%`} role="meter" aria-valuenow={battery} aria-valuemin={0} aria-valuemax={100}>
-        <span className="pixel text-[14px] text-pixel/70">BATTERY</span>
-        <span className="flex h-4 w-28 gap-[2px] border-2 border-pixel/80 p-[2px]">
+      <div
+        className="lx-meter pointer-events-none fixed left-3 top-[118px] z-[47] flex items-center gap-2 sm:left-6 sm:top-[132px]"
+        aria-label={`Flashlight battery ${battery}%`}
+        role="meter"
+        aria-valuenow={battery}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <span className="lx-meter-label">FLASHLIGHT</span>
+        <span className="lx-meter-bar flex h-4 w-28 gap-[2px] p-[2px]">
           {Array.from({ length: 10 }).map((_, i) => (
-            <span key={i} className={`h-full flex-1 ${i < Math.ceil(battery / 10) ? (battery < 20 ? 'bg-alarm' : 'bg-[#5be36b]') : 'bg-transparent'}`} />
+            <span key={i} className={`h-full flex-1 ${i < Math.ceil(battery / 10) ? (battery < 20 ? 'bg-[#ff1a1a]' : 'bg-[#39ff14]') : 'bg-transparent'}`} />
           ))}
         </span>
-        <span className="pixel w-10 text-[14px] tabular-nums text-pixel" data-testid="battery">
+        <span className="lx-meter-num w-10 tabular-nums" data-testid="battery">
           {battery}%
         </span>
       </div>
 
-      {/* found tray */}
-      <ol className="pointer-events-none fixed left-3 top-[148px] z-[47] flex gap-1.5 sm:left-auto sm:right-6 sm:top-[132px]" aria-label="Videos found">
-        {VIDEOS.map((v) => (
-          <li key={v.id} className="relative h-[26px] w-[46px] border-2 border-pixel/30 bg-black/50 sm:h-[34px] sm:w-[60px]">
-            <AnimatePresence>
-              {foundSet.has(v.id) ? (
-                <motion.img
-                  src={thumb(v, 'mq')}
-                  alt={v.title}
-                  referrerPolicy="no-referrer"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  initial={{ scale: 2.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, ease: EASE.snap }}
-                />
-              ) : null}
-            </AnimatePresence>
-          </li>
-        ))}
-      </ol>
+      {/* plays counter + found leaks */}
+      <div className="pointer-events-none fixed left-3 top-[160px] z-[47] flex items-center gap-3 sm:left-auto sm:right-6 sm:top-[128px]">
+        <span className="lx-counter hidden sm:flex" aria-label={`${state.views.toLocaleString('en-US')} plays`}>
+          PLAYS
+          <span className="lx-counter-digits" aria-hidden="true">
+            {plays.split('').map((digit, i) => (
+              <b key={i}>{digit}</b>
+            ))}
+          </span>
+        </span>
+        <ol className="flex gap-1.5" aria-label="Leaks found">
+          {LEAKS.map((leak) => (
+            <li key={leak.id} className="lx-slot">
+              {foundSet.has(leak.id) ? null : <span className="lx-slot-q" aria-hidden="true">?</span>}
+              <AnimatePresence>
+                {foundSet.has(leak.id) ? (
+                  <motion.img
+                    src={leak.photo.src}
+                    alt={`Found leak ${leak.file}: ${leak.photo.alt}`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    initial={{ scale: 2.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: EASE.snap }}
+                  />
+                ) : null}
+              </AnimatePresence>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   )
 }
-

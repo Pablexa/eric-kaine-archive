@@ -14,7 +14,7 @@ import { useScript } from '../useScript'
 
 const TARGET = 12
 const CROWD = [artistMedia.bleood, artistMedia.slayr, objectMedia.cheese, artistMedia.osamason, artistMedia.carti, artistMedia.slimey, objectMedia.seal, artistMedia.jaydes, artistMedia.verity, objectMedia.burger, objectMedia.drink]
-const LINES = ['the typography is in the pit.', 'the subscribe button just lost a shoe.', 'OPEN UP THE FONT PIT.', 'the entire website is crowd surfing.']
+const LINES = ['the typography is in the pit.', 'the follow button just lost a shoe.', 'OPEN UP THE FONT PIT.', 'the entire website is crowd surfing.']
 
 /** Real pieces of the archive become the crowd, then Bleoodity stage-dives. */
 export function MoshScene() {
@@ -70,7 +70,7 @@ export function MoshScene() {
       const r = el.getBoundingClientRect()
       return !captured.has(el) && getComputedStyle(el).visibility !== 'hidden' && r.width > 2 && r.height > 2 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth
     })
-    // Sprite placards fill out the crowd on narrow screens where fewer page
+    // Real photo placards fill out the crowd on narrow screens where fewer page
     // elements fit. They are real DOM bodies, using the same capture engine.
     const placards = [...(crowd.current?.querySelectorAll<HTMLElement>('[data-physics]') ?? [])]
     const selected = [...page, ...placards].slice(0, 28)

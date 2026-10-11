@@ -1,0 +1,222 @@
+/* Protocol 06 chrome: industry plant clones on a 2008 underground fan page.
+   Every clone is a real photo; everything drawn here is frames, stickers and text. */
+
+.kcl-root {
+  --kcl-comic: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive;
+  --kcl-impact: Impact, 'Haettenschweiler', 'Arial Narrow Bold', 'Arial Black', sans-serif;
+}
+
+/* ---------- the clones ---------- */
+
+.kcl-clone {
+  --d: 60px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60px;
+  height: 60px;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+}
+
+.kcl-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  object-fit: cover;
+  object-position: 50% 30%;
+  border-radius: 999px;
+  border: 3px solid var(--ring, #ffe600);
+  outline: 2px solid #000;
+  background: #000;
+  box-shadow: 3px 4px 0 #000;
+  filter: saturate(1.45) contrast(1.12);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.kcl-clone--kaineity .kcl-photo {
+  box-shadow: 3px 4px 0 #000, 0 0 14px 2px rgb(255 230 0 / 0.75);
+}
+
+.kcl-clone[data-state='wild'] .kcl-photo {
+  border-style: dashed;
+  filter: saturate(2.2) contrast(1.3) hue-rotate(-20deg);
+}
+
+.kcl-tag {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--d) * -0.16);
+  transform: translateX(-50%) rotate(-7deg);
+  padding: 0 0.35em;
+  font-family: var(--kcl-impact);
+  font-size: max(9px, calc(var(--d) * 0.19));
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #e00000;
+  background: #ffff00;
+  border: 1.5px solid #000;
+  box-shadow: 1px 1px 0 #000;
+}
+
+.kcl-clone[data-state='wild'] .kcl-tag {
+  color: #ffff00;
+  background: #e00000;
+  transform: translateX(-50%) rotate(6deg);
+}
+
+.kcl-stamp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  padding: 1px 0.4em;
+  font-family: var(--kcl-impact);
+  font-size: max(10px, calc(var(--d) * 0.24));
+  line-height: 1.1;
+  white-space: nowrap;
+  color: #fff;
+  background: #e00000;
+  border: 2px solid #ffff00;
+  box-shadow: 2px 2px 0 #000;
+  opacity: 0;
+}
+
+.kcl-clone[data-state='pop'] .kcl-stamp {
+  opacity: 1;
+}
+
+/* ---------- the alert box (hit-counter style) ---------- */
+
+.kcl-alert {
+  max-width: min(78vw, 300px);
+  padding: 8px 12px 10px;
+  transform: rotate(-4deg);
+  background: #000080;
+  border: 5px double #ffff00;
+  box-shadow: 6px 6px 0 #ff2bd6, 6px 6px 0 2px #000;
+}
+
+.kcl-alert__title {
+  margin: 0;
+  font-family: var(--kcl-impact);
+  font-size: clamp(18px, 2.2vw, 28px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #ffff00;
+  text-shadow: 2px 2px 0 #e00000, -1px -1px 0 #000;
+  animation: kcl-blink 1s step-end infinite;
+}
+
+.kcl-alert__sub {
+  margin: 4px 0 6px;
+  font-family: var(--kcl-comic);
+  font-size: 12px;
+  line-height: 1.2;
+  color: #39ff14;
+}
+
+.kcl-alert__count {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: Verdana, Tahoma, Geneva, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.kcl-digits {
+  padding: 0 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: #ff2a2a;
+  background: #000;
+  border: 2px inset #808080;
+}
+
+.kcl-digits--real {
+  color: #39ff14;
+}
+
+/* ---------- fake download button ---------- */
+
+.kcl-dl {
+  padding: 8px 16px 7px;
+  transform: rotate(3deg);
+  text-align: center;
+  background: linear-gradient(#7dff4f, #13a800);
+  border: 3px outset #b8ff9c;
+  border-radius: 6px;
+  box-shadow: 4px 5px 0 #000;
+}
+
+.kcl-dl__main {
+  display: block;
+  font-family: var(--kcl-impact);
+  font-size: 20px;
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.kcl-dl__fine {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--kcl-comic);
+  font-size: 11px;
+  color: #ffff00;
+  text-shadow: 1px 1px 0 #000;
+  animation: kcl-blink 0.8s step-end infinite;
+}
+
+/* ---------- marquee ---------- */
+
+.kcl-marquee {
+  height: 26px;
+  background: #000;
+  border-top: 3px dashed #ff2bd6;
+}
+
+.kcl-marquee__track {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  font-family: var(--kcl-comic);
+  font-size: 14px;
+  line-height: 23px;
+  font-weight: 700;
+  color: #39ff14;
+  text-shadow: 1px 1px 0 #e00000;
+  animation: kcl-scroll 22s linear infinite;
+}
+
+.kcl-marquee__track > span {
+  padding-right: 2em;
+}
+
+@keyframes kcl-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes kcl-blink {
+  50% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kcl-alert__title,
+  .kcl-dl__fine,
+  .kcl-marquee__track {
+    animation: none;
+  }
+}

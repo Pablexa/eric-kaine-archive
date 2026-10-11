@@ -8,8 +8,11 @@ import { Aborted, easeInOutCubic, tween } from '../animation/timeline'
  *              exact on-screen position; the original keeps its layout but is
  *              hidden. Each clone gets a Matter body (static until released).
  * release()  → the piece starts obeying gravity.
+ * addLoose() → drops a brand-new element (a real photo: cheese, a seal, an
+ *              artist) into the wreckage. It has no original on the page.
  * reassemble → every clone flies back to where its original lives, then the
- *              originals reappear. The page is never actually destroyed.
+ *              originals reappear; loose pieces fall off the bottom instead.
+ *              The page is never actually destroyed.
  */
 
 export interface Piece {
@@ -20,6 +23,21 @@ export interface Piece {
   h: number
   label: string
   released: boolean
+  /** Added with addLoose(): no original element, so it never flies "home". */
+  loose?: boolean
+}
+
+export interface LooseOptions {
+  /** Center position, in viewport pixels. */
+  x: number
+  y: number
+  w: number
+  h: number
+  label?: string
+  shape?: 'rect' | 'circle'
+  vx?: number
+  vy?: number
+  spin?: number
 }
 
 export interface HitEvent {
@@ -59,7 +77,7 @@ export class PileEngine {
   private onHitCb: ((e: HitEvent) => void) | null = null
   private onGrabCb: ((p: Piece) => void) | null = null
   private vPrev = { x: -999, y: -999 }
-  /** Only pieces the visitor actually threw can hit Verity. */
+  /** Only pieces the visitor actually threw can hit the guide. */
   private thrownAt = new Map<Matter.Body, number>()
 
   constructor(layer: HTMLElement) {
@@ -145,6 +163,40 @@ export class PileEngine {
     }
   }
 
+  /**
+   * Add an element that was never part of the page (e.g. a real photo) as a
+   * released physical piece. The engine owns the node from here on: it is
+   * positioned, simulated and removed on reassemble/destroy like any clone.
+   */
+  addLoose(node: HTMLElement, { x, y, w, h, label = 'loose', shape = 'rect', vx = 0, vy = 0, spin = 0 }: LooseOptions) {
+    node.setAttribute('aria-hidden', 'true')
+    Object.assign(node.style, {
+      position: 'absolute',
+      left: '0px',
+      top: '0px',
+      margin: '0px',
+      width: `${w}px`,
+      height: `${h}px`,
+      boxSizing: 'border-box',
+      transform: `translate3d(${x - w / 2}px, ${y - h / 2}px, 0)`,
+      transformOrigin: '50% 50%',
+      willChange: 'transform',
+      pointerEvents: 'none',
+    })
+    this.layer.appendChild(node)
+    const common = { friction: 0.55, frictionAir: 0.012, restitution: 0.3, density: 0.0016, label }
+    const body =
+      shape === 'circle'
+        ? Matter.Bodies.circle(x, y, Math.min(w, h) / 2, common)
+        : Matter.Bodies.rectangle(x, y, w, h, { ...common, chamfer: { radius: Math.min(8, h / 4) } })
+    Matter.Body.setStatic(body, true)
+    Matter.Composite.add(this.engine.world, body)
+    const piece: Piece = { el: node, clone: node, body, w, h, label, released: false, loose: true }
+    this.pieces.push(piece)
+    this.release(piece, vx, vy, spin)
+    return piece
+  }
+
   release(p: Piece, vx = 0, vy = 0, spin = 0) {
     if (p.released) return
     p.released = true
@@ -160,7 +212,7 @@ export class PileEngine {
     }
   }
 
-  /** Pieces whose bounds touch a circle — used for Verity's wrecking pass. */
+  /** Pieces whose bounds touch a circle — used for the guide's wrecking pass. */
   piecesNear(x: number, y: number, r: number) {
     return this.pieces.filter((p) => {
       if (p.released) return false
@@ -323,7 +375,7 @@ export class PileEngine {
     if (this.stage) this.stage.style.cursor = ''
   }
 
-  /** Nudge every resting piece — used when Verity slams into the floor. */
+  /** Nudge every resting piece — used when the guide slams into the floor. */
   quake(power = 6) {
     for (const p of this.pieces) {
       if (!p.released) continue
@@ -344,6 +396,12 @@ export class PileEngine {
     }
     const starts = this.pieces.map((p) => {
       const angle = p.released ? p.body.angle : 0
+      if (p.loose) {
+        // nothing to go back to: it drops out of the bottom of the screen
+        const x0 = p.body.position.x - p.w / 2
+        const y0 = p.body.position.y - p.h / 2
+        return { p, x0, y0, a0: angle, x1: x0 + (Math.random() - 0.5) * 160, y1: window.innerHeight + p.h + 40, a1: angle + (Math.random() - 0.5) * 2.4 }
+      }
       const turns = Math.round(angle / (Math.PI * 2)) * Math.PI * 2
       const target = p.el.getBoundingClientRect()
       return {
@@ -368,6 +426,7 @@ export class PileEngine {
             const y = s.y0 + (s.y1 - s.y0) * k - Math.sin(local * Math.PI) * 60
             const a = s.a0 + (s.a1 - s.a0) * k
             s.p.clone.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${a}rad)`
+            if (s.p.loose) s.p.clone.style.opacity = String(1 - k * 0.7)
           })
         },
         { ease: (t) => t, signal },

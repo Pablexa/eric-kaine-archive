@@ -1,0 +1,66 @@
+/* Protocol 01 wreckage: real photos that fall into the pile like printed
+   MySpace stickers, plus the "underground news" leak alert. */
+
+.ks-pile-photo {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 4px 0;
+  background: #fff;
+  border: 4px ridge var(--ks-edge, #ffff00);
+  box-shadow: 4px 5px 0 #000;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive;
+  user-select: none;
+}
+.ks-pile-photo img {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  object-fit: cover;
+  background: #222;
+  filter: saturate(1.6) contrast(1.15);
+  -webkit-user-drag: none;
+}
+.ks-pile-photo span {
+  display: block;
+  padding: 2px 0 3px;
+  overflow: hidden;
+  color: #000;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ks-pile-photo[data-tone='1'] { --ks-edge: #ff00cc; background: #00ff66; }
+.ks-pile-photo[data-tone='2'] { --ks-edge: #00e5ff; background: #ff6600; }
+.ks-pile-photo[data-tone='3'] { --ks-edge: #39ff14; background: #ffff00; }
+.ks-pile-photo[data-tone='4'] { --ks-edge: #ff2a2a; background: #c0c0c0; }
+
+.ks-leak-alert {
+  font-family: Impact, 'Haettenschweiler', 'Arial Narrow Bold', 'Arial Black', sans-serif;
+  color: #ffff00;
+  background: #d00000;
+  border: 5px double #ffff00;
+  box-shadow: 6px 6px 0 #000, 0 0 0 3px #000;
+  text-shadow: 2px 2px 0 #000;
+  letter-spacing: 0.02em;
+}
+.ks-leak-alert small {
+  display: block;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+}
+.ks-leak-alert .ks-blink {
+  animation: ks-collapse-blink 0.9s steps(2, start) infinite;
+}
+@keyframes ks-collapse-blink {
+  to { visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ks-leak-alert .ks-blink { animation: none; }
+}

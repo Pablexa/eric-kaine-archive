@@ -219,13 +219,13 @@ function HudContent({ hazard }: { hazard: boolean }) {
       <div className="flex items-center gap-1.5 sm:gap-2">
         <dl className="hidden items-center gap-4 pr-2 sm:flex" aria-label="Fame telemetry">
           <div className="flex items-baseline gap-1.5">
-            <dt className="pixel text-[12px] text-pixel/50">SUBS</dt>
+            <dt className="pixel text-[12px] text-pixel/50">FANS</dt>
             <dd className={`pixel text-[16px] tabular-nums ${state.plusSubs ? 'text-alarm' : 'text-pixel'}`} data-testid="hud-subs">
               <Scramble text={subs} duration={500} />
             </dd>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <dt className="pixel text-[12px] text-pixel/50">VIEWS</dt>
+            <dt className="pixel text-[12px] text-pixel/50">PLAYS</dt>
             <dd className="pixel text-[16px] tabular-nums text-pixel" data-testid="hud-views">
               {state.views.toLocaleString('en-US')}
             </dd>

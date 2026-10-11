@@ -9,19 +9,28 @@ import { sfx } from '../../../lib/audio/sfx'
 import { pointer } from '../../../lib/interactions/pointer'
 import { clamp, rand, wait } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
-import { Icon } from '../../shared/Icon'
+import { artistMedia, characterMedia, objectMedia } from '../../../lib/assets/realMedia'
+import './ButtonScene.css'
 
 /**
- * Protocol 03 — a callback to the giant red SUBSCRIBE plate on Eric's channel
- * banner. The same joke four times, escalating: it dodges, Verity shields it,
- * it splits into decoys, and then… it doesn't do anything at all.
+ * Protocol 03 — one giant FOLLOW button on a 2008 underground profile page.
+ * Eric Kaineity cannot let anyone follow Eric (one follower is basically
+ * mainstream). The same joke four times, escalating: it dodges, Eric Kaineity
+ * shields it, it splits into bootleg decoys, and then… it doesn't do anything at all.
  */
 
 type Stage = 'enter' | 'dodge' | 'shield' | 'shell' | 'calm' | 'pressed'
 
-const DODGE_LINES = ['nope.', 'no.', 'it’s shy.', 'STOP CHASING IT.']
-const WRONG_LINES = ['decoy. obviously.', 'wrong. so wrong.', 'that one was me in a costume.']
+const DODGE_LINES = ['nope.', 'no.', 'it’s gatekept.', 'STOP CHASING IT.']
+const WRONG_LINES = ['bootleg. obviously.', 'wrong. that one is a fake leak.', 'that one was me in a costume.']
 const IDLE_LINES = ['…why aren’t you pressing it.', 'is this reverse psychology.', 'it’s working. please just press it.']
+
+/** Every shell-game decoy is a bootleg follow button with somebody else's photo on it. */
+const DECOY_FACES = [artistMedia.bleood, artistMedia.slayr, artistMedia.osamason, artistMedia.carti, artistMedia.jaydes, artistMedia.slimey]
+const DECOY_STICKERS = ['100% REAL', 'REAL (FR)', 'NOT A BOOTLEG', 'OFFICIAL', 'TRUST ME', 'NO VIRUS']
+
+const NEWS =
+  ' +++ eric kaine is one click away from 1.5K + 1 followers +++ eric kaineity says absolutely not +++ do not join the gatekept discord +++ not trying to be famous +++ this button has been gatekept since 2008 +++ slatt +++'
 
 const size = () => {
   const w = clamp(window.innerWidth * 0.34, 240, 440)
@@ -105,7 +114,7 @@ export function ButtonScene() {
     return () => window.removeEventListener('pointermove', onMove)
   }, [stage, relocate])
 
-  // shield: Verity parks on the button; drag her away (or press her with the keyboard)
+  // shield: Eric Kaineity parks on the button; drag him away (or press him with the keyboard)
   useEffect(() => {
     if (stage !== 'shield') return
     const c = centerPos()
@@ -113,8 +122,8 @@ export function ButtonScene() {
     const big = Math.max(dim.h * 1.9, 110)
     void verity.moveTo(c.x, c.y, { size: big, duration: 0.7, ease: 'spring' }).catch(() => {})
     verity.setInteractive(true)
-    void chat.say('over my dead orb.', { hold: 200 }).catch(() => {})
-    objective.set('Get Verity off the button')
+    void chat.say('over my dead avatar.', { hold: 200 }).catch(() => {})
+    objective.set('Get Eric Kaineity off the button')
     let dragging = false
     let moved = false
     const done = () => {
@@ -189,7 +198,7 @@ export function ButtonScene() {
     await say('there is one button on this website i cannot let you press.')
     setStage('dodge')
     sfx.thud(0.9)
-    objective.set('Press the button')
+    objective.set('Press the FOLLOW button')
 
     // 1 → 2: dodge until the shield
     await new Promise<void>((resolve) => {
@@ -203,8 +212,8 @@ export function ButtonScene() {
     dispatch({ type: 'MOOD', mood: 'annoyed' })
 
     // 3: the shell game
-    objective.set('Find the real button')
-    await say('fine. then find the real one.', { hold: 300 })
+    objective.set('Find the real FOLLOW button')
+    await say('fine. then find the real one. the rest are bootlegs.', { hold: 300 })
     const real = Math.floor(Math.random() * 5)
     // Listen before the decoys appear: the real one may be found mid-shuffle.
     const found = new Promise<void>((resolve) => (shellResolve.current = resolve))
@@ -217,7 +226,7 @@ export function ButtonScene() {
     shuffling.abort()
 
     // 4: nothing happens
-    // Listen before the button returns: pressing it before Verity finishes talking still counts.
+    // Listen before the button returns: pressing it before Eric Kaineity finishes talking still counts.
     let pressedEarly = false
     const pressed = new Promise<void>((resolve) => (pressedResolve.current = () => { pressedEarly = true; resolve() }))
     setDecoys([])
@@ -287,7 +296,8 @@ export function ButtonScene() {
   }
 
   return (
-    <div className="absolute inset-0" data-testid="button-scene">
+    <div className="bt3-scene absolute inset-0" data-testid="button-scene">
+      <ProfileDecor />
       <AnimatePresence>
         {stage !== 'enter' && stage !== 'shell' ? (
           <SubscribeButton
@@ -324,6 +334,9 @@ export function ButtonScene() {
                   w={p.w}
                   ringing={d.real}
                   loudRing={d.real && wrong >= 2}
+                  photo={DECOY_FACES[d.id % DECOY_FACES.length]}
+                  sticker={DECOY_STICKERS[d.id % DECOY_STICKERS.length]}
+                  tilt={(d.id % 2 ? 1 : -1) * (1.5 + (d.id % 3))}
                   onClick={() => void onPick(d)}
                   testId={d.real ? 'decoy-real' : 'decoy'}
                 />
@@ -331,6 +344,78 @@ export function ButtonScene() {
             })
           : null}
       </AnimatePresence>
+    </div>
+  )
+}
+
+/** The 2008 profile page around the button. Pure decoration: nothing here takes clicks. */
+function ProfileDecor() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className="bt3-wallpaper" />
+
+      <figure className="bt3-decor bt3-polaroid hidden sm:block" style={{ left: '2.5%', top: 150, rotate: '-8deg' }}>
+        <span className="bt3-tape" />
+        <img src={objectMedia.cheese.src} alt="" draggable={false} />
+        <figcaption>cheese (real)</figcaption>
+      </figure>
+      <figure className="bt3-decor bt3-polaroid hidden sm:block" style={{ right: '2.5%', top: 138, rotate: '7deg' }}>
+        <span className="bt3-tape" />
+        <img src={objectMedia.seal.src} alt="" draggable={false} />
+        <figcaption>seal of approval</figcaption>
+      </figure>
+      <figure className="bt3-decor bt3-polaroid hidden md:block" style={{ right: '3.5%', top: '60%', rotate: '-5deg' }}>
+        <span className="bt3-tape" />
+        <img src={characterMedia.ericPfp.src} alt="" draggable={false} />
+        <figcaption>eric kaine (do NOT follow)</figcaption>
+      </figure>
+
+      <span className="bt3-decor bt3-fake-dl hidden sm:inline-flex" style={{ left: '3%', top: '64%', rotate: '-4deg' }}>
+        <span>⬇</span>
+        <span>
+          DOWNLOAD LEAK
+          <small>free · no virus · 320kbps</small>
+        </span>
+      </span>
+      <span className="bt3-decor bt3-fake-dl bt3-alt hidden md:inline-flex" style={{ left: '30%', top: '22%', rotate: '3deg' }}>
+        <span>★</span>
+        <span>
+          GET 1000 FOLLOWERS FREE.exe
+          <small>click here!!! (dont)</small>
+        </span>
+      </span>
+
+      <span className="bt3-decor bt3-word bt3-word-a bt3-blink hidden sm:block" style={{ right: '24%', top: '21%', rotate: '6deg' }}>
+        LEAK ALERT!!
+      </span>
+      <span className="bt3-decor bt3-word bt3-word-b hidden md:block" style={{ right: '26%', top: '76%', rotate: '-3deg' }}>
+        not trying to be famous
+      </span>
+      <span className="bt3-decor bt3-word bt3-word-c hidden md:block" style={{ left: '40%', top: '84%', rotate: '2deg' }}>
+        GATEKEPT SINCE 2008
+      </span>
+
+      <div className="bt3-decor hidden sm:block" style={{ right: 14, bottom: 34 }}>
+        <div className="bt3-counter">
+          <span>you are visitor</span>
+          <span className="bt3-digits">
+            {'0001501'.split('').map((n, i) => (
+              <span key={i}>{n}</span>
+            ))}
+          </span>
+          <span>best viewed @ 800x600</span>
+        </div>
+      </div>
+
+      <div className="bt3-news">
+        <span className="bt3-news-label">LEAK ALERT</span>
+        <div className="bt3-marquee">
+          <span className="bt3-marquee-track">
+            {NEWS}
+            {NEWS}
+          </span>
+        </div>
+      </div>
     </div>
   )
 }
@@ -344,16 +429,43 @@ interface SubscribeProps {
   ringing?: boolean
   loudRing?: boolean
   testId?: string
+  /** The real photo on the button. Defaults to Eric Kaine's own avatar. */
+  photo?: { src: string; alt: string }
+  /** Tilted corner sticker. */
+  sticker?: string
+  /** Static tilt in degrees (never animated, so the button holds still for clicks). */
+  tilt?: number
   onClick?: (e: React.MouseEvent) => void
   onPointerDown?: (e: React.PointerEvent) => void
   onKeyDown?: (e: React.KeyboardEvent) => void
 }
 
+/**
+ * The giant underground FOLLOW button (the export keeps its old name so
+ * nothing downstream breaks). `subscribed` means "followed".
+ */
 export const SubscribeButton = forwardRef<HTMLButtonElement, SubscribeProps>(function SubscribeButton(
-  { x, y, w, subscribed, disabled, ringing, loudRing, testId = 'subscribe', onClick, onPointerDown, onKeyDown },
+  {
+    x,
+    y,
+    w,
+    subscribed,
+    disabled,
+    ringing,
+    loudRing,
+    testId = 'subscribe',
+    photo = characterMedia.ericPfp,
+    sticker = '100% REAL',
+    tilt = -1.5,
+    onClick,
+    onPointerDown,
+    onKeyDown,
+  },
   ref,
 ) {
   const h = w * 0.27
+  // small decoys drop the small print so the word FOLLOW stays readable
+  const compact = h < 70
   return (
     <motion.button
       ref={ref}
@@ -362,27 +474,29 @@ export const SubscribeButton = forwardRef<HTMLButtonElement, SubscribeProps>(fun
       onPointerDown={onPointerDown}
       onKeyDown={onKeyDown}
       disabled={disabled}
-      aria-label={subscribed ? 'Subscribed' : 'Subscribe'}
-      className={`absolute left-0 top-0 flex touch-none select-none items-center justify-center gap-[0.45em] rounded-[0.55em] font-display font-black uppercase leading-none tracking-[-0.02em] [font-stretch:110%] focus-visible:outline-4 focus-visible:outline-verity ${
-        subscribed ? 'bg-[#3a3a3a] text-pixel/80 shadow-[0_0.18em_0_#1d1d1d]' : 'bg-signal text-white shadow-[0_0.18em_0_#8f150f,0_1.4em_3em_-0.8em_rgba(232,48,43,0.65)]'
-      }`}
+      aria-label={subscribed ? 'Following Eric Kaine' : 'Follow Eric Kaine'}
+      className="bt3-follow absolute left-0 top-0 touch-none select-none"
       style={{ width: w, height: h, fontSize: h * 0.42 }}
-      initial={{ x: x - w / 2, y: -h * 2, opacity: 0 }}
-      animate={{ x: x - w / 2, y: y - h / 2, opacity: 1 }}
+      initial={{ x: x - w / 2, y: -h * 2, opacity: 0, rotate: tilt }}
+      animate={{ x: x - w / 2, y: y - h / 2, opacity: 1, rotate: tilt }}
       exit={{ scale: 0, opacity: 0, transition: { duration: 0.25 } }}
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
       whileTap={{ y: y - h / 2 + 4 }}
       data-testid={testId}
+      data-followed={subscribed ? 'true' : 'false'}
     >
       <motion.span
-        className="grid h-[1.25em] w-[1.25em] place-items-center rounded-full bg-white text-signal"
+        className="bt3-photo"
         animate={ringing || subscribed ? { rotate: [0, -16, 14, -10, 6, 0] } : { rotate: 0 }}
         transition={ringing ? { duration: loudRing ? 0.5 : 0.6, repeat: Infinity, repeatDelay: loudRing ? 0.25 : 1.2 } : { duration: 0.7 }}
       >
-        <Icon name="bell" size={h * 0.36} strokeWidth={2.2} className={subscribed ? 'text-[#3a3a3a]' : ''} />
+        <img src={photo.src} alt="" draggable={false} />
       </motion.span>
-      {subscribed ? 'Subscribed' : 'Subscribe'}
+      <span className="bt3-label">
+        <span className="bt3-main">{subscribed ? 'Following' : 'Follow'}</span>
+        {compact ? null : <span className="bt3-sub">{subscribed ? 'welcome to the gatekept discord' : '+ join the gatekept discord'}</span>}
+      </span>
+      {h < 48 || subscribed ? null : <span className="bt3-sticker">{sticker}</span>}
     </motion.button>
   )
 })
-

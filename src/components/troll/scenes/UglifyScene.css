@@ -1,0 +1,174 @@
+/* Protocol 04 "MySpace era": the archive becomes a 2008 underground rap fan page. */
+
+.ug4-scene {
+  --ug4-pink: #ff2bd6;
+  --ug4-lime: #39ff14;
+  --ug4-yellow: #ffff00;
+  --ug4-cyan: #00e5ff;
+  --ug4-orange: #ff5500;
+  --ug4-myspace: #6699cc;
+  --ug4-myspace-lo: #003399;
+  --ug4-comic: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive;
+  --ug4-impact: Impact, 'Haettenschweiler', 'Arial Narrow Bold', 'Arial Black', sans-serif;
+  --ug4-verdana: Verdana, Tahoma, Geneva, sans-serif;
+}
+
+/* ---------- the MySpace profile box ---------- */
+
+.ug4-profile {
+  background: #fff;
+  border: 2px solid var(--ug4-myspace-lo);
+  box-shadow: 6px 6px 0 var(--ug4-lime), 6px 6px 0 3px #000;
+  color: #000;
+  font-family: var(--ug4-verdana);
+  rotate: 2deg;
+}
+.ug4-profile-name {
+  padding: 4px 8px 2px;
+  font: 700 18px / 1.1 var(--ug4-impact);
+  letter-spacing: 0.01em;
+  color: #000;
+}
+.ug4-profile-body {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 8px;
+  padding: 2px 8px 6px;
+}
+.ug4-profile-body img {
+  width: 76px;
+  height: 76px;
+  object-fit: cover;
+  border: 1px solid #999;
+}
+.ug4-profile-body p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.ug4-quote {
+  color: #cc0000;
+  font-family: var(--ug4-comic);
+  font-weight: 700;
+}
+.ug4-online {
+  color: #00a000;
+  font-weight: 700;
+  animation: ug4-blink 1s steps(1) infinite;
+}
+.ug4-contact {
+  margin: 0 8px 8px;
+  border: 1px solid var(--ug4-myspace);
+  font-size: 10px;
+}
+.ug4-contact-head {
+  background: var(--ug4-myspace);
+  color: #fff;
+  padding: 2px 6px;
+  font-weight: 700;
+}
+.ug4-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 6px;
+  padding: 3px 6px;
+  color: var(--ug4-myspace-lo);
+  text-decoration: underline;
+}
+
+/* ---------- FREE LEAKS fake download buttons ---------- */
+
+.ug4-leak {
+  display: block;
+  width: 100%;
+  padding: 6px 10px 5px;
+  background: linear-gradient(180deg, #7dff5a, var(--ug4-lime) 45%, #19b300);
+  border: 4px outset #e8ffe0;
+  box-shadow: 4px 4px 0 #000;
+  color: #000;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 120ms ease;
+}
+.ug4-leak:nth-child(2) {
+  background: linear-gradient(180deg, #ffb27a, var(--ug4-orange) 50%, #c23d00);
+  border-color: #ffd6bd;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  rotate: -2deg;
+}
+.ug4-leak:nth-child(3) {
+  background: linear-gradient(180deg, #ff9cf0, var(--ug4-pink) 50%, #a3008a);
+  border-color: #ffd1f7;
+  color: var(--ug4-yellow);
+  text-shadow: 1px 1px 0 #000;
+  rotate: 1.5deg;
+}
+.ug4-leak:hover,
+.ug4-leak:focus-visible {
+  transform: scale(1.04);
+  outline: 3px dashed var(--ug4-yellow);
+  outline-offset: 2px;
+}
+.ug4-leak:active {
+  border-style: inset;
+  transform: scale(0.98);
+}
+.ug4-leak-label {
+  display: block;
+  font: 400 19px / 1 var(--ug4-impact);
+  letter-spacing: 0.02em;
+  animation: ug4-blink 1.1s steps(1) infinite;
+}
+.ug4-leak[data-busy] .ug4-leak-label {
+  animation: none;
+}
+.ug4-leak-sub {
+  display: block;
+  margin-top: 2px;
+  font: 700 10px / 1.2 var(--ug4-comic);
+}
+
+/* ---------- the step stamp ---------- */
+
+.ug4-stamp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(86vw, 420px);
+  padding: 10px 14px 10px 10px;
+  background: var(--ug4-yellow);
+  border: 5px ridge var(--ug4-pink);
+  box-shadow: 10px 10px 0 #000;
+  color: #000;
+}
+.ug4-stamp img {
+  width: clamp(72px, 9vw, 112px);
+  aspect-ratio: 1;
+  flex: none;
+  object-fit: cover;
+  border: 3px solid #000;
+  rotate: -4deg;
+}
+.ug4-stamp-label {
+  margin: 0;
+  font: 400 clamp(26px, 3.4vw, 40px) / 0.95 var(--ug4-impact);
+  color: #ff0000;
+  -webkit-text-stroke: 1px #000;
+  text-shadow: 3px 3px 0 #000;
+}
+.ug4-stamp-note {
+  margin: 6px 0 0;
+  font: 700 clamp(12px, 1.2vw, 15px) / 1.2 var(--ug4-comic);
+  color: #000080;
+}
+.ug4-stamp-check {
+  color: var(--ug4-lime);
+  -webkit-text-stroke: 1px #000;
+}
+
+@keyframes ug4-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}

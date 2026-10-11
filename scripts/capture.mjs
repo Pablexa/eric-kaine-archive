@@ -85,7 +85,7 @@ async function playButton(page, prefix) {
     await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 4 })
     await sleep(500)
     const shieldUp = await page.getByTestId('objective').textContent().catch(() => '')
-    if (shieldUp?.includes('Verity')) break
+    if (shieldUp?.includes('Kaineity')) break
   }
   await sleep(1200)
   if (prefix) await shot(page, `${prefix}-shield`)

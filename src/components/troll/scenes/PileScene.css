@@ -1,0 +1,150 @@
+/* Protocol 01 chrome: the wreckage is now a 2008 profile page. Every piece
+   of it ignores the pointer so the whole stage stays draggable. */
+
+.ks-pile-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: Impact, 'Haettenschweiler', 'Arial Narrow Bold', 'Arial Black', sans-serif;
+  font-size: clamp(14px, 1.6vw, 20px);
+  letter-spacing: 0.04em;
+  color: #ffff00;
+  background: #e00000;
+  border-block: 3px solid #000;
+  box-shadow: 0 4px 0 #ff00cc;
+  text-shadow: 2px 2px 0 #000;
+}
+.ks-pile-marquee > span {
+  display: inline-block;
+  padding: 3px 0 2px;
+  animation: ks-pile-marquee 22s linear infinite;
+}
+
+.ks-pile-box {
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive;
+  color: #fff;
+  background: #1a0033;
+  box-shadow: 6px 7px 0 #000;
+}
+.ks-pile-box__bar {
+  padding: 3px 8px;
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 1px 1px 0 #000;
+  border-bottom: 3px solid #000;
+}
+
+.ks-top8 {
+  border: 5px ridge #39ff14;
+  transform: rotate(-2deg);
+}
+.ks-top8 .ks-pile-box__bar {
+  background: #6698cb;
+  color: #ff6600;
+  text-shadow: 1px 1px 0 #fff;
+}
+.ks-top8 figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 2px outset #c0c0c0;
+  background: #000;
+  filter: saturate(1.5) contrast(1.1);
+}
+.ks-top8 figcaption {
+  margin-top: 1px;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #00e5ff;
+  text-decoration: underline;
+}
+
+.ks-player {
+  border: 5px ridge #ffff00;
+  transform: rotate(2.5deg);
+}
+.ks-player .ks-pile-box__bar {
+  background: #ff00cc;
+  color: #fff;
+}
+.ks-player__art {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 3px outset #c0c0c0;
+  background: #000;
+  filter: saturate(1.6);
+}
+.ks-player__track {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #39ff14;
+  word-break: break-all;
+}
+.ks-player__progress {
+  height: 10px;
+  background: #000;
+  border: 2px inset #808080;
+  overflow: hidden;
+}
+.ks-player__progress > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: repeating-linear-gradient(90deg, #39ff14 0 8px, #00b33c 8px 12px);
+  transform-origin: left center;
+  animation: ks-pile-buffer 9s steps(18) infinite;
+}
+.ks-player__counter {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  color: #ff2a2a;
+  background: #000;
+  border: 2px inset #808080;
+  padding: 0 5px;
+  letter-spacing: 0.1em;
+}
+.ks-player__download {
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: center;
+  color: #000;
+  background: linear-gradient(#ffff66, #ffcc00);
+  border: 3px outset #ffee88;
+  padding: 4px 6px;
+}
+.ks-player__blink {
+  animation: ks-pile-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ks-pile-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes ks-pile-buffer {
+  from { transform: scaleX(0.04); }
+  to { transform: scaleX(0.97); }
+}
+@keyframes ks-pile-blink {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-pile-marquee > span,
+  .ks-player__blink {
+    animation: none;
+  }
+  .ks-player__progress > span {
+    animation: none;
+    transform: scaleX(0.62);
+  }
+}
