@@ -1,0 +1,51 @@
+.underground-3d {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  overflow: hidden;
+  pointer-events: none;
+}
+.underground-3d-canvas, .underground-3d-canvas canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.underground-3d-wordart {
+  position: absolute;
+  font: 900 clamp(16px, 2.2vw, 32px)/.88 Impact, 'Arial Black', sans-serif;
+  letter-spacing: -1px;
+  color: #faff00;
+  text-align: center;
+  -webkit-text-stroke: 1px #f000d8;
+  text-shadow: 3px 3px #002dff, 5px 5px #000;
+  transform: skewY(-8deg) rotate(-13deg);
+}
+.underground-3d-wordart-left { left: 7px; top: 17%; }
+.underground-3d-wordart-right { right: 7px; top: 30%; transform: skewY(8deg) rotate(12deg); }
+.underground-3d-sticker {
+  position: absolute;
+  bottom: 7px;
+  right: 5px;
+  max-width: 170px;
+  padding: 3px 5px;
+  border: 4px ridge #ff03d9;
+  background: #00ff2a;
+  color: #000;
+  font: 900 11px/.98 'Comic Sans MS', cursive;
+  transform: rotate(-5deg);
+}
+.underground-3d-fallback > span { position: absolute; font-size: clamp(70px, 12vw, 170px); filter: drop-shadow(7px 7px #ff00d4); }
+.underground-3d-burger { left: -15px; top: 24%; transform: rotate(-25deg); }
+.underground-3d-cheese { left: -10px; bottom: 13%; transform: rotate(20deg); }
+.underground-3d-cup { right: -20px; bottom: 12%; transform: rotate(-15deg); }
+.underground-3d-photo { position: absolute; width: clamp(80px, 12vw, 150px); height: clamp(100px, 15vw, 180px); object-fit: cover; border: 7px ridge #00ff2a; box-shadow: 6px 6px #ff00d4; }
+.underground-3d-photo-0 { right: 5px; top: 19%; transform: perspective(400px) rotateY(-30deg) rotate(12deg); }
+.underground-3d-photo-1 { left: 3px; top: 52%; transform: perspective(400px) rotateY(35deg) rotate(-10deg); }
+@media (max-width: 639px) {
+  .underground-3d-wordart { font-size: 15px; max-width: 95px; }
+  .underground-3d-wordart-left { top: 26%; }
+  .underground-3d-wordart-right { top: 24%; }
+  .underground-3d-sticker { max-width: 112px; font-size: 9px; }
+}

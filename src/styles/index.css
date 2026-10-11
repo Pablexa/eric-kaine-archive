@@ -1,0 +1,511 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono/index.css';
+@import '@fontsource-variable/pixelify-sans/index.css';
+@import '@fontsource/instrument-serif/latin-400.css';
+@import '@fontsource/instrument-serif/latin-400-italic.css';
+
+/* ───────────────────────── Design tokens ───────────────────────── */
+
+@theme {
+  /* Act I — the archive */
+  --color-ink: #0a0a0b;
+  --color-ink-2: #111113;
+  --color-ink-3: #19191c;
+  --color-ink-4: #232327;
+  --color-paper: #edebe6;
+  --color-paper-2: #c9c6bf;
+  --color-muted: #8e8b84;
+  --color-dim: #5e5b56;
+  --color-line: rgb(237 235 230 / 0.09);
+  --color-line-2: rgb(237 235 230 / 0.16);
+  /* sampled from the channel banner's red SUBSCRIBE plate */
+  --color-signal: #e8302b;
+  --color-signal-2: #ff4b3e;
+
+  /* Act II — Verity */
+  --color-verity: #ffd21f;
+  --color-verity-hi: #fff3a6;
+  --color-verity-lo: #d99a00;
+  --color-hazard: #0b0a07;
+  --color-alarm: #ff4128;
+  --color-chat: rgb(0 0 0 / 0.55);
+  --color-pixel: #f4f1e6;
+
+  --font-display: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+  --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-cine: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+:root {
+  --gutter: clamp(16px, 3.2vw, 40px);
+  --maxw: 1320px;
+  --header-h: 72px;
+  color-scheme: dark;
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+
+@layer base {
+html {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.is-locked {
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-stretch: 100%;
+  background: var(--color-ink);
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-paper);
+  outline-offset: 3px;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+}
+
+/* ───────────────────────── Layout helpers ───────────────────────── */
+
+@utility shell {
+  width: 100%;
+  max-width: calc(var(--maxw) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(12px, 1.6vw, 24px);
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.045em;
+  line-height: 0.84;
+}
+
+@utility pixel {
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+@utility hazard {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-verity) 0 14px,
+    var(--color-hazard) 14px 28px
+  );
+}
+
+@layer components {
+/* Hairline column rules — a quiet nod to the exposed grids of film portfolios. */
+.column-rules {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.column-rules > div {
+  height: 100%;
+  border-inline: 1px solid rgb(237 235 230 / 0.035);
+}
+
+/* Film grain */
+.grain {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 70;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 1.2s steps(6) infinite;
+}
+
+/* ───────────────────────── Media ───────────────────────── */
+
+.thumb-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-ink-3);
+  isolation: isolate;
+}
+.thumb-frame > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 900ms var(--ease-out-expo), filter 600ms var(--ease-out-expo);
+}
+/* hqdefault ships 4:3 with letterbox bars: scale to crop them away */
+.thumb-frame > img.is-letterboxed {
+  transform: scale(1.34);
+}
+.group:hover .thumb-frame > img,
+.group:focus-visible .thumb-frame > img {
+  transform: scale(1.045);
+}
+.group:hover .thumb-frame > img.is-letterboxed,
+.group:focus-visible .thumb-frame > img.is-letterboxed {
+  transform: scale(1.4);
+}
+
+/* Underline sweep for editorial links */
+.link-sweep {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 450ms var(--ease-out-expo);
+}
+.group:hover .link-sweep,
+.link-sweep:hover,
+.group:focus-visible .link-sweep {
+  background-size: 100% 1px;
+}
+
+/* ───────────────────────── The period ───────────────────────── */
+/* The recurring yellow period. It is just punctuation. For now. */
+.period {
+  display: inline-block;
+  width: 0.2em;
+  height: 0.2em;
+  margin-left: 0.04em;
+  border-radius: 999px;
+  background: radial-gradient(circle at 36% 30%, var(--color-verity-hi), var(--color-verity) 45%, var(--color-verity-lo));
+  vertical-align: baseline;
+  position: relative;
+}
+
+/* ───────────────────────── Redaction (cooperative path) ───────────────────────── */
+
+[data-redact] {
+  position: relative;
+}
+[data-redacted] {
+  cursor: default;
+}
+[data-redacted]::after {
+  content: 'GATEKEPT';
+  position: absolute;
+  inset: -2px -4px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-pixel);
+  font-size: clamp(10px, 0.9em, 28px);
+  letter-spacing: 0.08em;
+  color: var(--color-verity);
+  background: #050505;
+  z-index: 5;
+  animation: redact 520ms var(--ease-out-expo) both;
+  transform-origin: left center;
+  pointer-events: none;
+}
+.is-redacting [data-redact]:not([data-redacted]) {
+  cursor: crosshair;
+  outline: 1px dashed rgb(255 210 31 / 0.55);
+  outline-offset: 4px;
+}
+
+/* ───────────────────────── Troll world ───────────────────────── */
+
+.troll-backdrop {
+  background-color: var(--color-hazard);
+  background-image:
+    linear-gradient(rgb(255 210 31 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 210 31 / 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.pixel-btn {
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  line-height: 1;
+  padding: 12px 18px 13px;
+  color: var(--color-pixel);
+  background: #2b2b2b;
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 rgb(255 255 255 / 0.28),
+    inset -2px -3px 0 rgb(0 0 0 / 0.45);
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.55);
+  transition: background 120ms steps(2), transform 120ms steps(2);
+  touch-action: manipulation;
+}
+.pixel-btn:hover,
+.pixel-btn:focus-visible {
+  background: #3a3a3a;
+  outline: 2px solid var(--color-verity);
+  outline-offset: 0;
+}
+.pixel-btn:active {
+  transform: translateY(2px);
+}
+.pixel-btn[data-tone='yellow'] {
+  background: var(--color-verity);
+  color: #1a1400;
+  text-shadow: none;
+}
+.pixel-btn[data-tone='yellow']:hover,
+.pixel-btn[data-tone='yellow']:focus-visible {
+  background: #ffe066;
+  outline-color: var(--color-pixel);
+}
+
+.chat-line {
+  font-family: var(--font-pixel);
+  background: var(--color-chat);
+  color: var(--color-pixel);
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.6);
+}
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes redact {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes caret {
+  50% { opacity: 0; }
+}
+
+/* ───────────────────────── Act III: the uglification ─────────────────────────
+   Unlayered + !important on purpose: these rules exist to defeat the design
+   system. Every one is keyed to an html.ug-* class that chaos.reset() removes. */
+
+html.ug-font main *,
+html.ug-font footer * {
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', 'Segoe Print', cursive !important;
+  font-stretch: 100% !important;
+  letter-spacing: 0 !important;
+  font-style: normal !important;
+}
+html.ug-font main h1,
+html.ug-font main h1 *,
+html.ug-font main h2,
+html.ug-font main h2 * {
+  font-family: Impact, 'Haettenschweiler', 'Arial Black', sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+}
+html.ug-font main p {
+  color: #00ff66 !important;
+  text-shadow: 2px 2px 0 #ff00cc;
+}
+html.ug-font main blockquote {
+  color: #ffff00 !important;
+  text-shadow: 3px 3px 0 #ff0000;
+}
+
+html.ug-rainbow,
+html.ug-rainbow body {
+  background-color: #000 !important;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgb(255 255 255 / 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgb(255 255 0 / 0.9) 0 1.5px, transparent 2.5px),
+    repeating-linear-gradient(45deg, #ff00cc 0 60px, #ffcc00 60px 120px, #00ffcc 120px 180px, #3300ff 180px 240px) !important;
+  background-size: 90px 90px, 130px 130px, 340px 340px !important;
+  background-attachment: fixed !important;
+  animation: ug-slide 9s linear infinite;
+}
+html.ug-rainbow main section:not(#top),
+html.ug-rainbow footer {
+  background: rgb(0 0 0 / 0.42) !important;
+}
+html.ug-rainbow #top > [aria-hidden='true'],
+html.ug-rainbow .grain {
+  display: none !important;
+}
+@keyframes ug-slide {
+  to { background-position: 90px 90px, -130px 130px, 340px 0; }
+}
+
+html.ug-wordart main h1 [data-physics^='letter'] {
+  background: linear-gradient(180deg, #ff0000, #ff9900 20%, #ffff00 40%, #00ff00 60%, #0099ff 80%, #9900ff) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-stroke: 4px #000;
+  filter: drop-shadow(8px 8px 0 #000);
+}
+html.ug-wordart main h2 {
+  background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(5px 5px 0 #000);
+}
+
+html.ug-borders main img,
+html.ug-borders main .thumb-frame,
+html.ug-borders main iframe {
+  border: 7px ridge #c0c0c0 !important;
+  border-radius: 0 !important;
+}
+html.ug-borders main a,
+html.ug-borders footer a {
+  color: #4d6bff !important;
+  text-decoration: underline !important;
+}
+html.ug-borders main button {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border: 3px outset #fff !important;
+  border-radius: 0 !important;
+}
+
+html.ug-wobble main section > div > *:nth-child(odd),
+html.ug-wobble main h1,
+html.ug-wobble main li:nth-child(3n) {
+  animation: ug-wobble 1.7s ease-in-out infinite alternate;
+}
+html.ug-wobble main section > div > *:nth-child(even),
+html.ug-wobble main li:nth-child(3n + 1) {
+  animation: ug-wobble 2.3s ease-in-out infinite alternate-reverse;
+}
+@keyframes ug-wobble {
+  from { rotate: -2.5deg; scale: 0.98; }
+  to { rotate: 2.5deg; scale: 1.02; }
+}
+
+html.ug-cursor,
+html.ug-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ffd21f' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='11' cy='13' r='3.5' fill='%23fff'/%3E%3Ccircle cx='21' cy='13' r='3.5' fill='%23fff'/%3E%3Ccircle cx='12' cy='14' r='1.6'/%3E%3Ccircle cx='20' cy='12' r='1.6'/%3E%3Cpath d='M9 20 Q16 27 23 20' stroke='%23000' stroke-width='2' fill='none'/%3E%3C/svg%3E") 16 16, auto !important;
+}
+
+html.ug-tilt main,
+html.ug-tilt footer {
+  rotate: -3deg;
+  translate: 0 40px;
+  transition: rotate 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* the drum machine drives --kick (0 → 1 on every kick) */
+html.ug-beat main section {
+  scale: calc(1 + var(--kick, 0) * 0.035);
+}
+html.ug-beat main h1 [data-physics^='letter'] {
+  translate: 0 calc(var(--kick, 0) * -26px);
+}
+html.ug-beat .period {
+  scale: calc(1 + var(--kick, 0) * 0.8);
+}
+html.ug-drop main {
+  animation: ug-spin 7s linear infinite;
+  transform-origin: 50% 40vh;
+}
+/* shake main/footer, never body: a transformed body would capture every fixed layer */
+html.ug-drop main,
+html.ug-drop footer {
+  translate: calc(var(--kick, 0) * 9px) calc(var(--kick, 0) * -6px);
+}
+html.ug-drop main h1 [data-physics^='letter']:nth-child(odd) {
+  rotate: calc(var(--kick, 0) * 25deg);
+}
+@keyframes ug-spin {
+  to { rotate: 360deg; }
+}
+html.ug-upside main {
+  animation: none;
+  rotate: 180deg;
+}
+
+@keyframes dread-sway {
+  from { rotate: -5deg; }
+  to { rotate: 5deg; }
+}
+@keyframes ug-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes ug-spin-y {
+  to { transform: rotateY(360deg); }
+}
+
+/* Act IV: Bleoodity's record label has acquired the design system. */
+html.ug-vamp,
+html.ug-vamp body {
+  background-color: #130009 !important;
+  background-image: radial-gradient(ellipse at 25% 10%, #81001d 0, transparent 60%), repeating-linear-gradient(135deg, transparent 0 32px, #ff164014 32px 34px) !important;
+  background-size: cover !important;
+  animation: none;
+}
+html.ug-vamp main section:not(#top), html.ug-vamp footer { background: #150006b8 !important; }
+html.ug-vamp main p { color: #ffb4d4 !important; text-shadow: 2px 2px #66001b; }
+html.ug-vamp main h2 { background-image: linear-gradient(90deg, #ff1640, #ff9cde, #ff1640) !important; }
+html.ug-vamp main a { color: #ff75d1 !important; }
+html.ug-jelly main section > div { animation: ug-jelly 3.4s ease-in-out infinite alternate; transform-origin: center top; }
+@keyframes ug-jelly {
+  from { transform: skew(-1.5deg, 0.6deg) scaleX(0.985); }
+  to { transform: skew(1.5deg, -0.6deg) scaleX(1.015); }
+}
+
+/* ───────────────────────── Reduced motion ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .grain {
+    animation: none;
+  }
+}
