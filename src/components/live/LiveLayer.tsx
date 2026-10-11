@@ -6,6 +6,7 @@ import { useSfxState } from '../shared/useSfx'
 import {
   answer,
   callLevel,
+  chooseCallDevices,
   decline,
   devMessages,
   dismissMessage,
@@ -14,10 +15,12 @@ import {
   liveId,
   liveOnline,
   reportState,
+  setCallMuted,
   startLive,
   toggleMic,
   type DevMessage,
 } from '../../lib/live/client'
+import { DevicePicker } from './DevicePicker'
 
 /**
  * The live developer line, on top of everything (including the takeover):
@@ -121,6 +124,7 @@ function CallUi({ id }: { id: string | null }) {
   const call = useStore(liveCall)
   const reduce = useReducedMotion()
   const clock = useClock(call.phase === 'connected' ? call.since : null)
+  const [settings, setSettings] = useState(false)
 
   return (
     <AnimatePresence>
@@ -219,7 +223,31 @@ function CallUi({ id }: { id: string | null }) {
             >
               Hang up
             </button>
+            <button
+              type="button"
+              onClick={() => setCallMuted(!call.muted)}
+              disabled={call.mic !== 'on'}
+              aria-pressed={call.muted}
+              className={`px-2 py-2 font-display text-[13px] font-bold disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-paper ${call.muted ? 'bg-signal text-white' : 'border border-line-2 bg-ink-3 text-paper hover:bg-ink-4'}`}
+              data-testid="call-mute"
+            >
+              {call.muted ? '🔇 Muted' : 'Mute'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSettings((v) => !v)}
+              aria-expanded={settings}
+              className="border border-line-2 bg-ink-3 px-2 py-2 font-display text-[13px] font-bold text-paper hover:bg-ink-4 focus-visible:outline-2 focus-visible:outline-paper"
+              data-testid="call-audio"
+            >
+              ⚙ Audio
+            </button>
           </div>
+          {settings ? (
+            <div className="mt-3 border-t border-line-2 pt-3">
+              <DevicePicker lang="en" onChange={(next) => void chooseCallDevices(next)} testPrefix="call" />
+            </div>
+          ) : null}
         </motion.div>
       )}
 

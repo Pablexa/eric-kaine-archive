@@ -11,9 +11,9 @@ export function BleoodityFM() {
   const [playing, setPlaying] = useState(false)
   const [failed, setFailed] = useState(false)
 
-  // Volume only: never restarts playback.
+  // Follows the HUD volume slider (down to silence) and ducks under live calls; never restarts playback.
   useEffect(() => {
-    if (audio.current) audio.current.volume = Math.max(0.35, sound.volume) * 0.8 * sound.duck
+    if (audio.current) audio.current.volume = sound.volume * 0.8 * sound.duck
   }, [sound.volume, sound.duck, state])
 
   useEffect(() => {

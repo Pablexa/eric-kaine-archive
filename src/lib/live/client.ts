@@ -1,6 +1,7 @@
 import { createStore } from '../experience/store'
 import { sfx } from '../audio/sfx'
 import { chime, openMic, PcmPlayer, ring, type Mic } from './audio'
+import { audioDevices, chooseDevices, refreshDevices, type AudioDevices } from './devices'
 import { ID_RE, LIVE_PATH, type VisitorIn, type VisitorOut, type VisitorState } from './protocol'
 
 /**
@@ -21,7 +22,7 @@ export type MicState = 'off' | 'starting' | 'on' | 'blocked'
 export type CallUi =
   | { phase: 'idle' }
   | { phase: 'ringing' }
-  | { phase: 'connected'; since: number; mic: MicState }
+  | { phase: 'connected'; since: number; mic: MicState; muted: boolean }
   | { phase: 'ended'; reason: string }
 
 const STORAGE_KEY = 'ek-archive:live'
@@ -134,7 +135,7 @@ function handle(m: VisitorIn) {
       if (liveCall.get().phase === 'connected' || liveCall.get().phase === 'ringing') return
       window.clearTimeout(endTimer)
       liveCall.set({ phase: 'ringing' })
-      stopRing = ring()
+      stopRing = ring(audioDevices.get().output)
       ringTimer = window.setTimeout(decline, RING_FOR)
       return
     case 'hangup':
@@ -183,9 +184,9 @@ export function reportState(s: VisitorState) {
 export function answer() {
   if (liveCall.get().phase !== 'ringing') return
   stopRinging()
-  player = new PcmPlayer()
+  player = new PcmPlayer(audioDevices.get().output)
   send({ t: 'accept' })
-  liveCall.set({ phase: 'connected', since: Date.now(), mic: 'off' })
+  liveCall.set({ phase: 'connected', since: Date.now(), mic: 'off', muted: false })
   sfx.setDuck(DUCK)
 }
 
@@ -201,6 +202,40 @@ export function hangUp() {
   endCall('Call ended')
 }
 
+const sendPcm = (pcm: ArrayBuffer) => {
+  if (ws?.readyState === WebSocket.OPEN) ws.send(pcm)
+}
+
+/** Mute keeps the mic open but sends nothing; the developer sees "mic off". */
+export function setCallMuted(muted: boolean) {
+  const c = liveCall.get()
+  if (c.phase !== 'connected' || !mic) return
+  mic.setMuted(muted)
+  send({ t: 'mic', on: !muted })
+  liveCall.set({ ...c, muted })
+}
+
+/** Pick a mic and/or speaker; applies immediately, even in the middle of a call. */
+export async function chooseCallDevices(next: Partial<AudioDevices>) {
+  chooseDevices(next)
+  if (next.output !== undefined) player?.setOutput(next.output)
+  if (next.input === undefined || !mic) return
+  const c = liveCall.get()
+  const muted = c.phase === 'connected' && c.muted
+  mic.stop()
+  mic = null
+  try {
+    mic = await openMic(sendPcm, next.input)
+    mic.setMuted(muted)
+  } catch {
+    const now = liveCall.get()
+    if (now.phase === 'connected') {
+      send({ t: 'mic', on: false })
+      liveCall.set({ ...now, mic: 'blocked' })
+    }
+  }
+}
+
 export async function toggleMic() {
   const c = liveCall.get()
   if (c.phase !== 'connected') return
@@ -208,14 +243,12 @@ export async function toggleMic() {
     mic.stop()
     mic = null
     send({ t: 'mic', on: false })
-    liveCall.set({ ...c, mic: 'off' })
+    liveCall.set({ ...c, mic: 'off', muted: false })
     return
   }
   liveCall.set({ ...c, mic: 'starting' })
   try {
-    const opened = await openMic((pcm) => {
-      if (ws?.readyState === WebSocket.OPEN) ws.send(pcm)
-    })
+    const opened = await openMic(sendPcm, audioDevices.get().input)
     const now = liveCall.get()
     if (now.phase !== 'connected') {
       opened.stop()
@@ -223,7 +256,8 @@ export async function toggleMic() {
     }
     mic = opened
     send({ t: 'mic', on: true })
-    liveCall.set({ ...now, mic: 'on' })
+    liveCall.set({ ...now, mic: 'on', muted: false })
+    void refreshDevices()
   } catch {
     const now = liveCall.get()
     if (now.phase === 'connected') liveCall.set({ ...now, mic: 'blocked' })

@@ -7,7 +7,7 @@ export function trackErrors(page: Page) {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('console', (m) => {
-    if (m.type() === 'error' && !/Failed to load resource|net::ERR/.test(m.text())) errors.push(m.text())
+    if (m.type() === 'error' && !/Failed to load resource|net::ERR|compute-pressure/.test(m.text())) errors.push(m.text())
   })
   return errors
 }

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useStore } from '../lib/experience/store'
 import { ID_RE, MAX_TEXT, type VisitorInfo } from '../lib/live/protocol'
-import { call, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setMuted, startCall, visitors } from './hub'
+import { call, chooseCallDevices, clearScreens, conn, hangup, levels, log, login, logout, savedKey, sendMessage, setMuted, startCall, visitors } from './hub'
+import { DevicePicker } from '../components/live/DevicePicker'
 
 const SCENES: Record<string, string> = {
   intro: 'Intro (la guía se presenta)',
@@ -167,6 +168,12 @@ function CallCard({ target, setTarget }: { target: string; setTarget: (v: string
           Llamar
         </button>
       </form>
+      <details className="mt-3 border border-line-2 bg-ink px-3 py-2" open>
+        <summary className="cursor-pointer text-[12px] text-paper-2">Audio de la llamada</summary>
+        <div className="mt-2">
+          <DevicePicker lang="es" onChange={(next) => void chooseCallDevices(next)} testPrefix="admin" />
+        </div>
+      </details>
       <p className={`mt-3 text-[14px] ${c.phase === 'connected' ? 'text-[#4be37a]' : 'text-paper-2'}`} data-testid="admin-call-status" data-phase={c.phase}>
         {status[c.phase]}
       </p>
@@ -180,6 +187,8 @@ function CallCard({ target, setTarget }: { target: string; setTarget: (v: string
               onClick={() => setMuted(!c.muted)}
               disabled={c.phase !== 'connected'}
               className={`flex-1 px-3 py-2 font-display text-[14px] font-bold disabled:opacity-40 ${c.muted ? 'bg-verity text-ink' : 'border border-line-2 bg-ink-3'}`}
+              aria-pressed={c.muted}
+              data-testid="admin-mute"
             >
               {c.muted ? 'Mic silenciado' : 'Silenciar mi mic'}
             </button>

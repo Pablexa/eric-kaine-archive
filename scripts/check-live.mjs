@@ -119,6 +119,53 @@ try {
   if (!(backFrames > 20)) fail(`owner received too few audio frames: ${backFrames}`)
   step(`owner is hearing the visitor (${backFrames} frames)`)
 
+  // frames received over a window, to tell "audio flowing" from "silenced"
+  const flow = async (page, read, ms = 1500) => {
+    await page.waitForTimeout(400) // let in-flight frames land
+    const a = await read()
+    await page.waitForTimeout(ms)
+    return (await read()) - a
+  }
+  const atOwner = () => admin.getByTestId('meter-them').getAttribute('data-frames').then(Number)
+  const atVisitor = () => visitor.getByTestId('call-bars').getAttribute('data-frames').then(Number)
+
+  // visitor mute / unmute
+  await visitor.getByTestId('call-mute').click()
+  await admin.getByText('Visitante (mic off)').waitFor({ timeout: 5000 })
+  const mutedFlow = await flow(admin, atOwner)
+  if (mutedFlow > 2) fail(`visitor muted but the owner still got ${mutedFlow} frames`)
+  await visitor.getByTestId('call-mute').click()
+  const unmutedFlow = await flow(admin, atOwner)
+  if (!(unmutedFlow > 15)) fail(`visitor unmuted but the owner only got ${unmutedFlow} frames`)
+  step(`visitor mute works (0 frames muted, ${unmutedFlow} after unmuting) and the panel shows "mic off"`)
+
+  // owner mute / unmute
+  await admin.getByTestId('admin-mute').click()
+  const ownerMuted = await flow(visitor, atVisitor)
+  if (ownerMuted > 2) fail(`owner muted but the visitor still got ${ownerMuted} frames`)
+  await admin.getByTestId('admin-mute').click()
+  const ownerBack = await flow(visitor, atVisitor)
+  if (!(ownerBack > 15)) fail(`owner unmuted but the visitor only got ${ownerBack} frames`)
+  step(`owner mute works (0 frames muted, ${ownerBack} after unmuting)`)
+
+  // device pickers on both sides; switching the mic mid-call keeps audio flowing
+  await visitor.getByTestId('call-audio').click()
+  const vIn = visitor.getByTestId('call-input')
+  await vIn.waitFor({ timeout: 3000 })
+  const vInputs = await vIn.locator('option').evaluateAll((o) => o.map((x) => x.value).filter(Boolean))
+  if (!vInputs.length) fail('visitor mic list is empty')
+  await vIn.selectOption(vInputs[vInputs.length - 1])
+  const afterSwitch = await flow(admin, atOwner)
+  if (!(afterSwitch > 15)) fail(`visitor switched mic and the owner only got ${afterSwitch} frames`)
+  const aIn = admin.getByTestId('admin-input')
+  const aInputs = await aIn.locator('option').evaluateAll((o) => o.map((x) => x.value).filter(Boolean))
+  if (!aInputs.length) fail('owner mic list is empty')
+  await aIn.selectOption(aInputs[aInputs.length - 1])
+  const ownerSwitch = await flow(visitor, atVisitor)
+  if (!(ownerSwitch > 15)) fail(`owner switched mic and the visitor only got ${ownerSwitch} frames`)
+  const outputs = await Promise.all([visitor, admin].map((p, i) => p.getByTestId(i ? 'admin-output' : 'call-output').count()))
+  step(`mic pickers switch mid-call on both sides (${vInputs.length}/${aInputs.length} mics listed; output pickers: ${outputs.join('/')})`)
+
   // owner hangs up
   await admin.getByTestId('admin-hangup').click()
   await visitor.getByTestId('call-ended').filter({ hasText: 'The developer hung up' }).waitFor({ timeout: 5000 })

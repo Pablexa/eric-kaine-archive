@@ -24,13 +24,13 @@ export const artistMedia = {
   jaydes: { src: '/media/jaydes.jpg', alt: 'Jaydes in the official Poison music video', source: 'https://www.youtube.com/watch?v=MgKebqcV8o4', credit: 'The Toxic Lifestyle · Jaydes — Poison; directed by Tycho' },
   slimey: { src: '/media/slimey.jpg', alt: '2Slimey in the official Vet music video', source: 'https://www.youtube.com/watch?v=vBoKLPKP8J0', credit: '2Slimey · Vet (official music video)' },
   cheese: objectMedia.cheese,
-  verity: { src: '/media/bleoodity.png', alt: 'Bleoodity: Bleood\'s photo, tinted yellow', source: 'https://www.youtube.com/watch?v=m1zoIUa7rBE', credit: 'Derived from bleood · cryn innis coupe (official video)' },
+  verity: { src: '/media/bleoodity.png', alt: 'Bleoodity: Bleood\'s photo, tinted violet', source: '/media/SOURCES.md', credit: 'Photo of Bleood supplied by the site owner, tinted violet' },
 } satisfies Record<string, RealMedia>
 
-/** The guide: Eric Kaine's real avatar tinted yellow, then Bleood's photo tinted yellow after the twist. */
+/** The guide: Eric Kaine's real avatar tinted yellow, then Bleood's photo tinted violet (with dreads) after the twist. */
 export const characterMedia = {
   kaineity: { src: '/media/eric-kaineity.png', alt: 'Eric Kaineity: Eric Kaine\'s avatar, tinted yellow', source: 'https://www.youtube.com/@eric2kaine', credit: 'Derived from Eric Kaine\'s channel avatar' },
-  bleoodity: { src: '/media/bleoodity.png', alt: 'Bleoodity: Bleood\'s photo, tinted yellow', source: 'https://www.youtube.com/watch?v=m1zoIUa7rBE', credit: 'Derived from bleood · cryn innis coupe (official video)' },
+  bleoodity: { src: '/media/bleoodity.png', alt: 'Bleoodity: Bleood\'s photo, tinted violet', source: '/media/SOURCES.md', credit: 'Photo of Bleood supplied by the site owner, tinted violet' },
   ericPfp: { src: '/media/eric-pfp.png', alt: 'Eric Kaine\'s channel avatar', source: 'https://www.youtube.com/@eric2kaine', credit: 'Eric Kaine' },
 } satisfies Record<string, RealMedia>
 

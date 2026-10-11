@@ -116,7 +116,10 @@ test.describe('Acts II–IV — protocols and endings', () => {
     await expect(page.getByTestId('background-music')).toHaveAttribute('data-playing', 'true')
     // The loop has no pause, stop or mute control, and plays even though sound was declined.
     await expect(page.getByTestId('sound-toggle')).toHaveCount(0)
-    await expect(page.getByTestId('volume')).toHaveCount(0)
+    // ...but the volume slider stays, and the loop follows it down to silence.
+    await page.getByTestId('volume').fill('0')
+    await expect.poll(() => page.getByTestId('cheese-audio').evaluate((el) => (el as HTMLAudioElement).volume)).toBe(0)
+    await page.getByTestId('volume').fill('0.9')
     const audio = page.getByTestId('cheese-audio')
     expect(await audio.evaluate((el) => { const a = el as HTMLAudioElement; return { loop: a.loop, muted: a.muted, paused: a.paused, controls: a.controls } })).toEqual({ loop: true, muted: false, paused: false, controls: false })
     const t0 = await audio.evaluate((el) => (el as HTMLAudioElement).currentTime)

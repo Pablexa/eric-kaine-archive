@@ -25,6 +25,33 @@ test.describe('Foreshadowing and the reveal', () => {
     expect(errors).toEqual([])
   })
 
+  test('voiced lines wait for each other: no voice is cut off by the next line', async ({ page }) => {
+    test.setTimeout(90_000)
+    await page.addInitScript(() => {
+      const w = window as unknown as { __voices: { src: string; cut: boolean; ended: boolean }[] }
+      w.__voices = []
+      const play = HTMLMediaElement.prototype.play
+      HTMLMediaElement.prototype.play = function () {
+        const src = this.currentSrc || this.src
+        if (src.includes('/media/voice/')) {
+          const rec = { src, cut: false, ended: false }
+          w.__voices.push(rec)
+          this.addEventListener('ended', () => { rec.ended = true }, { once: true })
+          this.addEventListener('pause', () => { if (!this.ended) rec.cut = true }, { once: true })
+        }
+        return play.call(this)
+      }
+    })
+    // fast pacing makes every hold tiny, so only waiting for the voice keeps lines apart
+    await openFast(page, '&voice=1')
+    await reveal(page, { sound: true })
+    await page.waitForFunction(() => (window as unknown as { __voices: unknown[] }).__voices.length >= 4, null, { timeout: 60_000 })
+    await sleep(2500)
+    const voices = await page.evaluate(() => (window as unknown as { __voices: { cut: boolean; ended: boolean }[] }).__voices)
+    expect(voices.filter((v) => v.cut)).toEqual([])
+    expect(voices.filter((v) => v.ended).length).toBeGreaterThanOrEqual(3)
+  })
+
   test('clicking the docked guide starts the reveal; Leave restores the archive', async ({ page }) => {
     await openFast(page)
     await page.getByTestId('bio-quote').scrollIntoViewIfNeeded()

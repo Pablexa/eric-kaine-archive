@@ -59,7 +59,7 @@ class ChatStore {
     const line: ChatLine = { id: this.nextId++, author, text, shown: text.length, done: true, at: Date.now(), tone }
     this.lines = [...this.lines.slice(-7), line]
     this.emit()
-    voice.speak(text, author, { interrupt: false })
+    void voice.speak(text, author, { interrupt: false })
     return line
   }
 
@@ -76,7 +76,9 @@ class ChatStore {
     this.lines = [...this.lines.slice(-7), line]
     this.skipFlag = false
     this.emit()
-    voice.speak(text, author)
+    // The next line waits for this one's voice to finish, so lines never talk over each other.
+    let voiced = false
+    void voice.speak(text, author).then(() => { voiced = true })
     const holdMs = (hold ?? Math.min(2600, 700 + text.length * 32)) * TIME.scale
 
     return new Promise((resolve, reject) => {
@@ -101,10 +103,13 @@ class ChatStore {
         this.skipFlag = false
         const check = () => {
           if (signal?.aborted) return
-          if (this.skipFlag || performance.now() - start >= holdMs) {
+          if (this.skipFlag) {
+            // skipping also cuts the voice, so the next line never talks over it
             this.skipFlag = false
+            voice.stop()
             finish()
-          } else timer = window.setTimeout(check, 50)
+          } else if (voiced && performance.now() - start >= holdMs) finish()
+          else timer = window.setTimeout(check, 50)
         }
         check()
       }

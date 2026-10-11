@@ -18,11 +18,25 @@ export interface Mic {
   stop(): void
 }
 
-/** Opens the microphone and calls `onFrame` with each 40 ms PCM frame. */
-export async function openMic(onFrame: (pcm: ArrayBuffer) => void): Promise<Mic> {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
-  })
+type SinkCapable = { setSinkId?: (id: string) => Promise<void> }
+
+/** Routes an AudioContext or media element to a chosen output ('' = system default). */
+export function routeTo(target: AudioContext | HTMLMediaElement, output: string) {
+  const t = target as unknown as SinkCapable
+  if (t.setSinkId) void t.setSinkId(output).catch(() => {})
+}
+
+/** Opens the microphone (a chosen one, or the default) and calls `onFrame` with each 40 ms PCM frame. */
+export async function openMic(onFrame: (pcm: ArrayBuffer) => void, deviceId = ''): Promise<Mic> {
+  const base = { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+  let stream: MediaStream
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: deviceId ? { ...base, deviceId: { exact: deviceId } } : base })
+  } catch (e) {
+    // the chosen mic was unplugged or renamed: fall back to the default one
+    if (!deviceId) throw e
+    stream = await navigator.mediaDevices.getUserMedia({ audio: base })
+  }
   const ctx = new (AudioCtx())()
   try {
     await ctx.audioWorklet.addModule('/live/capture-worklet.js')
@@ -71,8 +85,9 @@ export class PcmPlayer {
   frames = 0
 
   /** Create inside a click/tap handler so the browser lets it start. */
-  constructor() {
+  constructor(output = '') {
     this.ctx = new (AudioCtx())()
+    if (output) routeTo(this.ctx, output)
     this.out = this.ctx.createGain()
     this.analyser = this.ctx.createAnalyser()
     this.analyser.fftSize = 256
@@ -83,6 +98,11 @@ export class PcmPlayer {
 
   resume() {
     void this.ctx.resume()
+  }
+
+  /** Speaker or headphones ('' = system default). */
+  setOutput(output: string) {
+    routeTo(this.ctx, output)
   }
 
   setVolume(v: number) {
@@ -146,8 +166,9 @@ function beep(ctx: AudioContext, at: number, freqs: number[], dur: number, gain:
 /** The owner's ringtone, looping until the call is answered, declined or ends. */
 export const RINGTONE = '/media/ringtone.mp3'
 
-export function ring(): () => void {
+export function ring(output = ''): () => void {
   const audio = new Audio(RINGTONE)
+  if (output) routeTo(audio, output)
   audio.loop = true
   audio.volume = 0.9
   let fallback: (() => void) | null = null

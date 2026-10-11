@@ -1,5 +1,6 @@
 import { createStore } from '../lib/experience/store'
 import { openMic, PcmPlayer, ring, type Mic } from '../lib/live/audio'
+import { audioDevices, chooseDevices, refreshDevices, type AudioDevices } from '../lib/live/devices'
 import { ID_RE, LIVE_PATH, type AdminIn, type AdminOut, type CallPhase, type VisitorInfo } from '../lib/live/protocol'
 
 /** The owner's end of the live developer line (admin panel). */
@@ -156,7 +157,7 @@ function handle(m: AdminIn) {
       if (m.phase === 'ringing') {
         call.set({ ...c, phase: 'ringing' })
         stopRingback?.()
-        stopRingback = ring()
+        stopRingback = ring(audioDevices.get().output)
         window.clearTimeout(ringTimer)
         ringTimer = window.setTimeout(() => {
           if (call.get().phase !== 'ringing') return
@@ -206,12 +207,11 @@ function finish(phase: AdminCallPhase, text: string) {
 export async function startCall(id: string) {
   if (!ID_RE.test(id) || conn.get() !== 'online') return
   if (ACTIVE.includes(call.get().phase)) hangup()
-  player = new PcmPlayer()
+  player = new PcmPlayer(audioDevices.get().output)
   call.set({ id, phase: 'mic', since: null, muted: false, visitorMic: false })
   try {
-    mic = await openMic((pcm) => {
-      if (call.get().phase === 'connected' && ws?.readyState === WebSocket.OPEN) ws.send(pcm)
-    })
+    mic = await openMic(sendPcm, audioDevices.get().input)
+    void refreshDevices()
   } catch {
     finish('mic-blocked', 'No se pudo abrir tu micrófono (permiso bloqueado o sin micrófono)')
     return
@@ -229,6 +229,27 @@ export function hangup() {
   if (!ACTIVE.includes(c.phase)) return
   send({ t: 'hangup' })
   finish('ended', c.phase === 'connected' ? `Colgaste a #${c.id}` : `Cancelaste la llamada a #${c.id}`)
+}
+
+const sendPcm = (pcm: ArrayBuffer) => {
+  if (call.get().phase === 'connected' && ws?.readyState === WebSocket.OPEN) ws.send(pcm)
+}
+
+/** Elegir micrófono y/o salida; se aplica al instante, también en plena llamada. */
+export async function chooseCallDevices(next: Partial<AudioDevices>) {
+  chooseDevices(next)
+  if (next.output !== undefined) player?.setOutput(next.output)
+  if (next.input === undefined || !mic) return
+  const muted = call.get().muted
+  mic.stop()
+  mic = null
+  try {
+    mic = await openMic(sendPcm, next.input)
+    mic.setMuted(muted)
+    note('Cambiaste de micrófono')
+  } catch {
+    note('No se pudo abrir ese micrófono', 'warn')
+  }
 }
 
 export function setMuted(muted: boolean) {

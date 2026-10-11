@@ -35,28 +35,46 @@ function source(text: string, author: Author): string | null {
 
 export const voice = {
   preload: () => void load(),
-  /** `interrupt: false` keeps a line that is already playing (for rapid chat spam). */
-  speak(text: string, author: Author, { interrupt = true } = {}) {
-    if (author === 'system' || !sfx.enabled || TIME.scale < 1) return
-    if (!interrupt && current && !current.paused && !current.ended) return
-    const play = () => {
-      const src = source(text, author)
-      if (!src) return
-      current?.pause()
-      const audio = new Audio(src)
-      audio.volume = Math.min(1, sfx.volume * sfx.duck)
-      if (author === 'bleoodity') {
-        audio.preservesPitch = false
-        audio.playbackRate = 0.85 + Math.random() * 0.35
+  /**
+   * Plays a line's voice. Resolves when it has finished (or was cut off, failed,
+   * or there is nothing to play), so chat.say can wait for it before the next line.
+   * `interrupt: false` keeps a line that is already playing (for rapid chat spam).
+   */
+  speak(text: string, author: Author, { interrupt = true } = {}): Promise<void> {
+    if (author === 'system' || !sfx.enabled || (TIME.scale < 1 && !TIME.voice)) return Promise.resolve()
+    if (!interrupt && current && !current.paused && !current.ended) return Promise.resolve()
+    return new Promise<void>((resolve) => {
+      let settled = false
+      const done = () => {
+        if (settled) return
+        settled = true
+        window.clearTimeout(cap)
+        resolve()
       }
-      current = audio
-      void audio.play().catch(() => {})
-    }
-    if (manifest) play()
-    else {
-      const asked = performance.now()
-      void load().then(() => { if (performance.now() - asked < 1500) play() })
-    }
+      // never let a stuck clip hold the script forever
+      const cap = window.setTimeout(done, 15_000)
+      const play = () => {
+        const src = source(text, author)
+        if (!src) return done()
+        current?.pause()
+        const audio = new Audio(src)
+        audio.volume = Math.min(1, sfx.volume * sfx.duck)
+        if (author === 'bleoodity') {
+          audio.preservesPitch = false
+          audio.playbackRate = 0.85 + Math.random() * 0.35
+        }
+        audio.addEventListener('ended', done, { once: true })
+        audio.addEventListener('error', done, { once: true })
+        audio.addEventListener('pause', done, { once: true })
+        current = audio
+        void audio.play().catch(done)
+      }
+      if (manifest) play()
+      else {
+        const asked = performance.now()
+        void load().then(() => (performance.now() - asked < 1500 ? play() : done()))
+      }
+    })
   },
   stop() {
     current?.pause()

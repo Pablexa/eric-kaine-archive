@@ -24,6 +24,8 @@ export const TIME = {
   drain: params.has('fast') && params.has('drain') ? 14 : 1,
   /** Test hook: `?fast=1&media=1` keeps the real YouTube players in fast runs. */
   media: params.has('media'),
+  /** Test hook: `?fast=1&voice=1` keeps character voices in fast runs. */
+  voice: params.has('voice'),
 }
 
 export function wait(ms: number, signal?: AbortSignal): Promise<void> {

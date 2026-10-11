@@ -47,3 +47,8 @@ Images:
 Voices:
 - `voice/bleood-1..7.mp3`: 1.3 s snippets cut from `bleood-cheese.mp3` (real Bleood audio, no synthesis). Played, slightly pitch-varied, when Bleoodity talks.
 - `voice/eric/*.mp3` + `manifest.json`: Eric Kaineity's lines in a voice cloned from the site owner's own 35 s recording, with their consent (the raw recording is not committed). Rendered by `scripts/voice/clone_eric.py`: Piper TTS voice en_US "ryan" medium (rhasspy/piper v0.0.2; dataset licence CC BY-NC-SA 4.0, so keep the site non-commercial) converted with kNN-VC (bshall/knn-vc v0.1, MIT; WavLM-Large + prematched HiFi-GAN).
+
+## Violet Bleoodity and live-call ringtone (2026-10-11)
+
+- `bleoodity.png` (replaced): photo of Bleood supplied by the site owner, square crop on the face (Pillow), grayscale → violet colorize. The violet dreads around it are drawn SVG in `VerityOrb.tsx`, as the owner asked.
+- `ringtone.mp3` (30.1 s): supplied by the site owner; loops while a live call rings and stops on answer.
