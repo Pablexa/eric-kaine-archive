@@ -3,7 +3,7 @@ import { useExperience } from '../../../lib/experience/ExperienceContext'
 import { chat } from '../../../lib/experience/chat'
 import { verity } from '../../../lib/experience/verity'
 import { ask, objective, useStore } from '../../../lib/experience/store'
-import { backdrop, introCard } from '../../../lib/experience/stage'
+import { backdrop, introCard, songOneCue } from '../../../lib/experience/stage'
 import { sfx } from '../../../lib/audio/sfx'
 import { channel } from '../../../lib/content/channel'
 import { characterMedia } from '../../../lib/assets/realMedia'
@@ -28,6 +28,7 @@ export function IntroScene() {
     objective.set(null)
     backdrop.set('dim')
     introCard.set(null)
+    songOneCue.set(false)
     verity.onPress = null
     verity.onGrab = null
 
@@ -100,6 +101,8 @@ export function IntroScene() {
       await say('really? oh. ok. i’ve never had a co-sign before.')
       dispatch({ type: 'SCENE', scene: 'redact' })
     } else {
+      // song 1 ("Reasons I Should Stay") kicks in on this line
+      songOneCue.set(true)
       await say('ok.', { hold: 900 })
       await say('then we do this the hard way.', { hold: 600 })
       dispatch({ type: 'SCENE', scene: 'collapse' })

@@ -5,7 +5,7 @@ import { CHAOS_SCENES, KAINEITY_SCENES, UNDERGROUND_SCENES, isTrollActive } from
 import { KaineityFM } from './KaineityFM'
 import { chat } from '../../lib/experience/chat'
 import { objective, useStore } from '../../lib/experience/store'
-import { backdrop, introCard, pileDim, shake, streamOverlay } from '../../lib/experience/stage'
+import { backdrop, introCard, pileDim, shake, songOneCue, streamOverlay } from '../../lib/experience/stage'
 import { prefersReducedMotion } from '../../lib/animation/timeline'
 import { ChatLog, Objective } from './ChatLog'
 import { EndingCard } from './EndingCard'
@@ -48,6 +48,7 @@ export function TrollLayer() {
   const dim = useStore(pileDim)
   const shakeN = useStore(shake)
   const showStream = useStore(streamOverlay)
+  const songCue = useStore(songOneCue)
   const stageRef = useRef<HTMLDivElement>(null)
   const sx = useMotionValue(0)
   const active = isTrollActive(state)
@@ -118,7 +119,7 @@ export function TrollLayer() {
         {scene === 'button' ? <ButtonScene key={`button-${state.run}`} /> : null}
         {scene === 'meltdown' ? <MeltdownScene key={`meltdown-${state.run}`} /> : null}
       </motion.div>
-      {scene && KAINEITY_SCENES.includes(scene) ? <KaineityFM key={`kfm-${state.run}`} /> : null}
+      {scene && KAINEITY_SCENES.includes(scene) && (scene !== 'intro' || songCue) ? <KaineityFM key={`kfm-${state.run}`} /> : null}
 
       {/* Act III renders above the page (not inside the stage) so the page stays visible and pokeable */}
       <Suspense fallback={null}>

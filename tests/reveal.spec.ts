@@ -83,11 +83,15 @@ test.describe('Foreshadowing and the reveal', () => {
     await reveal(page, { sound: true })
     const toggle = page.getByTestId('sound-toggle')
     await expect(toggle).toHaveAttribute('aria-pressed', 'true')
-    // song 1 starts with the sound, and the corner card says what it is
+    // the intro is quiet; song 1 kicks in on "ok. then we do this the hard way." and the corner card names it
     const card = page.getByTestId('now-playing')
+    await expect(card).toHaveCount(0)
+    await page.getByTestId('choice-refuse').click({ timeout: 30_000 })
     await expect(card).toBeVisible({ timeout: 10_000 })
     await expect(page.getByTestId('now-playing-title')).toHaveText('Reasons I Should Stay')
     await expect(page.getByTestId('now-playing-artist')).toHaveText('Jaydes')
+    await expect(card.locator('img')).toHaveAttribute('src', '/media/covers/reasons.jpg')
+    await expect.poll(() => card.locator('img').evaluate((i) => (i as HTMLImageElement).naturalWidth)).toBeGreaterThan(0)
     await expect(card).toContainText(/currently playing/i)
     await toggle.click()
     await expect(toggle).toHaveAttribute('aria-pressed', 'false')

@@ -1,5 +1,4 @@
 import { createStore } from '../experience/store'
-import { artistMedia } from '../assets/realMedia'
 
 /**
  * The songs of the experience, in order, and which one is playing right now
@@ -14,11 +13,11 @@ export interface Track {
 
 export const TRACKS = {
   /** 1 · Acts II–III */
-  reasons: { title: 'Reasons I Should Stay', artist: 'Jaydes', cover: artistMedia.jaydes.src },
+  reasons: { title: 'Reasons I Should Stay', artist: 'Jaydes', cover: '/media/covers/reasons.jpg' },
   /** 2 · Protocol 07, the beat */
-  bloody: { title: 'bloody', artist: '2Slimey', cover: artistMedia.slimey.src },
+  bloody: { title: 'bloody', artist: '2Slimey', cover: '/media/covers/bloody.jpg' },
   /** 3 · Bleoodity's act (Act IV) */
-  money: { title: 'i aint start making money till i started doing drugs', artist: 'Bleood', cover: artistMedia.bleood.src },
+  money: { title: 'i aint start making money till i started doing drugs', artist: 'Bleood', cover: '/media/covers/money.jpg' },
   /** the end credits */
   patience: { title: 'patience', artist: 'revivle', cover: '/media/patience-cover.png' },
 } satisfies Record<string, Track>

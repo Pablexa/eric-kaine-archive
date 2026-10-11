@@ -27,3 +27,6 @@ export const streamOverlay = createStore(false)
 
 /** The end: the credits page (with the patience player) is on top of the ending card. */
 export const credits = createStore(false)
+
+/** Song 1 waits for its cue in the intro ("ok. then we do this the hard way."); later scenes play it regardless. */
+export const songOneCue = createStore(false)

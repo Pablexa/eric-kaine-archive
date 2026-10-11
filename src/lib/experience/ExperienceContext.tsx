@@ -4,7 +4,7 @@ import { initialState, isTrollActive, reducer, type Action, type EndingId, type 
 import { chat, bubble } from './chat'
 import { verity } from './verity'
 import { chaos } from './chaos'
-import { fm, hudHidden, streamOverlay, subsOverride } from './stage'
+import { fm, hudHidden, songOneCue, streamOverlay, subsOverride } from './stage'
 import { sfx } from '../audio/sfx'
 import type { PileEngine } from '../interactions/pile'
 import { lockScroll, unlockScroll } from '../interactions/scroll'
@@ -67,6 +67,7 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
 
   const restore = useCallback(async (quick: boolean) => {
     fm.set('off')
+    songOneCue.set(false)
     voice.stop()
     streamOverlay.set(false)
     subsOverride.set(null)

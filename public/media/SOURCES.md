@@ -60,4 +60,4 @@ Voices:
 - `patience-cover.png` (157 × 157): the song's cover art, supplied by the site owner.
 - `dev-avatar.png`: the developer's (757valentino) Discord avatar, cropped from a profile screenshot they shared for the credits signature. The banner photo and the names in their profile bio were deliberately not used.
 
-The "currently playing" card (top right) names each song while it is audible. Its covers are, for now, the artists' existing photos above (Jaydes, 2Slimey, Bleood); the owner's own cover images can replace them in `src/lib/audio/nowPlaying.ts`.
+The "currently playing" card (top right) names each song while it is audible. Its covers `covers/reasons.jpg`, `covers/bloody.jpg` and `covers/money.jpg` are the song cover images the site owner supplied on 2026-10-11, square-cropped to 300 × 300 (Pillow).
