@@ -13,7 +13,7 @@ const only = (process.argv.find((a) => a.startsWith('--only=')) ?? '').slice(7).
 const out = new URL('../screenshots/', import.meta.url)
 await mkdir(out, { recursive: true })
 
-const browser = await chromium.launch({ channel: process.env.PW_CHANNEL ?? 'chrome' })
+const browser = await chromium.launch({ channel: (process.env.PW_CHANNEL ?? 'chrome') || undefined, executablePath: process.env.PW_EXECUTABLE || undefined })
 const shot = (page, name) => page.screenshot({ path: fileURLToPath(new URL(`${name}.png`, out)) })
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
@@ -192,15 +192,22 @@ async function playActFour(page, prefix, { fast = true } = {}) {
   await page.waitForSelector('[data-testid=foodfight]', { timeout: 30000 })
   await sleep(fast ? 350 : 1200)
   if (prefix) await shot(page, `${prefix}-foodfight`)
-  for (let i = 0; i < 18; i++) await activate('feed-cheese')
+  for (let i = 0; i < 30; i++) {
+    const fed = await page.getByTestId('foodfight').getAttribute('data-fed').catch(() => null)
+    if (fed === null || Number(fed) >= 18) break
+    await activate('feed-cheese').catch(() => {})
+  }
 
   await page.waitForSelector('[data-testid=brainrot]', { timeout: 30000 })
+  await page.waitForSelector('[data-testid=brainrot][data-section=quad]', { timeout: 60000 })
+  if (prefix) await shot(page, `${prefix}-quad`)
+
+  await page.waitForSelector('[data-testid=runner]', { timeout: 60000 })
   await activate('runner-right')
   await activate('runner-left')
   await activate('runner-jump')
+  await sleep(fast ? 300 : 2500)
   if (prefix) await shot(page, `${prefix}-runner`)
-  await page.waitForSelector('[data-testid=brainrot][data-section=quad]', { timeout: 60000 })
-  if (prefix) await shot(page, `${prefix}-quad`)
 
   await page.waitForSelector('[data-testid=mosh][data-ready=true]', { timeout: 30000 })
   if (prefix) await shot(page, `${prefix}-mosh`)

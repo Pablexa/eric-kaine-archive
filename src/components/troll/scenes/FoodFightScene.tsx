@@ -4,15 +4,15 @@ import { useExperience } from '../../../lib/experience/ExperienceContext'
 import { chat } from '../../../lib/experience/chat'
 import { objective } from '../../../lib/experience/store'
 import { verity } from '../../../lib/experience/verity'
-import { objectImage, type ObjectMediaId } from '../../../lib/assets/realMedia'
+import { objectImage, type ObjectArtId } from '../../../lib/assets/cast'
 import { sfx } from '../../../lib/audio/sfx'
 import { clamp, loop, prefersReducedMotion, wait, waitFor } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
 
 const TARGET = 18
-const FOOD: ObjectMediaId[] = ['seal', 'burger', 'cheese', 'cheese', 'drink', 'draco', 'slime', 'cheese']
-const LINES = ['the catering budget is gone.', 'do not feed me the draco. cheese only.', 'this is a food fight and also a payroll dispute.', 'seals are flying. normal label meeting.', 'mhm yeah. more cheese.']
-type Piece = { body: Matter.Body; sprite: ObjectMediaId; size: number; thrown: boolean }
+const FOOD: ObjectArtId[] = ['seal', 'burger', 'cheese', 'torta', 'cheese', 'drank', 'draco', 'slime', 'cheese', 'dragon', 'poo', 'soda', 'torta', 'cheese']
+const LINES = ['the catering budget is gone.', 'do not feed me the draco. cheese only.', 'the tortas are airborne. sandwich warfare.', 'uk rap is straight poo. the poo is also flying.', 'this is a food fight and also a payroll dispute.', 'seals are flying. normal label meeting.', 'mhm yeah. more cheese.']
+type Piece = { body: Matter.Body; sprite: ObjectArtId; size: number; thrown: boolean }
 type Burst = { x: number; y: number; at: number; text: string; color: string }
 
 export function FoodFightScene() {
@@ -198,14 +198,15 @@ export function FoodFightScene() {
           ctx.save()
           ctx.translate(x, y)
           ctx.rotate(reduce ? 0 : piece.body.angle)
-          const photoWidth = piece.size * clamp(image.naturalWidth / image.naturalHeight, 0.65, 1.7)
-          ctx.fillStyle = piece.sprite === 'cheese' ? '#ffff00' : '#fff'
-          ctx.fillRect(-photoWidth / 2 - 2, -piece.size / 2 - 2, photoWidth + 4, piece.size + 15)
-          ctx.drawImage(image, -photoWidth / 2, -piece.size / 2, photoWidth, piece.size)
+          ctx.drawImage(image, -piece.size / 2, -piece.size / 2, piece.size, piece.size)
           ctx.font = 'bold 10px Arial, sans-serif'
           ctx.textAlign = 'center'
-          ctx.fillStyle = '#000'
-          ctx.fillText(piece.sprite === 'drink' ? 'DOUBLE CUP' : piece.sprite.toUpperCase(), 0, piece.size / 2 + 10)
+          ctx.lineWidth = 3
+          ctx.strokeStyle = '#000'
+          ctx.fillStyle = piece.sprite === 'cheese' ? '#ffd21f' : '#fff'
+          const tag = piece.sprite === 'drank' ? 'DOUBLE CUP' : piece.sprite.toUpperCase()
+          ctx.strokeText(tag, 0, piece.size / 2 + 8)
+          ctx.fillText(tag, 0, piece.size / 2 + 8)
           ctx.restore()
         }
         bursts = bursts.filter((b) => now - b.at < 1000)

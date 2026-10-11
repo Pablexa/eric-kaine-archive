@@ -21,7 +21,7 @@ const MEDIA: VideoSource[] = [
 ]
 const WORDS = ['SIGMA', 'RIZZ', 'OHIO', 'FANUM TAX', 'MEWING', '+1000 AURA', 'SKIBIDI', '6 7', "I’M 10.", '!discord', 'SLATT', 'CHEESE ACQUIRED', 'BRO DONATED AT THE WRONG TIME']
 const CAPTIONS = ['please gatekeep me im not trying to be famous', 'making a beat but every tab chooses the sounds', 'bro opened subway surfers inside subway surfers', 'the cheese has a commuter pass', 'I found 2slimey in internet explorer', 'your attention span has left the server']
-const SPAM = ['YOUR RAM IS NOW CHEESE', 'CLICK HERE TO DOWNLOAD MORE RIZZ', 'CONGRATULATIONS!! YOU ARE VISITOR 6,700,000', 'VIRUS SCAN: FOUND !DISCORD', 'MYSPACE TOP 8: EVERYONE IS BLEOOD', 'FREE IPOD* (*it is a train)', 'THERE ARE 67 ORBS IN YOUR AREA', 'TURN DOWN FOR WHAT .WMV']
+const SPAM = ['THE CHEESE HAS A COMMUTER PASS', 'CLICK HERE FOR MORE RIZZ (NOTHING HAPPENS)', 'YOU ARE VISITOR 6,700,000 (EVERYONE IS)', 'SLAYR IS STILL IN THE BURGER COSTUME', 'MYSPACE TOP 8: EVERYONE IS BLEOOD', 'FREE IPOD* (*it is a train)', 'THERE ARE 67 ORBS IN YOUR AREA', 'TURN DOWN FOR WHAT .WMV']
 
 function VideoPane({ source, index, fast }: { source: VideoSource; index: number; fast: boolean }) {
   const [playing, setPlaying] = useState(!fast)
@@ -69,8 +69,8 @@ export function BrainrotScene() {
     if (ended.current) return
     ended.current = true
     objective.set(null)
-    chat.post('all four tabs are playing. your attention span is cooked. mosh time.', 'bleoodity')
-    dispatch({ type: 'SCENE', scene: 'mosh' })
+    chat.post('all four tabs are playing. your attention span is cooked. now YOU are the gameplay.', 'bleoodity')
+    dispatch({ type: 'SCENE', scene: 'runner' })
   }, [dispatch])
 
   useEffect(() => {
@@ -122,9 +122,9 @@ export function BrainrotScene() {
       <div className="br08-tools" role="group" aria-label="Brainrot collage controls">
         <button type="button" onClick={meme} data-testid="brainrot-meme">☢ PRESS FOR BRAINROT</button>
         <button type="button" onClick={() => { setExtraPanes((n) => Math.min(4, n + 1)); setSpam((n) => n + 1); sfx.errorDing(3) }} data-testid="brainrot-add-pane" disabled={paneCount >= 6}>+ OPEN ANOTHER TAB</button>
-        {skipReady ? <button type="button" onClick={finish} data-testid="brainrot-skip">MY BRAIN IS DONE →</button> : <span>Exit to mosh unlocks at 40s</span>}
+        {skipReady ? <button type="button" onClick={finish} data-testid="brainrot-skip">MY BRAIN IS DONE →</button> : <span>Exit unlocks at 40s</span>}
       </div>
-      <div className="br08-status"><span>▓▓▓▓▓▓░░░ DOWNLOADING ATTENTION SPAN.EXE</span><span>{section === 'quad' ? 'MAXIMUM BRAINROT' : section.toUpperCase()} · {Math.min(6, paneCount)} TABS · {spam * 1000} AURA</span></div>
+      <div className="br08-status"><span>▓▓▓▓▓▓░░░ BUFFERING ATTENTION SPAN</span><span>{section === 'quad' ? 'MAXIMUM BRAINROT' : section.toUpperCase()} · {Math.min(6, paneCount)} TABS · {spam * 1000} AURA</span></div>
       <span className="sr-only" aria-live="polite">{section === 'quad' ? 'Maximum brainrot: four real video panels. Use the buttons to add tabs or make memes.' : 'Real Subway Surfers gameplay videos. Each player has playback controls and a source link.'}</span>
     </section>
   )

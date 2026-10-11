@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { artistMedia } from '../../lib/assets/realMedia'
+import { artistArt } from '../../lib/assets/cast'
 import './Underground3D.css'
 
 interface Portrait { src: string; label: string }
 interface Prop { object: THREE.Group; side: -1 | 1; y: number; scale: number; speed: number; phase: number }
 const DEFAULT_PORTRAITS: Portrait[] = [
-  { src: artistMedia.carti.src, label: 'CARTI.JPG' },
-  { src: artistMedia.bleood.src, label: 'BLEOOD.EXE' },
-  { src: artistMedia.osamason.src, label: 'OSAMASON.ZIP' },
+  { src: artistArt.slayr.src, label: 'SLAYR.BURGER' },
+  { src: artistArt.bleood.src, label: 'BLEOOD.EXE' },
+  { src: artistArt.carti.src, label: 'SLATT.ZIP' },
 ]
 
 const material = (color: string, emissive = '#000000') => new THREE.MeshStandardMaterial({ color, emissive, emissiveIntensity: 0.3, roughness: 0.42, metalness: 0.16, flatShading: true })
@@ -145,18 +145,20 @@ export function Underground3D({ portraits = DEFAULT_PORTRAITS }: { portraits?: r
     portraits.slice(0, 3).forEach((portrait, i) => {
       const frame = new THREE.Group()
       mesh(frame, new THREE.BoxGeometry(1.43, 1.65, 0.18), material(i % 2 ? '#00ff22' : '#ff00db', '#72003f'))
-      const photoMaterial = new THREE.MeshBasicMaterial({ color: '#fffc13', side: THREE.DoubleSide })
-      mesh(frame, new THREE.PlaneGeometry(1.27, 1.21), photoMaterial, 0, 0.09, 0.105)
+      // Sprites are transparent, so they sit on a solid neon card.
+      mesh(frame, new THREE.PlaneGeometry(1.27, 1.21), new THREE.MeshBasicMaterial({ color: '#fffc13', side: THREE.DoubleSide }), 0, 0.09, 0.1)
+      const photoMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff', side: THREE.DoubleSide, transparent: true, opacity: 0 })
+      mesh(frame, new THREE.PlaneGeometry(1.2, 1.15), photoMaterial, 0, 0.09, 0.106)
       const texture = textureLoader.load(portrait.src, (loaded) => {
         if (disposed) { loaded.dispose(); return }
         loaded.colorSpace = THREE.SRGBColorSpace
         loaded.minFilter = THREE.LinearFilter
         loaded.magFilter = THREE.LinearFilter
-        photoMaterial.color.set('#ffffff')
+        photoMaterial.opacity = 1
         photoMaterial.map = loaded
         photoMaterial.needsUpdate = true
         if (reduced && !document.hidden) renderer.render(scene, camera)
-      }, undefined, () => { /* The neon frame still works if a photo fails. */ })
+      }, undefined, () => { /* The neon card still works if a sprite fails. */ })
       photoTextures.add(texture)
       const label = labelTexture(portrait.label)
       photoTextures.add(label)

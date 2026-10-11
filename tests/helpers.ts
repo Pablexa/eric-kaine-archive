@@ -157,8 +157,9 @@ export async function playActFour(page: Page, { touch = false, capture = false }
   }
   await expect(page.getByTestId('label')).toBeVisible({ timeout: 30_000 })
   await expect(page.getByTestId('background-music')).toBeVisible()
-  await expect(page.getByTestId('cheese-audio')).toHaveAttribute('src', '/media/bleood-cheese.mp3')
-  await expect.poll(() => page.getByTestId('cheese-audio').evaluate((el) => (el as HTMLAudioElement).readyState)).toBeGreaterThanOrEqual(2)
+  // the song only ever plays through YouTube's player (not loaded in fast mode)
+  await expect(page.getByTestId('background-music')).toHaveAttribute('data-video-id', 'mPJhwEcj2g4')
+  await expect(page.locator('audio')).toHaveCount(0)
   await expect.poll(() => page.getByTestId('label').locator('img').evaluateAll((imgs) => imgs.every((el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth > 0))).toBe(true)
   await expect(page.locator('html')).toHaveClass(/ug-vamp/)
   await expect(page.getByTestId('label-card-0')).toBeEnabled({ timeout: 30_000 })
@@ -170,7 +171,10 @@ export async function playActFour(page: Page, { touch = false, capture = false }
   await sleep(300)
   await shot('foodfight')
   await activate('blast-food')
-  for (let i = 0; i < 18; i++) await activate('feed-cheese')
+  const food = page.getByTestId('foodfight')
+  for (let i = 0; i < 30 && (await food.count()) && Number(await food.getAttribute('data-fed').catch(() => '18')) < 18; i++) {
+    await activate('feed-cheese').catch(() => {})
+  }
 
   const brainrot = page.getByTestId('brainrot')
   await expect(brainrot).toBeVisible({ timeout: 20_000 })
@@ -184,15 +188,33 @@ export async function playActFour(page: Page, { touch = false, capture = false }
   await expect(brainrot).toHaveAttribute('data-section', 'quad', { timeout: 30_000 })
   await shot('maximum-brainrot')
 
+  // 11 subway verity — switch lanes and jump with the real controls; the clock ends it
+  const runner = page.getByTestId('runner')
+  await expect(runner).toBeVisible({ timeout: 30_000 })
+  await activate('runner-left')
+  await expect(runner).toHaveAttribute('data-lane', '0')
+  await activate('runner-right')
+  await activate('runner-right')
+  await expect(runner).toHaveAttribute('data-lane', '2')
+  await activate('runner-jump')
+  if (!touch) {
+    await page.keyboard.press('ArrowLeft')
+    await expect(runner).toHaveAttribute('data-lane', '1')
+  }
+  await shot('runner')
+
   const mosh = page.getByTestId('mosh')
   await expect(mosh).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('mosh-jump')).toBeEnabled({ timeout: 30_000 })
   await shot('mosh')
-  for (let i = 0; i < 12; i++) { await activate('mosh-jump'); await sleep(100) }
+  for (let i = 0; i < 24 && Number((await mosh.getAttribute('data-jumps').catch(() => '12')) ?? '12') < 12; i++) {
+    await activate('mosh-jump').catch(() => {})
+    await sleep(100)
+  }
   await expect(page.getByTestId('legend')).toBeVisible({ timeout: 30_000 })
   await expect(page.getByTestId('legend-subs')).toHaveText('1.5B', { timeout: 15_000 })
-  await shot('legend')
   await expect(page.getByTestId('legend-bio')).toBeVisible({ timeout: 15_000 })
+  await shot('legend')
   await expect(page.getByTestId('background-music')).toHaveCount(0)
   await expect(page.getByTestId('live-chat')).toHaveCount(0)
   await expect(page.getByTestId('ending')).toBeVisible({ timeout: 30_000 })

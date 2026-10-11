@@ -40,7 +40,7 @@
 .underground-3d-burger { left: -15px; top: 24%; transform: rotate(-25deg); }
 .underground-3d-cheese { left: -10px; bottom: 13%; transform: rotate(20deg); }
 .underground-3d-cup { right: -20px; bottom: 12%; transform: rotate(-15deg); }
-.underground-3d-photo { position: absolute; width: clamp(80px, 12vw, 150px); height: clamp(100px, 15vw, 180px); object-fit: cover; border: 7px ridge #00ff2a; box-shadow: 6px 6px #ff00d4; }
+.underground-3d-photo { position: absolute; width: clamp(80px, 12vw, 150px); height: clamp(100px, 15vw, 180px); object-fit: contain; background: #fffc13; border: 7px ridge #00ff2a; box-shadow: 6px 6px #ff00d4; }
 .underground-3d-photo-0 { right: 5px; top: 19%; transform: perspective(400px) rotateY(-30deg) rotate(12deg); }
 .underground-3d-photo-1 { left: 3px; top: 52%; transform: perspective(400px) rotateY(35deg) rotate(-10deg); }
 @media (max-width: 639px) {

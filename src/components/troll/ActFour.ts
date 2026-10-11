@@ -1,6 +1,7 @@
 export { LabelScene } from './scenes/LabelScene'
 export { FoodFightScene } from './scenes/FoodFightScene'
 export { BrainrotScene } from './scenes/BrainrotScene'
+export { RunnerScene } from './scenes/RunnerScene'
 export { MoshScene } from './scenes/MoshScene'
 export { LegendScene } from './scenes/LegendScene'
 export { BleoodityFM } from './underground/BleoodityFM'

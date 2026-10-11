@@ -49,7 +49,7 @@ The archive comes with a friendly guide. It's a small yellow orb called **Verity
 
 | Ending | How |
 |---|---|
-| **One More Subscriber** | Refuse → all eleven protocols → the underground finale. (Roughly 6–9 minutes at real pacing, depending on interaction time.) |
+| **One More Subscriber** | Refuse → all twelve protocols → the underground finale. (Roughly 6–9 minutes at real pacing, depending on interaction time.) |
 | **Safely Obscure** | Let the flashlight battery die → choose "Leave him obscure". |
 | **Certified Gatekeeper** | Agree to help → redact eight "fame-adjacent" things on the live page → Verity says "phase two" and the redacted page goes through all of Act III anyway → the twist. |
 

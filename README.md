@@ -7,9 +7,9 @@ It is a polished, editorial fan site, right up until its friendly guide orb, **V
 That turns into a roughly 6–9 minute experience, depending on how long you play with the wreckage:
 - **Act II:** the site physically collapses, a flashlight hunt in the dark, a SUBSCRIBE button that won't be pressed, and an emergency broadcast.
 - **Act III:** Verity vandalises the site into a 2003 GeoCities page, then 15 popup closures, a 20-orb clone army, a playable beat with a bass drop that breaks the page, and a twist where Verity turns out to be Bleoodity and "deletes" the website.
-- **Act IV:** a deliberately ugly 2008 collage of actual artist photos, local meme audio, flying photographic food and real Three.js props. Sign eight photo contracts, feed Bleoodity, watch real Subway Surfers gameplay in a 62-second video meltdown, and jump in a mosh pit made from the website. The imaginary subscriber count reaches 1.5 billion, then the real bio brings everything back.
+- **Act IV:** Bleoodity's underground takeover, styled as a deliberately ugly 2008 collage with original cartoon parody mascots and Three.js props. You sign eight mascots (Bleood, Slayr in a burger costume, OsamaSon, Playboi Carti, Jaydes, the Cheese Guy, 2Slimey, Lil Verity) and feed Bleoodity cheese while tortas, dranks, dracos and dragons fly. Then come real Subway Surfers videos in a brainrot portal, a playable runner (Subway Verity) and a mosh pit made from the website. The imaginary subscriber count reaches 1.5 billion, then the real bio brings everything back.
 
-It's loud. Original synthesized effects run through a compressor/limiter. A downloaded 18.064-second Bleood meme MP3 loops locally in the background, with no standalone player or close button. The HUD mute and volume control audio and effects, and `Esc` leaves. Playback retries on a tap if the browser requires a new gesture. Videos use visible YouTube embeds and need internet access. See [media credits](public/media/SOURCES.md).
+It's loud. Original synthesized effects run through a compressor/limiter. The cheese song plays only through YouTube's own embedded player (BLEOODITY FM). Nothing is downloaded or re-hosted. The HUD mute and volume control both the effects and that player, and `Esc` leaves. Videos need internet access.
 
 - **Concept, phases, endings and hidden interactions:** [`CREATIVE_BRIEF.md`](CREATIVE_BRIEF.md)
 - **Research log:** [`DESIGN_RESEARCH.md`](DESIGN_RESEARCH.md)
@@ -87,7 +87,7 @@ node scripts/check-csp.mjs
 npm run build
 ```
 
-The output goes to `dist/` and is about 160 KB of gzipped JS on first load. Physics, Act III, Act IV and Three.js load lazily; local photos and the meme MP3 add roughly 840 KB of media.
+The output goes to `dist/` and is about 160 KB of gzipped JS on first load. Physics, Act III, Act IV and Three.js load lazily. There are no local media files.
 
 ## Deploy
 

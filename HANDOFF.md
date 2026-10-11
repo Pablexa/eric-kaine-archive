@@ -1,6 +1,6 @@
 # Handoff prompt: "Eric Kaine — The Archive" (troll fan website)
 
-Current status (2026-10-10): Act IV was revised to the user's requested ugly 2008 media collage. Six real artist photos and six real object photos replace the rapper/object drawings; real Subway Surfers videos replace the drawn runner. Three.js models float through the takeover, and a downloaded local 18-second meme MP3 loops in the background without an individual close button. HUD mute/Esc remain. The pre-takeover now has 15 popup closures and 20 clones. See README.md, public/media/SOURCES.md and IMPLEMENTATION_REVIEW.md for current implementation/verification; the brief below is historical.
+Current status (2026-10-11): Act IV is reviewed and tested: Label, Food Fight, Brainrot, **Subway Verity** (new protocol 11, an original runner), Mosh (12) and Legend. The photo/MP3 revision was reverted to original sprites (`src/lib/assets/cast.ts`), and the cheese song plays via YouTube embed only. See IMPLEMENTATION_REVIEW.md. The brief below is historical.
 
 ---
 

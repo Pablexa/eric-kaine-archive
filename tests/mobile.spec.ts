@@ -45,7 +45,7 @@ test.describe('Mobile', () => {
   })
 
   test('the underground takeover is playable on a phone', async ({ page }) => {
-    test.setTimeout(180_000)
+    test.setTimeout(240_000)
     const errors = trackErrors(page)
     await openFast(page)
     await reveal(page)

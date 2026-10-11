@@ -7,13 +7,13 @@ import { verity } from '../../../lib/experience/verity'
 import { objective } from '../../../lib/experience/store'
 import { backdrop, fm, hudHidden, pileDim, streamOverlay, subsOverride } from '../../../lib/experience/stage'
 import { channel } from '../../../lib/content/channel'
-import { artistMedia, objectMedia } from '../../../lib/assets/realMedia'
+import { artistArt, objectArt } from '../../../lib/assets/cast'
 import { sfx } from '../../../lib/audio/sfx'
 import { scrollToY } from '../../../lib/interactions/scroll'
 import { EASE, TIME, prefersReducedMotion, wait } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
 
-const CONFETTI = [objectMedia.cheese, artistMedia.jaydes, objectMedia.seal, artistMedia.carti, artistMedia.slimey, artistMedia.bleood, objectMedia.burger, artistMedia.verity]
+const CONFETTI = [objectArt.cheese, artistArt.jaydes, objectArt.seal, artistArt.carti, artistArt.slimey, artistArt.bleood, objectArt.burger, artistArt.verity, objectArt.drank, objectArt.torta, objectArt.draco, artistArt.slayr]
 const COUNTS = ['1.5K', '15K', '1.5M', '1.5B']
 type Beat = 'fame' | 'bio' | 'restore'
 

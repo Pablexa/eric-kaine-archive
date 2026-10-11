@@ -7,13 +7,13 @@ import { verity } from '../../../lib/experience/verity'
 import { objective } from '../../../lib/experience/store'
 import { backdrop, pileDim, shake } from '../../../lib/experience/stage'
 import { sfx } from '../../../lib/audio/sfx'
-import { artistMedia, objectMedia } from '../../../lib/assets/realMedia'
+import { artistArt, objectArt } from '../../../lib/assets/cast'
 import { scrollToY } from '../../../lib/interactions/scroll'
 import { TIME, easeInCubic, prefersReducedMotion, tween, wait, waitFor } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
 
 const TARGET = 12
-const CROWD = [artistMedia.bleood, artistMedia.slayr, objectMedia.cheese, artistMedia.osamason, artistMedia.carti, artistMedia.slimey, objectMedia.seal, artistMedia.jaydes, artistMedia.verity, objectMedia.burger, objectMedia.drink]
+const CROWD = [artistArt.bleood, artistArt.slayr, objectArt.cheese, artistArt.osamason, artistArt.carti, artistArt.slimey, objectArt.seal, artistArt.jaydes, artistArt.verity, objectArt.burger, objectArt.drank, objectArt.torta, objectArt.draco]
 const LINES = ['the typography is in the pit.', 'the subscribe button just lost a shoe.', 'OPEN UP THE FONT PIT.', 'the entire website is crowd surfing.']
 
 /** Real pieces of the archive become the crowd, then Bleoodity stage-dives. */
@@ -153,12 +153,12 @@ export function MoshScene() {
       <div ref={crowd} className="pointer-events-none absolute inset-x-4 top-[30%] flex flex-wrap justify-between gap-3" aria-hidden="true">
         {CROWD.map((id, i) => (
           <div key={id.src} data-physics={`mosh:${i}`} className="h-[70px] w-[64px] rounded-sm border-2 border-[#ff315d] bg-[#21040b] p-1 shadow-[4px_4px_0_#000]" style={{ marginTop: (i % 3) * 26 }}>
-            <img src={id.src} alt="" className="h-full w-full object-cover" draggable={false} />
+            <img src={id.src} alt="" className="h-full w-full object-contain" draggable={false} />
           </div>
         ))}
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-[14%] px-4 text-center">
-        <p className="pixel text-sm tracking-[0.2em] text-[#ff597e]">PROTOCOL 11 · NO REFUNDS</p>
+        <p className="pixel text-sm tracking-[0.2em] text-[#ff597e]">PROTOCOL 12 · NO REFUNDS</p>
         <h2 className="mt-2 text-[clamp(46px,9vw,112px)] font-black uppercase leading-none text-[#ffefdc]" style={{ fontFamily: 'Impact, sans-serif', textShadow: '5px 5px 0 #c81738' }}>
           {diving ? 'STAGE DIVE' : 'FONT PIT'}
         </h2>

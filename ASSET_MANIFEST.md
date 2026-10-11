@@ -64,6 +64,11 @@ GSAP was considered and not installed. Motion's imperative `animate()` plus the 
 
 ## Act IV assets
 
-The current underground section uses six verified artist photos and six real object photos under `public/media/`, mapped in `src/lib/assets/realMedia.ts`. Wikimedia assets retain credits and licenses in `public/media/SOURCES.md`; artist thumbnails credit their verified music-video uploads. The fictional Verity character remains original. Actual Three.js meshes provide the burger, cheese wedge, double cup and rotating photo boards. Subway Surfers uses two real public YouTube gameplay videos in visible embedded players; the old drawn runner has been removed.
+No photographs, no re-hosted thumbnails and no downloaded audio. (An earlier revision added rapper photos, real object photos and a ripped meme MP3 under `public/media/`. These were removed on 2026-10-11 because they broke the project rules: no real likenesses, no copied audio or assets.)
 
-`public/media/bleood-cheese.mp3` is the public 18.064-second meme recording from Boop Deck sound 2451, stored locally and looped as background audio. This is a short meme clip, not a full album track. The original YouTube song also appears as a visible video in the collage. Fast tests omit external video requests but load and validate the local MP3 and photos. Chomp, stamp, donation, crowd and laser cues remain synthesized.
+- **Cast art:** `src/lib/assets/cast.ts` maps each parody mascot to an original SVG sprite from `sprites.ts`: Bleood → seal with rainbow dreads, Slayr → burger costume, OsamaSon → flame, Playboi Carti → fangs, Jaydes → purple star, 2Slimey → slime, The Cheese Guy → cheese block with a burrito, Lil Verity → orb. Each label card says "PARODY MASCOT".
+- **Flying objects:** cheese, burgers, seals, tortas (the sandwich), dranks (a purple double cup), dracos (cartoon), dragons, poo, slime, grape soda and coins, all original sprites.
+- **3D:** the Three.js burger, cheese wedge and double cup are procedural meshes. The rotating boards show sprites.
+- **Music:** Bleood's official "mhm i got the cheese" upload (`cheeseSong` in `channel.ts`) plays only inside YouTube's own visible `youtube-nocookie` player (BLEOODITY FM). HUD mute and volume are forwarded to the player with YouTube's iframe `postMessage` commands. Fast/test mode never loads the embed.
+- **Subway Surfers:** two public gameplay videos in visible YouTube embeds (brainrot portal). The playable runner, **Subway Verity** (protocol 11), is an original canvas game with no Subway Surfers art.
+- **Sound effects:** chomp, stamp, donation, crowd, laser, siren and coin are all synthesized in `sfx.ts`.

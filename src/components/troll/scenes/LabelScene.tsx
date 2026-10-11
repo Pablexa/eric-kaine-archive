@@ -3,7 +3,7 @@ import { useExperience } from '../../../lib/experience/ExperienceContext'
 import { chat } from '../../../lib/experience/chat'
 import { objective } from '../../../lib/experience/store'
 import { verity } from '../../../lib/experience/verity'
-import { artistMedia, objectMedia } from '../../../lib/assets/realMedia'
+import { artistArt, objectArt } from '../../../lib/assets/cast'
 import { sfx } from '../../../lib/audio/sfx'
 import { wait, waitFor } from '../../../lib/animation/timeline'
 import { useScript } from '../useScript'
@@ -82,20 +82,20 @@ export function LabelScene() {
       <p className="text-[11px] font-black text-blue-800">☆ xX BLEOODITY'S UNDERGROUND HOME PAGE Xx ☆ EST. 2008 ☆</p>
       <h2 className="text-[clamp(25px,5vw,55px)] font-black leading-none">BLEOODITY RECORDS!!!!</h2>
       <div className="flex items-center justify-center gap-2 text-[12px] text-black">
-        <img src={objectMedia.cheese.src} alt="" className="h-7 w-12 object-cover" />
-        <b>CLICK THE JPEG TO SIGN YOUR LIFE AWAY</b>
+        <img src={objectArt.cheese.src} alt="" className="h-7 w-10 object-contain" />
+        <b>CLICK A MASCOT TO SIGN IT</b>
         <span className="bg-black px-1 font-mono text-[#00ff00]" aria-live="polite">{signed.length}/8</span>
       </div>
     </header>
-    <div className="label-spam shrink-0 text-[14px]" aria-hidden="true"><span>{'FREE CHEESE ★ CLICK HERE ★ SLATT ★ UNDER CONSTRUCTION ★ YOUR COMPUTER IS NOW A TORTA ★ '.repeat(4)}</span></div>
+    <div className="label-spam shrink-0 text-[14px]" aria-hidden="true"><span>{'FREE CHEESE ★ CLICK HERE ★ SLATT ★ UNDER CONSTRUCTION ★ TORTAS ARE SANDWICHES ★ '.repeat(4)}</span></div>
     <div className="label-photos grid min-h-0 flex-1 grid-cols-2 items-start gap-2 overflow-y-auto p-3 sm:grid-cols-4 sm:gap-4 sm:p-5">
       {ROSTER.map((card, i) => {
         const isSigned = signed.includes(i)
-        const photo = artistMedia[card.key]
+        const photo = artistArt[card.key]
         return <button key={card.name} type="button" data-testid={`label-card-${i}`} data-signed={isSigned} aria-label={isSigned ? `${card.name}, signed` : `Sign ${card.name}`} aria-pressed={isSigned} disabled={isSigned} onClick={() => sign(i)} className="label-photo relative block w-full p-1 text-center" style={{ '--tilt': `${[ -5, 4, -3, 6, 3, -6, 5, -4 ][i]}deg` } as CSSProperties}>
           <span className="label-contract">{isSigned ? 'CONTRACT SAVED' : 'SIGN.exe [X]'}</span>
-          <img src={photo.src} alt={photo.alt} draggable={false} className="h-[134px] w-full object-cover sm:h-[184px]" style={{ objectPosition: 'center 30%', filter: i === 6 ? 'saturate(2)' : undefined }} />
-          {i === 1 && <img src={objectMedia.burger.src} alt="" className="pointer-events-none absolute bottom-9 right-0 h-16 w-20 -rotate-12 border-2 border-red-600 object-cover" />}
+          <img src={photo.src} alt={photo.alt} draggable={false} className="h-[134px] w-full bg-black/30 object-contain sm:h-[184px]" />
+          <span className="pointer-events-none absolute left-1 top-1 bg-red-600 px-1 font-mono text-[8px] text-white">PARODY MASCOT</span>
           <strong className="block break-words text-[20px] leading-none sm:text-[26px]" style={{ color: card.color }}>{card.name}</strong>
           <span className="block bg-white text-[10px] font-bold text-blue-800 underline">{card.title}</span>
           {isSigned && <span className="label-stamp">SIGNED!!!</span>}
@@ -103,8 +103,8 @@ export function LabelScene() {
       })}
     </div>
     <footer className="flex min-h-[35px] shrink-0 items-center gap-1 px-1 py-0.5 text-[11px] font-bold">
-      <span>TOP 8:</span>{signed.map((i) => <img key={i} src={artistMedia[ROSTER[i].key].src} alt={ROSTER[i].name} className="h-7 w-7 object-cover sm:h-8 sm:w-8" />)}
-      {!signed.length && <span>0 friends. 0 dollars. 100000 viruses.</span>}
+      <span>TOP 8:</span>{signed.map((i) => <img key={i} src={artistArt[ROSTER[i].key].src} alt={ROSTER[i].name} className="h-7 w-7 object-contain sm:h-8 sm:w-8" />)}
+      {!signed.length && <span>0 friends. 0 dollars. 100000 cheeses.</span>}
       <span className="ml-auto hidden text-right text-[9px] sm:block">VISITORS: 000001501<br />© 2008 my dad owns the internet</span>
     </footer>
   </section>

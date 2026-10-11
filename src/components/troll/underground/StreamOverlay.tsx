@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { sfx } from '../../../lib/audio/sfx'
-import { type SpriteId } from '../../../lib/assets/sprites'
-import { artistMedia, objectMedia } from '../../../lib/assets/realMedia'
+import { spriteUrl, type SpriteId } from '../../../lib/assets/sprites'
 import { TIME, EASE, pick } from '../../../lib/animation/timeline'
 
 /**
@@ -57,15 +56,6 @@ interface Msg {
   text: string
 }
 
-const alertPhoto = (id: SpriteId) => {
-  if (id === 'sealdreads') return artistMedia.bleood.src
-  if (id === 'lilverity') return artistMedia.verity.src
-  if (id === 'burger') return objectMedia.burger.src
-  if (id === 'seal') return objectMedia.seal.src
-  if (id === 'drank') return objectMedia.drink.src
-  if (id === 'draco') return objectMedia.draco.src
-  return objectMedia.cheese.src
-}
 
 export function StreamOverlay() {
   const [msgs, setMsgs] = useState<Msg[]>([])
@@ -126,7 +116,7 @@ export function StreamOverlay() {
             transition={{ duration: 0.45, ease: EASE.snap }}
             data-testid="donation"
           >
-            <img src={alertPhoto(alert.sprite)} alt="" className="h-14 w-14 shrink-0 border-4 border-ridge border-red-600 object-cover" style={{ animation: 'ug-spin-y 1.2s linear infinite' }} />
+            <img src={spriteUrl(alert.sprite)} alt="" className="h-14 w-14 shrink-0 border-4 border-ridge border-red-600 object-contain" style={{ animation: 'ug-spin-y 1.2s linear infinite' }} />
             <span className="min-w-0">
               <span className="pixel block text-[16px]">
                 <b>{alert.name}</b> donated <b className="text-[#b3001b]">{alert.amount}</b>

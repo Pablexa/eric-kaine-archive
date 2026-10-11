@@ -28,7 +28,8 @@ export type Scene =
   | 'label' // protocol 08 — bleoodity signs the underground
   | 'foodfight' // protocol 09 — everything goes flying
   | 'brainrot' // protocol 10 — split-screen brainrot
-  | 'mosh' // protocol 11 — the website moshes
+  | 'runner' // protocol 11 — subway verity (an original runner)
+  | 'mosh' // protocol 12 — the website moshes
   | 'legend' // 1.5 billion subscribers, and then the bio
   | 'ending' // ending card
 
@@ -160,19 +161,20 @@ export const PROTOCOLS: { scene: Scene; index: string; label: string }[] = [
   { scene: 'label', index: '08', label: 'The label' },
   { scene: 'foodfight', index: '09', label: 'Food fight' },
   { scene: 'brainrot', index: '10', label: 'Brainrot' },
-  { scene: 'mosh', index: '11', label: 'Mosh pit' },
+  { scene: 'runner', index: '11', label: 'Subway Verity' },
+  { scene: 'mosh', index: '12', label: 'Mosh pit' },
 ]
 
 /** Scenes during which the archive is in its "uglified" state. */
-export const CHAOS_SCENES: Scene[] = ['uglify', 'popups', 'clones', 'beat', 'twist', 'label', 'foodfight', 'brainrot', 'mosh', 'legend']
+export const CHAOS_SCENES: Scene[] = ['uglify', 'popups', 'clones', 'beat', 'twist', 'label', 'foodfight', 'brainrot', 'runner', 'mosh', 'legend']
 
 /** Act IV: Bleoodity's takeover (stream chat + BLEOODITY FM run throughout). */
-export const UNDERGROUND_SCENES: Scene[] = ['label', 'foodfight', 'brainrot', 'mosh', 'legend']
+export const UNDERGROUND_SCENES: Scene[] = ['label', 'foodfight', 'brainrot', 'runner', 'mosh', 'legend']
 
 export const ENDINGS: Record<EndingId, { title: string; line: string }> = {
   gatekeeper: {
     title: 'Certified Gatekeeper',
-    line: 'You helped. You redacted, uglified, popped, dropped, signed the underground, fed Bleoodity, survived the brainrot and moshed. Then you read the bio again. Nobody will ever find him.',
+    line: 'You helped. You redacted, uglified, popped, dropped, signed the underground, fed Bleoodity, survived the brainrot, ran the subway and moshed. Then you read the bio again. Nobody will ever find him.',
   },
   obscure: {
     title: 'Safely Obscure',
@@ -180,6 +182,6 @@ export const ENDINGS: Record<EndingId, { title: string; line: string }> = {
   },
   subscriber: {
     title: 'One More Subscriber',
-    line: '1.5K + 1. You survived the collapse, the dark, the button, the redesign, the popups, the clones, the drop, the label, the food fight, the brainrot and the mosh pit. For a moment he had 1.5 billion. Then everyone read the bio.',
+    line: '1.5K + 1. You survived the collapse, the dark, the button, the redesign, the popups, the clones, the drop, the label, the food fight, the brainrot, the subway and the mosh pit. For a moment he had 1.5 billion. Then everyone read the bio.',
   },
 }

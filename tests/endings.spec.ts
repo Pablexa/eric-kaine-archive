@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 import { beatTheButton, findAllVideos, openFast, passPile, playActFour, playActThree, reveal, sleep, toPile, trackErrors } from './helpers'
 
-test.describe.configure({ timeout: 180_000 })
+test.describe.configure({ timeout: 240_000 })
 
 test.describe('Acts II–IV — protocols and endings', () => {
-  test('main path: all eleven protocols → the takeover → One More Subscriber', async ({ page }) => {
+  test('main path: all twelve protocols → the takeover → One More Subscriber', async ({ page }) => {
     const errors = trackErrors(page)
     await openFast(page)
     await toPile(page)
@@ -113,14 +113,14 @@ test.describe('Acts II–IV — protocols and endings', () => {
     }
     await playActThree(page)
     await expect(page.getByTestId('label')).toBeVisible({ timeout: 30_000 })
-    await expect(page.getByTestId('background-music')).toHaveAttribute('data-playing', 'true')
+    await expect(page.getByTestId('background-music')).toHaveAttribute('data-muted', 'false')
     await page.getByTestId('sound-toggle').click()
     await expect(page.getByTestId('sound-toggle')).toHaveAttribute('aria-pressed', 'false')
     await expect(page.getByTestId('background-music')).toHaveAttribute('data-muted', 'true')
     await page.getByTestId('leave').click()
     await expect(page.getByTestId('leave')).toContainText(/LEAVING|%|jk/)
     await expect(page.getByTestId('troll-stage')).toHaveCount(0, { timeout: 10_000 })
-    await expect(page.getByTestId('cheese-audio')).toHaveCount(0)
+    await expect(page.getByTestId('background-music')).toHaveCount(0)
     expect(await page.evaluate(() => [...document.documentElement.classList].filter((c) => c.startsWith('ug-')))).toEqual([])
     await expect(page.getByTestId('ugly-widgets')).toHaveCount(0)
     await expect(page.getByTestId('live-chat')).toHaveCount(0)

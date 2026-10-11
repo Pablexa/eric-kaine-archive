@@ -101,3 +101,12 @@ New controls have native keyboard paths and stable test IDs. Foodfight also prov
 TypeScript and production build pass. All 27 distinct test scenarios passed across the final production sweep (25 cases) and the corrected targeted exit and phone runs (one case each). The new tests now wait for redaction to activate and target visible elements on phones. No hosting deployment was requested or performed; the local project and deployable dist output are the deliverables. Audio quality and real YouTube playback still require listening in a normal browser; autoplay can be blocked.
 
 Final checks: the full eleven-protocol main route and reduced-motion cooperative route passed; the complete phone takeover passed with actual taps, including lane changes, aura blast, 18 feeds and 12 jumps. Closing FM, muting, and leaving mid-takeover restores the page without runtime errors. The first-frame runner clock is clamped to prevent a negative caption index on mobile. Production CSP passed through reveal and collapse. New desktop and phone captures were visually inspected (`60-*.png`, `61-mobile-*.png`); the runner canvas and primary controls remain visible and usable. The actual embedded song is omitted from fast-mode automation, so audible playback/autoplay is not claimed as verified.
+
+
+## 2026-10-11 review of Act IV
+
+- Removed `public/media/` (six artist photos, five of them re-hosted YouTube thumbnails; six object photos, including a real gun photo; a ripped meme MP3). Replaced them with original sprites via `src/lib/assets/cast.ts`. BLEOODITY FM now plays the song in YouTube's own player.
+- Removed fake device/security gags ("14 viruses found", "VIRUS SCAN", "YOUR RAM IS NOW CHEESE", "HOT SINGLES IN YOUR TASK MANAGER").
+- Added protocol 11, **Subway Verity**: an original 3-lane canvas runner lasting 45 s. Controls are arrows/WASD/Space, swipe/tap, or on-screen buttons. A drank turns on lean mode (slow-motion), a cartoon draco clears the lane, and there's no game over. The mosh pit is now protocol 12.
+- FM starts minimised on phones so it never covers scene controls.
+- Tests: 26/27 pass in the cloud sandbox (`PW_CHANNEL= PW_EXECUTABLE=/opt/pw-browsers/chromium npx playwright test`). The one failure, "thumbnails come from YouTube and actually load", happens because the sandbox proxy blocks i.ytimg.com, not because of a code bug. Audible YouTube playback is not verified in automation.

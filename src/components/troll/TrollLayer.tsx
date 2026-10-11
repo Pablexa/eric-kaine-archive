@@ -28,6 +28,7 @@ const loadActFour = () => import('./ActFour')
 const LabelScene = lazy(() => loadActFour().then((m) => ({ default: m.LabelScene })))
 const FoodFightScene = lazy(() => loadActFour().then((m) => ({ default: m.FoodFightScene })))
 const BrainrotScene = lazy(() => loadActFour().then((m) => ({ default: m.BrainrotScene })))
+const RunnerScene = lazy(() => loadActFour().then((m) => ({ default: m.RunnerScene })))
 const MoshScene = lazy(() => loadActFour().then((m) => ({ default: m.MoshScene })))
 const LegendScene = lazy(() => loadActFour().then((m) => ({ default: m.LegendScene })))
 const BleoodityFM = lazy(() => loadActFour().then((m) => ({ default: m.BleoodityFM })))
@@ -132,6 +133,7 @@ export function TrollLayer() {
         {scene === 'label' ? <LabelScene key={`label-${state.run}`} /> : null}
         {scene === 'foodfight' ? <FoodFightScene key={`food-${state.run}`} /> : null}
         {scene === 'brainrot' ? <BrainrotScene key={`brain-${state.run}`} /> : null}
+        {scene === 'runner' ? <RunnerScene key={`runner-${state.run}`} /> : null}
         {scene === 'mosh' ? <MoshScene key={`mosh-${state.run}`} /> : null}
         {scene === 'legend' ? <LegendScene key={`legend-${state.run}`} /> : null}
       </Suspense>
