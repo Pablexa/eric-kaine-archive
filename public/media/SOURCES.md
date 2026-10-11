@@ -66,3 +66,7 @@ The "currently playing" card (top right) names each song while it is audible. It
 ## Bleood song restored to the owner's file (2026-10-11)
 
 - `bleoodity-loop.mp3` (107.3 s): the owner's own Bleood song file, as supplied (md5 of the upload `f5fe7480…`, identical to their first upload). The earlier tamed version (bass cut + loudness normalisation) is gone. The only processing is one fixed gain of −11.95 dB (ffmpeg `volume`, re-encoded VBR ~184 kbps) so it plays at the same loudness as "bloody": the original measured −4.6 LUFS with +9 dBTP overs; the file now measures −16.6 LUFS, −2.9 dBTP. No EQ, no compression, no edits.
+
+## Voices via fish.audio (2026-10-11)
+
+- `voice/eric/*` and `voice/bleoodity/*` were re-rendered with `scripts/voice/fish_voices.py`, using the owner's own fish.audio voice models (Eric Kaineity `ff1374f505b24744a334d20b8fece6fe`, Bleoodity `8a63edafb408416bba26f089d6c708d5`, both made from the owner's modified voice) and the `s2.1-pro-free` model, then loudness-normalised (−16 LUFS). Same file names and manifests as before; any line fish.audio cannot render keeps its previous kNN-VC clip. The API key is read from `FISH_API_KEY` and is not stored in the repo.
