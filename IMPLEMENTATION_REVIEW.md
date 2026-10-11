@@ -101,3 +101,27 @@ New controls have native keyboard paths and stable test IDs. Foodfight also prov
 TypeScript and production build pass. All 27 distinct test scenarios passed across the final production sweep (25 cases) and the corrected targeted exit and phone runs (one case each). The new tests now wait for redaction to activate and target visible elements on phones. No hosting deployment was requested or performed; the local project and deployable dist output are the deliverables. Audio quality and real YouTube playback still require listening in a normal browser; autoplay can be blocked.
 
 Final checks: the full eleven-protocol main route and reduced-motion cooperative route passed; the complete phone takeover passed with actual taps, including lane changes, aura blast, 18 feeds and 12 jumps. Closing FM, muting, and leaving mid-takeover restores the page without runtime errors. The first-frame runner clock is clamped to prevent a negative caption index on mobile. Production CSP passed through reveal and collapse. New desktop and phone captures were visually inspected (`60-*.png`, `61-mobile-*.png`); the runner canvas and primary controls remain visible and usable. The actual embedded song is omitted from fast-mode automation, so audible playback/autoplay is not claimed as verified.
+
+## Act IV media revision — verification 2026-10-11
+
+This replaces the 2026-10-10 notes above for the media rewrite (real photos, real Subway Surfers videos, Three.js models, looping MP3, 20 clones, 15 popup closures). Run against a fresh production build (`vite preview`) in Playwright's Chromium.
+
+| Check | Result |
+|---|---|
+| `npm run build` (typecheck + Vite) | Pass |
+| `main path: all eleven protocols → the takeover → One More Subscriber` (desktop) | Pass. 20 clones, label → foodfight → brainrot → mosh → legend → ending; the run uses `?fast=1&media=1`, so the two real YouTube players render and their `src` is checked (`youtube-nocookie.com/embed/i0M4ARe9v0Y` and `ZtHCnXMjIXY`, `autoplay=1&mute=1…loop=1`) |
+| `leaving the takeover stops FM and restores every page change` (desktop) | Pass. The MP3 is `loop`, unmuted, not paused, has no controls, and `currentTime` advances even though the visitor chose "sound off". No `sound-toggle`/`volume` exists during the act. LEAVE removes the audio element, every `ug-*` class, the widgets and the chat, and brings the HUD mute back |
+| `the underground takeover is playable on a phone` (Pixel 7) | **Failed first** (17/18 cheese: one rapid tap was eaten as a double-tap zoom). Fixed with `touch-action: manipulation` on every takeover button; the test now feeds until the counter really reads 18. Pass after the fix |
+| Full suite regression run | See the note at the end of this section |
+
+**Screenshots inspected:** `screenshots/60-*` (desktop) and `61-mobile-*` (phone). All artist and object photos load (the test asserts `naturalWidth > 0` for every label image). The Three.js burger, cheese and double cup are visible over the checkerboard/spam collage. Primary controls (sign cards, FEED CHEESE, AURA BLAST, meme/tab buttons, JUMP, LEAVE) stay on screen and clickable at 1440×900 and 412×915.
+
+**What changed in this pass:**
+- The Bleoodity loop can no longer be muted from the page: the HUD hides mute and volume while it plays, and the audio ignores the sound toggle. Esc and LEAVE still exit and stop it, and the legend finale still cuts it.
+- `touch-action: manipulation` on all `[data-troll-ui]` buttons (rapid tapping on phones).
+- Test hook `?fast=1&media=1` keeps the real YouTube players in fast runs.
+
+**Not verified here (honest limits):**
+- Actual video playback. This sandbox's network policy blocks YouTube, so the players render as blocked frames in `60-real-videos.png`/`60-maximum-brainrot.png`. Embed URLs and CSP `frame-src https://www.youtube-nocookie.com` were checked; whether YouTube allows embedding of both videos must be confirmed in a normal browser with internet access.
+- Audible sound. Playback state (`playing`, advancing time, not muted) is verified, but nobody listened. Browsers can still block autoplay until a tap; the component retries on the next tap or keypress.
+- The MP3 is an 18.064-second fragment of the meme, not the full song.

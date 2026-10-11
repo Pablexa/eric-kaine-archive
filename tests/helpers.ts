@@ -145,7 +145,7 @@ export async function playActThree(page: Page) {
 }
 
 /** Act IV is played through its real buttons, with no state-machine shortcuts. */
-export async function playActFour(page: Page, { touch = false, capture = false } = {}) {
+export async function playActFour(page: Page, { touch = false, capture = false, media = false } = {}) {
   const activate = async (id: string) => {
     const button = page.getByTestId(id)
     await expect(button).toBeEnabled({ timeout: 30_000 })
@@ -170,12 +170,20 @@ export async function playActFour(page: Page, { touch = false, capture = false }
   await sleep(300)
   await shot('foodfight')
   await activate('blast-food')
-  for (let i = 0; i < 18; i++) await activate('feed-cheese')
+  const food = page.getByTestId('foodfight')
+  for (let i = 0; i < 24 && (await food.count()) && Number(await food.getAttribute('data-fed').catch(() => '18')) < 18; i++) await activate('feed-cheese').catch(() => {})
 
   const brainrot = page.getByTestId('brainrot')
   await expect(brainrot).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('brainrot-video-0')).toHaveAttribute('data-video-id', 'i0M4ARe9v0Y')
   await expect(page.getByTestId('brainrot-video-1')).toHaveAttribute('data-video-id', 'ZtHCnXMjIXY')
+  if (media) {
+    // Real, muted, looping embeds: the MP3 stays the only soundtrack.
+    const players = page.getByTestId('brainrot-youtube-player')
+    await expect(players).toHaveCount(2)
+    await expect(players.nth(0)).toHaveAttribute('src', /^https:\/\/www\.youtube-nocookie\.com\/embed\/i0M4ARe9v0Y\?autoplay=1&mute=1.*loop=1/)
+    await expect(players.nth(1)).toHaveAttribute('src', /^https:\/\/www\.youtube-nocookie\.com\/embed\/ZtHCnXMjIXY\?autoplay=1&mute=1.*loop=1/)
+  }
   await activate('brainrot-meme')
   await expect(brainrot).toHaveAttribute('data-memes', '1')
   await activate('brainrot-add-pane')

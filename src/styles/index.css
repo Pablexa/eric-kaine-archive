@@ -509,3 +509,8 @@ html.ug-jelly main section > div { animation: ug-jelly 3.4s ease-in-out infinite
     animation: none;
   }
 }
+
+/* Rapid taps on takeover controls must never be eaten by double-tap zoom. */
+[data-troll-ui] button {
+  touch-action: manipulation;
+}

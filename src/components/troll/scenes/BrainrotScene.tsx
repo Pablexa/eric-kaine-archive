@@ -64,7 +64,7 @@ export function BrainrotScene() {
   const [skipReady, setSkipReady] = useState(false)
   const ended = useRef(false)
   const reduced = useRef(prefersReducedMotion()).current
-  const fast = TIME.scale < 1
+  const fast = TIME.scale < 1 && !TIME.media
   const finish = useCallback(() => {
     if (ended.current) return
     ended.current = true

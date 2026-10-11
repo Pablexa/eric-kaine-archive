@@ -22,6 +22,8 @@ export const TIME = {
   scale: params.has('fast') ? 0.08 : 1,
   /** Test hook: `?fast=1&drain=1` empties the flashlight battery quickly. */
   drain: params.has('fast') && params.has('drain') ? 14 : 1,
+  /** Test hook: `?fast=1&media=1` keeps the real YouTube players in fast runs. */
+  media: params.has('media'),
 }
 
 export function wait(ms: number, signal?: AbortSignal): Promise<void> {

@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useExperience } from '../../lib/experience/ExperienceContext'
 import { CHAOS_SCENES, isTrollActive, PROTOCOLS } from '../../lib/experience/machine'
 import { useStore } from '../../lib/experience/store'
-import { hudHidden, subsOverride } from '../../lib/experience/stage'
+import { fm, hudHidden, subsOverride } from '../../lib/experience/stage'
 import { channel } from '../../lib/content/channel'
 import { EASE } from '../../lib/animation/timeline'
 import { scrollToSection } from '../../lib/interactions/scroll'
@@ -171,6 +171,8 @@ function HudContent({ hazard }: { hazard: boolean }) {
   const { state, leave } = useExperience()
   const snd = useSfxState()
   const override = useStore(subsOverride)
+  // The Bleoodity loop is unstoppable by design: no mute or volume while it plays. Esc/LEAVE still exit.
+  const musicLocked = useStore(fm) === 'on'
   const redact = state.scene === 'redact'
   const current = PROTOCOLS.findIndex((p) => p.scene === state.scene)
   const label = state.scene === 'intro' ? 'ARCHIVE GUIDE' : redact ? 'OPERATION GATEKEEP' : 'GATEKEEPER PROTOCOL'
@@ -229,7 +231,7 @@ function HudContent({ hazard }: { hazard: boolean }) {
             </dd>
           </div>
         </dl>
-        <button
+        {musicLocked ? null : <button
           type="button"
           onClick={() => sfx.toggle()}
           className="pixel flex h-10 items-center gap-1.5 border border-pixel/20 px-2.5 text-[14px] text-pixel hover:border-verity"
@@ -239,8 +241,8 @@ function HudContent({ hazard }: { hazard: boolean }) {
         >
           <Icon name={snd.enabled ? 'sound-on' : 'sound-off'} size={16} />
           <span className="hidden sm:inline">{snd.enabled ? 'ON' : 'OFF'}</span>
-        </button>
-        {snd.enabled ? (
+        </button>}
+        {snd.enabled && !musicLocked ? (
           <label className="hidden items-center xl:flex">
             <span className="sr-only">Volume</span>
             <input

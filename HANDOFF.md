@@ -1,6 +1,6 @@
 # Handoff prompt: "Eric Kaine — The Archive" (troll fan website)
 
-Current status (2026-10-10): Act IV was revised to the user's requested ugly 2008 media collage. Six real artist photos and six real object photos replace the rapper/object drawings; real Subway Surfers videos replace the drawn runner. Three.js models float through the takeover, and a downloaded local 18-second meme MP3 loops in the background without an individual close button. HUD mute/Esc remain. The pre-takeover now has 15 popup closures and 20 clones. See README.md, public/media/SOURCES.md and IMPLEMENTATION_REVIEW.md for current implementation/verification; the brief below is historical.
+Current status (2026-10-10): Act IV was revised to the user's requested ugly 2008 media collage. Six real artist photos and six real object photos replace the rapper/object drawings; real Subway Surfers videos replace the drawn runner. Three.js models float through the takeover, and a downloaded local 18-second meme MP3 loops in the background with no pause/stop/mute control anywhere on the page (the HUD mute hides while it plays). Esc/LEAVE still exit and stop it. The pre-takeover now has 15 popup closures and 20 clones. See README.md, public/media/SOURCES.md and IMPLEMENTATION_REVIEW.md for current implementation/verification; the brief below is historical.
 
 ---
 
@@ -118,7 +118,7 @@ At real pacing, played quickly, Acts I–III take about 4 minutes. A person read
 - **Verified creator facts only.** Don't invent quotes, milestones or accusations about Eric or any real person. The rapper cards are clearly labelled parody, with silly made-up stats. Don't put fake quotes in real artists' mouths. Don't use real people's photos or likenesses; use the original SVG sprites.
 - **Copyright.** Don't copy song audio or lyrics, and don't use Subway Surfers or Skibidi assets. Real music only plays through YouTube's official embed (`BleoodityFM`).
 - **Tortas are the sandwich.** The user also asked for "tortas (mexican fat ladies)". That part was declined as ethnic and body-shaming content; use sandwiches.
-- **Safety.** No strobe or flashing above 3 Hz: chaos should be motion, not brightness flicker. `Esc` must always leave instantly. Sound always goes through the limiter, and there's always a visible mute. Verity's sound overrides happen only once each, and leaving restores the visitor's choice. No fake device or security warnings, no downloads, no redirects.
+- **Safety.** No strobe or flashing above 3 Hz: chaos should be motion, not brightness flicker. `Esc` must always leave instantly. Sound always goes through the limiter, and there's always a visible mute (exception, requested by the owner: the Act IV Bleoodity loop has none; Esc/LEAVE still stop it). Verity's sound overrides happen only once each, and leaving restores the visitor's choice. No fake device or security warnings, no downloads, no redirects.
 - **Gotchas:**
   - Never apply a transform to `<body>`; it breaks every `position: fixed` layer. Shake or spin `main`/`footer` instead.
   - Vite 8 needs `manualChunks` written as a function.
