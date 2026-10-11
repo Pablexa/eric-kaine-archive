@@ -50,6 +50,8 @@ class Sfx {
   asked = false
   /** Set when Verity overrides "keep it silent". */
   forced = false
+  /** Everything is lowered while the visitor is on a call with the developer (1 = normal). */
+  duck = 1
 
   constructor() {
     try {
@@ -86,7 +88,7 @@ class Sfx {
       if (!AC) return
       this.ctx = new AC()
       this.master = this.ctx.createGain()
-      this.master.gain.value = this.volume
+      this.master.gain.value = this.volume * this.duck
       const glue = this.ctx.createDynamicsCompressor()
       glue.threshold.value = -16
       glue.ratio.value = 4
@@ -124,7 +126,13 @@ class Sfx {
 
   setVolume(v: number) {
     this.volume = Math.min(1, Math.max(0, v))
-    if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.02)
+    if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.volume * this.duck, this.ctx.currentTime, 0.02)
+    this.emit()
+  }
+
+  setDuck(v: number) {
+    this.duck = Math.min(1, Math.max(0, v))
+    if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.volume * this.duck, this.ctx.currentTime, 0.05)
     this.emit()
   }
 

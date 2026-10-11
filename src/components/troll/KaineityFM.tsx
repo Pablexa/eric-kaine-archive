@@ -9,7 +9,7 @@ export function KaineityFM() {
   useEffect(() => {
     const el = audio.current
     if (!el) return
-    el.volume = sound.volume * 0.45
+    el.volume = sound.volume * 0.45 * sound.duck
     if (!sound.enabled) {
       el.pause()
       return
@@ -22,7 +22,7 @@ export function KaineityFM() {
       window.removeEventListener('pointerdown', play)
       window.removeEventListener('keydown', play)
     }
-  }, [sound.enabled, sound.volume])
+  }, [sound.enabled, sound.volume, sound.duck])
 
   useEffect(() => () => audio.current?.pause(), [])
 

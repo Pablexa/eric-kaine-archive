@@ -13,8 +13,8 @@ export function BleoodityFM() {
 
   // Volume only: never restarts playback.
   useEffect(() => {
-    if (audio.current) audio.current.volume = Math.max(0.35, sound.volume) * 0.8
-  }, [sound.volume, state])
+    if (audio.current) audio.current.volume = Math.max(0.35, sound.volume) * 0.8 * sound.duck
+  }, [sound.volume, sound.duck, state])
 
   useEffect(() => {
     const el = audio.current

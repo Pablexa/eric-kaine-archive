@@ -1,0 +1,19 @@
+{
+  // erickaine.site: static dist/ plus the live developer line (worker/index.ts).
+  // Build first: npm run deploy (= build + typecheck worker + wrangler deploy)
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "erickaine",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // only the live API runs the script; every other request is a plain static file
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "HUB", "class_name": "Hub" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Hub"] }]
+}

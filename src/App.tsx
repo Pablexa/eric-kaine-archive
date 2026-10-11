@@ -9,6 +9,7 @@ import { Archive } from './components/professional/Archive'
 import { Links } from './components/professional/Links'
 import { TrollLayer } from './components/troll/TrollLayer'
 import { VerityOrb } from './components/troll/VerityOrb'
+import { LiveLayer } from './components/live/LiveLayer'
 
 function ColumnRules() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
       </div>
       <TrollLayer />
       <VerityOrb />
+      <LiveLayer />
       <div className="grain" aria-hidden="true" />
     </ExperienceProvider>
   )

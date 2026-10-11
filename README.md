@@ -89,28 +89,56 @@ npm run build
 
 The output goes to `dist/` and is about 160 KB of gzipped JS on first load. Physics, Act III, Act IV and Three.js load lazily; local photos and the meme MP3 add roughly 840 KB of media.
 
+## Live developer line
+
+The owner can reach whoever is on the site, in real time, from a private panel at **`/admin`**:
+
+- **Visitor number.** Every visitor sees a small `#12345` in the top-left corner. It is stored in the browser, so it survives reloads.
+- **Developer messages.** Text typed in the panel pops up on screen by itself, either for everyone on the site or for one number. Each message has a duration (6–45 s, or until closed). "Borrar pantalla" removes them.
+- **Calls.** Type the number you see on the stream and press **Llamar**. The visitor gets an "INCOMING CALL" card with a ring. Once they answer, they hear the owner's microphone live (about 0.2 s of delay), and the site's music and effects drop to 20%. The visitor can press **Talk back** to turn their own mic on (the browser asks for permission), and either side can hang up.
+- **Who is where.** The panel lists every visitor live: which protocol/scene they're on, whether site sound is on, and whether the tab is in front.
+
+How it works: `worker/index.ts` is a Cloudflare Worker with one Durable Object (`Hub`). Each page holds a WebSocket to it at `/api/live`. Call audio is raw 16 kHz PCM relayed through the hub (`src/lib/live/audio.ts`, `public/live/capture-worklet.js`), so there is no WebRTC: neither side ever sees the other's IP address, and no TURN server is needed. Static files never touch the script (`run_worker_first: ["/api/*"]`).
+
+The admin key is a Worker secret. Until it is set, the panel refuses everyone:
+
+```bash
+npx wrangler secret put ADMIN_KEY
+```
+
+The visitor side is visitor-facing English; the panel is in Spanish. The line is off on `localhost` (so the Playwright suite never depends on it) and in `?fast=1`; force it with `?live=1`.
+
+**Test it locally.** Put a test key in `.dev.vars` (gitignored) as `ADMIN_KEY=...`, then:
+
+```bash
+npm run dev:live
+```
+
+```bash
+node scripts/check-live.mjs
+```
+
+The check drives a visitor and the panel with Chrome's fake microphone. It covers the visitor number, broadcast and targeted messages, decline, answer, audio in both directions, hang-up, number persistence, an offline number and a wrong key.
+
 ## Deploy
 
-The site is a static `dist/` folder. Any static host works.
+Production is a Cloudflare Worker named `erickaine` (static assets plus the live line), configured in `wrangler.jsonc`:
 
-**Cloudflare Pages**
-1. Create a new project from the Git repository, or drag `dist/` into Direct Upload.
-2. Set the build command to `npm run build` and the output directory to `dist`.
-3. `public/_headers` is copied into `dist/` and applied automatically (CSP, caching, permissions policy).
-4. To add a custom domain, open Pages → your project → Custom domains.
+```bash
+npm run deploy
+```
 
-**Vercel**
-1. Import the repository. `vercel.json` already sets the framework, the build command, the output directory and the same headers.
-2. To add a custom domain, open Project → Settings → Domains.
+This builds, typechecks the Worker and runs `wrangler deploy`. `public/_headers` is copied into `dist/` and applied to static files (CSP, caching, permissions policy; `/admin` is `noindex` and `no-store`). The microphone is allowed for this origin only (`microphone=(self)`), because calls need it.
 
-**Netlify / any static host:** publish `dist/`. Netlify reads `_headers` too.
+Custom domains need the domain's DNS on Cloudflare. Add it as a zone in the same account and point the registrar's nameservers at Cloudflare. Then add it to the Worker under Settings → Domains & Routes, or with a `routes` entry `{ "pattern": "example.com", "custom_domain": true }`.
+
+**Other static hosts** (Vercel, Netlify) can still serve `dist/`, but without the Worker the live line stays offline. `vercel.json` keeps the same headers.
 
 **After deploying, check that:**
 - Thumbnails (`i.ytimg.com`) and the avatar (`yt3.googleusercontent.com`) load.
 - The featured player opens (`youtube-nocookie.com`).
 - The browser console shows no CSP errors.
-
-The CSP was verified locally with `scripts/check-csp.mjs`. It has **not** been verified on a live host, because this project hasn't been deployed.
+- `/admin` logs in, and a second browser shows a number that appears in the panel.
 
 ## Content updates
 

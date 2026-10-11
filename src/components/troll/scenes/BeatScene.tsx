@@ -140,7 +140,7 @@ export function BeatScene() {
     let blocked = false
     const syncAudio = () => {
       if (!audio) return
-      audio.volume = clamp01(sfx.volume)
+      audio.volume = clamp01(sfx.volume * sfx.duck)
       audio.muted = blocked || !sfx.enabled
     }
     // any tap: unmute a muted autoplay, or restart a track the browser paused (where the scene is now)

@@ -44,7 +44,7 @@ export const voice = {
       if (!src) return
       current?.pause()
       const audio = new Audio(src)
-      audio.volume = Math.min(1, sfx.volume)
+      audio.volume = Math.min(1, sfx.volume * sfx.duck)
       if (author === 'bleoodity') {
         audio.preservesPitch = false
         audio.playbackRate = 0.85 + Math.random() * 0.35

@@ -145,3 +145,21 @@ Fixes found while verifying:
 - Removed an assertion I had added earlier that expected the HUD sound button after leaving; the archive navigation never had one.
 
 Not verified: nobody listened to the voices or music, and voices are skipped in `?fast=1` test runs, so in-page voice playback is only checked by code path and file serving. Phones were out of scope for this pass.
+
+## Live developer line — verification 2026-10-11
+
+The owner can message and call visitors live from `/admin` (see README → Live developer line). It runs on a Cloudflare Worker with one Durable Object (`worker/index.ts`). Static files are still served as plain assets.
+
+| Check | Result |
+|---|---|
+| `tsc -b` (site + panel), `tsc -p worker`, `vite build` | Pass. The panel is its own entry (`admin.html`, ~6 KB gzipped plus shared chunks); the site's first-load JS grew by ~3 KB gzipped |
+| `node scripts/check-live.mjs` against `wrangler dev` (local Durable Object, Chrome fake microphone) | Pass: visitor number shown; wrong key refused; panel lists the visitor; broadcast and targeted messages pop up without any visitor action; decline reaches the panel; answer connects both sides; **owner → visitor audio at 25 frames/s** (40 ms frames, real time); visitor "Talk back" audio reaches the panel; owner hang-up shows "The developer hung up"; same number after reload; calling an absent number reports offline; no console errors on either page |
+| Screenshots | `screenshots/81-live-message.png`, `82-live-ringing.png`, `83-live-oncall.png`, `84-admin-panel.png` inspected: the corner number, message card, incoming-call card and call widget sit above the page; the panel shows the visitor's scene and call state |
+
+Design notes:
+- **No WebRTC.** Audio is 16 kHz PCM relayed through the hub, so neither person learns the other's IP address and no TURN service or extra secret is needed. Bandwidth is about 256 kbit/s each way during a call.
+- **Hibernation-safe.** Every per-socket fact (visitor number, scene, call state) lives in the WebSocket attachment, so the hub can hibernate between messages.
+- **Consent and control.** The visitor must press Answer; their microphone stays off unless they press Talk back (and the browser asks); either side can hang up. Messages have a close button. `Permissions-Policy` now allows the microphone for this origin only.
+- **Off in tests.** The client never connects on `localhost` or with `?fast=1` unless `?live=1` is passed, so the existing suite is unaffected.
+
+Not verified: real microphones and speakers (only Chrome's fake device), echo when a visitor talks back without headphones (browser echo cancellation may not cover Web Audio playback), Safari/Firefox, and behaviour with hundreds of simultaneous visitors.
